@@ -449,3 +449,80 @@ button { cursor: pointer; border: 0; background: none; padding: 0; }
 .etiqueta.ambar { color: var(--amber); }
 .etiqueta.verde { color: var(--green); }
 .titulo.rojo { color: var(--red); }
+
+/* =====================================================================
+   FORMULARIOS, HOJAS, CURSOS Y HORARIO (fase 2)
+   ===================================================================== */
+
+.seccion-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.seccion-cab .titulo { margin: 0; }
+.seccion > .seccion-cab { margin-bottom: 10px; }
+.btn.pequeno { min-height: 38px; padding: 0 14px; font-size: 0.875rem; border-radius: 12px; flex: none; }
+.btn.peligro { background: none; border: 1.5px solid var(--red); color: var(--red); }
+button.estado { cursor: pointer; border-radius: 10px; padding: 6px 8px; margin-right: -8px; }
+
+/* campos de formulario */
+.campo input[type='text'], .campo input[type='date'], .campo input[type='time'], .campo input[type='number'], .campo select, .campo textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-size: 1rem; /* 16px o más: Safari no hace zoom al tocar el campo */
+  min-height: 48px;
+  color: var(--text);
+}
+.campo select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 15px) 21px; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 36px; }
+.campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--accent); outline: 0; }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.interruptor { display: flex; align-items: center; gap: 12px; margin-top: 18px; font-weight: 500; }
+.interruptor input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+.colores { display: flex; flex-wrap: wrap; gap: 10px; }
+.color { width: 38px; height: 38px; border-radius: 50%; border: 3px solid transparent; box-shadow: 0 0 0 1.5px var(--line); }
+.color[aria-pressed='true'] { border-color: var(--bg); box-shadow: 0 0 0 3px var(--accent); }
+.dias { display: flex; flex-wrap: wrap; gap: 6px; }
+.dias button { min-width: 46px; min-height: 42px; padding: 0 10px; border-radius: 12px; background: var(--surface2); font-weight: 600; }
+.dias button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); }
+.avisos-importar { margin: 10px 0 0; padding-left: 18px; color: var(--amber); font-size: 0.875rem; }
+
+/* hoja inferior */
+.hoja-fondo { position: fixed; inset: 0; z-index: 60; background: rgb(4 6 18 / 0.6); display: flex; align-items: flex-end; justify-content: center; animation: aparece 0.18s ease-out; }
+@keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+.hoja {
+  width: 100%;
+  max-width: 600px;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-radius: 26px 26px 0 0;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  animation: sube 0.24s ease-out;
+}
+@keyframes sube { from { transform: translateY(40px); opacity: 0.5; } to { transform: none; opacity: 1; } }
+.hoja-asa { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 9px auto 0; }
+.hoja-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 18px 0; }
+.hoja-cuerpo { overflow-y: auto; padding: 4px 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.icono-btn { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--surface2); color: var(--text); flex: none; }
+
+/* cursos */
+.punto.grande { width: 14px; height: 14px; margin: 0; flex: none; }
+
+/* horario */
+.dia-bloque { margin-top: 18px; }
+.dia-titulo { font-family: var(--display); font-size: 1.0625rem; font-weight: 700; margin: 0 0 8px; }
+.libre { color: var(--muted); font-size: 0.875rem; padding: 2px; }
+.clase { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--surface); border-radius: 14px; padding: 11px 13px; margin-bottom: 8px; box-shadow: var(--sombra); }
+:root[data-theme='dark'] .clase { border: 1px solid var(--line); }
+.clase .barra { width: 5px; align-self: stretch; border-radius: 3px; flex: none; }
+.clase .hora { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.875rem; min-width: 104px; }
+.clase .nombre { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.clase .nombre small { display: block; color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+
+/* el texto de una tarea ahora es un botón */
+button.tarea-texto { text-align: left; background: none; padding: 0; border: 0; color: inherit; }
+
+/* Los campos de fecha y hora tienen un ancho mínimo propio en el navegador: sin esto se salían de la hoja */
+.dos > * { min-width: 0; }
+.campo input[type='date'], .campo input[type='time'] { min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; }

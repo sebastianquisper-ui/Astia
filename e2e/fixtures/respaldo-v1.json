@@ -1,0 +1,58 @@
+{
+  "app": "astia",
+  "v": 1,
+  "at": "2026-10-14T20:00:00.000Z",
+  "config": {
+    "name": "Sebastián",
+    "startDate": "2026-08-24",
+    "totalWeeks": 16,
+    "theme": "hora",
+    "fontScale": 1.15,
+    "focusMin": 25,
+    "breakMin": 5,
+    "courses": [
+      { "id": "kcalc01a", "name": "Cálculo II", "color": "#7C8CFF" },
+      { "id": "kdisc02b", "name": "Matemática Discreta", "color": "#FF7A90" },
+      { "id": "kfis03cc", "name": "Física", "color": "#4FD1A5" }
+    ],
+    "schedule": [
+      { "id": "b1", "courseId": "kcalc01a", "day": 0, "start": "08:00", "end": "10:00", "room": "A-203" },
+      { "id": "b2", "courseId": "kdisc02b", "day": 1, "start": "10:00", "end": "12:00", "room": "" },
+      { "id": "b3", "courseId": "kfis03cc", "day": 3, "start": "14:00", "end": "16:00", "room": "C-305" },
+      { "id": "b4", "courseId": "curso-borrado", "day": 2, "start": "08:00", "end": "10:00", "room": "X" }
+    ]
+  },
+  "tasks": {
+    "items": [
+      { "id": "0yh6vke4", "title": "GUÍA 4 DE CÁLCULO II", "courseId": "kcalc01a", "type": "tarea", "due": "2026-10-16", "time": "23:59", "priority": "alta", "needsEvidence": true, "status": "pending", "createdAt": 1760000000000, "steps": [{ "t": "Resolver los ejercicios 1 al 5", "done": true }, { "t": "Pasar en limpio", "done": false }] },
+      { "id": "t-examen1", "title": "Examen parcial de Física", "courseId": "kfis03cc", "type": "examen", "due": "2026-10-20", "time": "15:00", "priority": "alta", "needsEvidence": false, "status": "pending", "steps": [] },
+      { "id": "t-estudio", "title": "Repasar grafos", "courseId": "kdisc02b", "type": "estudio", "due": "2026-10-18", "time": "", "priority": "media", "needsEvidence": true, "method": "espaciada", "status": "pending", "steps": [] },
+      { "id": "t-hecha", "title": "Guía 3 de Cálculo II", "courseId": "kcalc01a", "type": "tarea", "due": "2026-10-09", "time": "", "priority": "media", "needsEvidence": false, "status": "done", "doneAt": 1760100000000, "steps": [] },
+      { "id": "t-huerfana", "title": "Tarea de un curso borrado", "courseId": "curso-borrado", "type": "tarea", "due": "2026-10-25", "time": "", "priority": "baja", "needsEvidence": false, "status": "pending", "steps": [] },
+      { "id": "t-rota", "title": "Sin fecha válida", "courseId": "kcalc01a", "type": "tarea", "due": "", "status": "pending", "steps": [] }
+    ],
+    "plan": { "2026-10-15": ["0yh6vke4", "t-examen1", "no-existe"] }
+  },
+  "itin": {
+    "w": {
+      "kcalc01a_7": { "topic": "Integrales dobles", "notes": "Repasar cambio de variables" },
+      "kdisc02b_7": { "topic": "", "notes": "" },
+      "kfis03cc_8": { "topic": "Ondas", "notes": "" }
+    }
+  },
+  "prog": {
+    "days": {
+      "2026-10-13": { "done": 2, "focus": 55, "rest": 10, "pomos": 2 },
+      "2026-10-14": { "done": 1, "focus": 25, "rest": 5, "pomos": 1 }
+    },
+    "ai": { "2026-10-14": 3 }
+  },
+  "goals": {
+    "items": [
+      { "id": "g1", "name": "30 minutos de inglés", "log": { "2026-10-13": 1, "2026-10-14": 1 } }
+    ]
+  },
+  "feedback": {
+    "items": [{ "id": "f1", "text": "Que suene menos robótica", "at": 1760050000000, "done": false }]
+  }
+}

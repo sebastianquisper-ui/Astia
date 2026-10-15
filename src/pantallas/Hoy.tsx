@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAjustes } from '../ajustes/AjustesProvider'
+import { useEditorTarea } from '../formularios/EditorTarea'
+import { planDeHoy } from '../lib/plan'
 import { useDatos } from '../datos/DatosProvider'
 import { animoDe, fraseDe, frasesToque, type Animo } from '../lib/avatar'
 import { claseAhora } from '../lib/ahora'
 import { diffDays } from '../lib/fechas'
-import { porUrgencia, urgenciaDe } from '../lib/urgencia'
+import { urgenciaDe } from '../lib/urgencia'
 import { saludoDe } from '../lib/saludo'
 import { Avatar } from '../ui/Avatar'
 import { useAviso } from '../ui/Aviso'
@@ -16,7 +18,8 @@ import { Vacio } from '../ui/Vacio'
 
 export function Hoy() {
   const { ajustes } = useAjustes()
-  const { tareas, tareasBase, cursos, clases, hayDatos, alternar } = useDatos()
+  const { tareas, planes, cursos, clases, hayDatos, alternar } = useDatos()
+  const { abrir, nodo } = useEditorTarea()
   const avisar = useAviso()
   const ahora = useAhora()
 
@@ -29,13 +32,8 @@ export function Hoy() {
 
   const delArea = useMemo(() => tareas.filter((t) => area === 'todo' || t.area === area), [tareas, area])
 
-  // "Tus 3 de hoy": las 3 más urgentes del área, elegidas una sola vez con las tareas originales
-  // (así no cambian mientras las vas marcando).
-  const idsPlan = useMemo(
-    () => tareasBase.filter((t) => t.estado === 'pendiente' && (area === 'todo' || t.area === area)).sort(porUrgencia).slice(0, 3).map((t) => t.id),
-    [tareasBase, area],
-  )
-  const plan = idsPlan.map((id) => tareas.find((t) => t.id === id)).filter((t) => t !== undefined)
+  // "Tus 3 de hoy": las que elegiste a mano o, si no, las 3 más urgentes
+  const plan = planDeHoy(tareas, planes, area, ahora)
 
   const pendientes = delArea.filter((t) => t.estado === 'pendiente')
   const vencidas = pendientes.filter((t) => urgenciaDe(t, ahora) === 'vencida').length
@@ -118,20 +116,24 @@ export function Hoy() {
       )}
 
       <div className="seccion">
-        <h2 className="titulo">Tus 3 de hoy</h2>
+        <div className="seccion-cab">
+          <h2 className="titulo">Tus 3 de hoy</h2>
+          <button className="btn pequeno suave" onClick={() => abrir()}>+ Nueva tarea</button>
+        </div>
         {plan.length ? (
           <div className="tlista">
             {plan.map((t) => (
-              <FilaTarea key={t.id} tarea={t} curso={cursos.find((c) => c.id === t.cursoId)} ahora={ahora} alAlternar={() => alternarTarea(t.id, t.estado === 'hecha')} />
+              <FilaTarea key={t.id} tarea={t} curso={cursos.find((c) => c.id === t.cursoId)} ahora={ahora} alAlternar={() => alternarTarea(t.id, t.estado === 'hecha')} alAbrir={() => abrir(t.id)} />
             ))}
           </div>
         ) : (
           <Vacio
             titulo={hayDatos ? 'Nada pendiente en esta área' : 'Sin tareas todavía'}
-            texto={hayDatos ? 'Cambia de área o agrega una tarea nueva.' : 'Cuando cargues tus cursos y tareas, elige aquí las 3 que sí o sí cumples hoy.'}
+            texto={hayDatos ? 'Cambia de área o agrega una tarea nueva.' : 'Agrega una tarea con el botón de arriba, o importa tu respaldo de la v1 en Más → Ajustes.'}
           />
         )}
       </div>
+      {nodo}
     </section>
   )
 }

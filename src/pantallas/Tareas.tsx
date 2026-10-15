@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useDatos } from '../datos/DatosProvider'
+import { useEditorTarea } from '../formularios/EditorTarea'
 import { porUrgencia, urgenciaDe } from '../lib/urgencia'
 import { useAviso } from '../ui/Aviso'
 import { FilaTarea } from '../ui/FilaTarea'
@@ -9,6 +10,7 @@ import { Vacio } from '../ui/Vacio'
 
 export function Tareas() {
   const { tareas, cursos, hayDatos, alternar } = useDatos()
+  const { abrir, nodo } = useEditorTarea()
   const avisar = useAviso()
   const ahora = useAhora()
   const [filtro, setFiltro] = useState<'pend' | 'hechas'>('pend')
@@ -28,6 +30,7 @@ export function Tareas() {
           tarea={t}
           curso={cursos.find((c) => c.id === t.cursoId)}
           ahora={ahora}
+          alAbrir={() => abrir(t.id)}
           alAlternar={() => {
             alternar(t.id)
             avisar(t.estado === 'hecha' ? 'Tarea reabierta.' : 'Hecha. Una menos.')
@@ -39,7 +42,10 @@ export function Tareas() {
 
   return (
     <section className="pantalla">
-      <h1 className="titulo">Tareas</h1>
+      <div className="seccion-cab">
+        <h1 className="titulo">Tareas</h1>
+        <button className="btn pequeno" onClick={() => abrir()}>+ Nueva tarea</button>
+      </div>
       <p className="sub">Rojo: menos de 48 h · Ámbar: esta semana · Verde: después.</p>
 
       <div className="bloque">
@@ -56,7 +62,7 @@ export function Tareas() {
         <div className="seccion">
           <Vacio
             titulo={hayDatos ? (filtro === 'pend' ? 'Nada pendiente' : 'Aún no hay hechas') : 'Nada pendiente'}
-            texto={hayDatos ? 'Cuando haya tareas en esta lista, aparecerán aquí.' : 'Cuando agregues tareas las verás aquí ordenadas por urgencia.'}
+            texto={hayDatos ? 'Cuando haya tareas en esta lista, aparecerán aquí.' : 'Agrega una tarea con el botón de arriba, o importa tu respaldo de la v1 en Más → Ajustes.'}
           />
         </div>
       )}
@@ -72,6 +78,7 @@ export function Tareas() {
           {lista(resto)}
         </div>
       )}
+      {nodo}
     </section>
   )
 }

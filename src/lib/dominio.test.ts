@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import type { Clase, Tarea } from '../dominio/tipos'
 import { claseAhora, formatoCuenta } from './ahora'
 import { animoDe, fraseDe, frasesToque } from './avatar'
-import { addDays, aMinutos, diffDays, indiceDia, parseYmd, ymd } from './fechas'
+import { addDays, aMinutos, diffDays, indiceDia, lunesDe, parseYmd, semanaDelCiclo, ymd } from './fechas'
 import { porUrgencia, textoVence, urgenciaDe } from './urgencia'
 
 const tarea = (fecha: string, hora?: string, estado: Tarea['estado'] = 'pendiente'): Tarea => ({
-  id: 'x', titulo: 'x', area: 'universidad', cursoId: null, tipo: 'tarea', fecha, hora, estado,
+  id: 'x', titulo: 'x', area: 'universidad', cursoId: null, tipo: 'tarea', fecha, hora, estado, prioridad: 'media', pideEvidencia: false, pasos: [], actualizadoEn: 0,
 })
 
 describe('fechas', () => {
@@ -23,6 +23,26 @@ describe('fechas', () => {
   })
   it('aMinutos convierte horas', () => {
     expect(aMinutos('14:30')).toBe(870)
+  })
+})
+
+describe('semana del ciclo', () => {
+  it('el día de inicio es la semana 1 y cada lunes empieza otra', () => {
+    expect(semanaDelCiclo('2026-08-24', new Date(2026, 7, 24))).toBe(1)
+    expect(semanaDelCiclo('2026-08-24', new Date(2026, 7, 30))).toBe(1) // domingo
+    expect(semanaDelCiclo('2026-08-24', new Date(2026, 7, 31))).toBe(2)
+  })
+  it('jueves 15 de octubre es la semana 8 de un ciclo que empezó el 24 de agosto', () => {
+    expect(semanaDelCiclo('2026-08-24', new Date(2026, 9, 15))).toBe(8)
+  })
+  it('si el ciclo empezó a mitad de semana, cuenta desde su lunes', () => {
+    expect(semanaDelCiclo('2026-08-26', new Date(2026, 7, 28))).toBe(1)
+  })
+  it('sin fecha de inicio no hay semana', () => {
+    expect(semanaDelCiclo('', new Date())).toBeNull()
+  })
+  it('lunesDe devuelve el lunes de esa semana', () => {
+    expect(ymd(lunesDe(new Date(2026, 9, 15)))).toBe('2026-10-12')
   })
 })
 
@@ -52,9 +72,9 @@ describe('urgencia (semáforo)', () => {
 
 describe('claseAhora', () => {
   const clases: Clase[] = [
-    { id: 'a', cursoId: 'c1', dia: 3, inicio: '08:00', fin: '10:00', aula: 'A' }, // jueves
-    { id: 'b', cursoId: 'c2', dia: 3, inicio: '14:00', fin: '16:00', aula: 'B' },
-    { id: 'c', cursoId: 'c1', dia: 0, inicio: '08:00', fin: '10:00', aula: 'A' }, // lunes
+    { id: 'a', cursoId: 'c1', dia: 3, inicio: '08:00', fin: '10:00', aula: 'A', actualizadoEn: 0 }, // jueves
+    { id: 'b', cursoId: 'c2', dia: 3, inicio: '14:00', fin: '16:00', aula: 'B', actualizadoEn: 0 },
+    { id: 'c', cursoId: 'c1', dia: 0, inicio: '08:00', fin: '10:00', aula: 'A', actualizadoEn: 0 }, // lunes
   ]
   it('detecta que estás en clase y cuánto falta', () => {
     const e = claseAhora(clases, new Date(2026, 9, 15, 9, 0)) // jueves 15 oct, 9:00

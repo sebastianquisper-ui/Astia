@@ -1,14 +1,15 @@
-import type { Clase, Curso, Tarea } from '../dominio/tipos'
+import type { Clase, Curso, Datos, Tarea } from '../dominio/tipos'
+import { datosVacios } from '../datos/almacenamiento'
 import { addDays, ymd } from '../lib/fechas'
 
 // DATOS DE EJEMPLO para ver cómo se ve la app. No son los datos reales de nadie.
 // Las fechas son relativas a hoy, así siempre hay tareas vencidas, de hoy, de esta semana...
 
 export const CURSOS_EJEMPLO: Curso[] = [
-  { id: 'c-calc', nombre: 'Cálculo II', color: '#7C8CFF' },
-  { id: 'c-disc', nombre: 'Matemática Discreta', color: '#FF7A90' },
-  { id: 'c-fis', nombre: 'Física', color: '#4FD1A5' },
-  { id: 'c-prog', nombre: 'Programación', color: '#FFB454' },
+  { id: 'c-calc', nombre: 'Cálculo II', color: '#7C8CFF', actualizadoEn: 0 },
+  { id: 'c-disc', nombre: 'Matemática Discreta', color: '#FF7A90', actualizadoEn: 0 },
+  { id: 'c-fis', nombre: 'Física', color: '#4FD1A5', actualizadoEn: 0 },
+  { id: 'c-prog', nombre: 'Programación', color: '#FFB454', actualizadoEn: 0 },
 ]
 
 // [día (0 = lunes), curso, inicio, fin, aula]
@@ -36,11 +37,14 @@ export const CLASES_EJEMPLO: Clase[] = HORARIO.map(([dia, cursoId, inicio, fin, 
   inicio,
   fin,
   aula,
+  actualizadoEn: 0,
 }))
+
+type Base = Omit<Tarea, 'prioridad' | 'pideEvidencia' | 'pasos' | 'actualizadoEn'>
 
 export function tareasEjemplo(ahora: Date): Tarea[] {
   const en = (dias: number) => ymd(addDays(ahora, dias))
-  return [
+  const lista: Base[] = [
     { id: 't1', titulo: 'Informe de laboratorio', area: 'universidad', cursoId: 'c-fis', tipo: 'tarea', fecha: en(-1), hora: '18:00', estado: 'pendiente' },
     { id: 't2', titulo: 'Examen parcial de Física', area: 'universidad', cursoId: 'c-fis', tipo: 'examen', fecha: en(1), hora: '15:00', estado: 'pendiente' },
     { id: 't3', titulo: 'Resolver práctica de Cálculo II', area: 'universidad', cursoId: 'c-calc', tipo: 'estudio', fecha: en(0), hora: '21:00', estado: 'pendiente' },
@@ -51,4 +55,10 @@ export function tareasEjemplo(ahora: Date): Tarea[] {
     { id: 't8', titulo: 'Ensayo de Física', area: 'universidad', cursoId: 'c-fis', tipo: 'tarea', fecha: en(12), estado: 'pendiente' },
     { id: 't9', titulo: 'Guía de Matemática Discreta', area: 'universidad', cursoId: 'c-disc', tipo: 'tarea', fecha: en(-2), estado: 'hecha', hechaEn: addDays(ahora, -2).toISOString() },
   ]
+  return lista.map((t) => ({ ...t, prioridad: 'media' as const, pideEvidencia: t.tipo === 'estudio', pasos: [], actualizadoEn: 0 }))
+}
+
+/** El conjunto completo de datos de ejemplo, listo para usar como `Datos`. */
+export function datosDeEjemplo(ahora: Date): Datos {
+  return { ...datosVacios(), cursos: CURSOS_EJEMPLO, clases: CLASES_EJEMPLO, tareas: tareasEjemplo(ahora) }
 }

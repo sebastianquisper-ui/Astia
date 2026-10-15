@@ -3,7 +3,8 @@ import { hashDe, leerRuta, type Pestana, type Ruta } from './lib/ruta'
 import { Estrella } from './ui/Icono'
 import { NavInferior } from './ui/NavInferior'
 import { Hoy } from './pantallas/Hoy'
-import { Cursos, Semana } from './pantallas/Simples'
+import { Semana } from './pantallas/Simples'
+import { Cursos } from './pantallas/Cursos'
 import { Tareas } from './pantallas/Tareas'
 import { Cielo } from './ui/Cielo'
 import { useAjustes } from './ajustes/AjustesProvider'
@@ -38,9 +39,15 @@ export default function App() {
             <Estrella />
             Astia
           </div>
-          <div className="estado" title="La nube se conecta en la fase 2">
-            <i /> {ajustes.datosEjemplo ? 'Datos de ejemplo' : 'Solo en este teléfono'}
-          </div>
+          {ajustes.datosEjemplo ? (
+            <button className="estado" onClick={() => ir({ pestana: 'mas', sub: 'ajustes' })} aria-label="Datos de ejemplo. Toca para cargar los tuyos en Ajustes">
+              <i /> Datos de ejemplo
+            </button>
+          ) : (
+            <div className="estado" title="La nube se conecta en la parte 2b">
+              <i /> Solo en este teléfono
+            </div>
+          )}
         </header>
         <main>
           {ruta.pestana === 'hoy' && <Hoy />}

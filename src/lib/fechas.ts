@@ -30,3 +30,12 @@ export const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sáb
 export const DIAS_CORTOS = ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom']
 export const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 export const fechaCorta = (d: Date) => `${DIAS_CORTOS[indiceDia(d)]} ${d.getDate()} ${MESES[d.getMonth()]}`
+
+/** El lunes de la semana de `d`. */
+export const lunesDe = (d: Date) => addDays(d, -indiceDia(d))
+
+/** Número de semana del ciclo (1 = la semana donde empieza). Antes del inicio da 0 o negativo. */
+export function semanaDelCiclo(inicioCiclo: string, fecha: Date): number | null {
+  if (!inicioCiclo) return null
+  return Math.floor(diffDays(lunesDe(fecha), lunesDe(parseYmd(inicioCiclo))) / 7) + 1
+}

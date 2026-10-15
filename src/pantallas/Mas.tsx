@@ -1,6 +1,7 @@
 import { Icono, type NombreIcono } from '../ui/Icono'
 import { Vacio } from '../ui/Vacio'
 import { Ajustes } from './Ajustes'
+import { Horario } from './Horario'
 
 interface Entrada {
   id: string
@@ -25,6 +26,7 @@ const ENTRADAS: Entrada[] = [
 
 export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => void }) {
   if (sub === 'ajustes') return <Ajustes alVolver={() => alAbrir('')} />
+  if (sub === 'horario') return <Horario alVolver={() => alAbrir('')} />
 
   const entrada = ENTRADAS.find((e) => e.id === sub)
   if (entrada) {

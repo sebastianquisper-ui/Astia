@@ -14,15 +14,3 @@ export function Semana() {
     </section>
   )
 }
-
-export function Cursos() {
-  return (
-    <section className="pantalla">
-      <h1 className="titulo">Cursos</h1>
-      <p className="sub">Cada curso con sus 16 semanas.</p>
-      <div className="seccion">
-        <Vacio titulo="Sin cursos" texto="Agrega tus cursos para ver el tema de cada semana, tus notas y actividades." />
-      </div>
-    </section>
-  )
-}
