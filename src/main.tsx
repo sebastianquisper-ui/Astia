@@ -8,6 +8,7 @@ import './estilos/app.css'
 import App from './App'
 import { AvisoProvider } from './ui/Aviso'
 import { AjustesProvider } from './ajustes/AjustesProvider'
+import { DatosProvider } from './datos/DatosProvider'
 
 // Registra el service worker: es lo que permite instalar la app y abrirla sin internet
 registerSW({ immediate: true })
@@ -16,7 +17,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AvisoProvider>
       <AjustesProvider>
-        <App />
+        <DatosProvider>
+          <App />
+        </DatosProvider>
       </AjustesProvider>
     </AvisoProvider>
   </StrictMode>,

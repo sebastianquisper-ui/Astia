@@ -26,15 +26,3 @@ export function Cursos() {
     </section>
   )
 }
-
-export function Tareas() {
-  return (
-    <section className="pantalla">
-      <h1 className="titulo">Tareas</h1>
-      <p className="sub">Rojo: menos de 48 h · Ámbar: esta semana · Verde: después.</p>
-      <div className="seccion">
-        <Vacio titulo="Nada pendiente" texto="Cuando agregues tareas las verás aquí ordenadas por urgencia." />
-      </div>
-    </section>
-  )
-}

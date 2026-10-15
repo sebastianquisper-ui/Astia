@@ -75,6 +75,15 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
           ))}
         </div>
       </div>
+
+      <div className="campo">
+        <span className="etiqueta" id="et-demo">Datos de ejemplo</span>
+        <div className="seg" role="group" aria-labelledby="et-demo">
+          <button aria-pressed={ajustes.datosEjemplo} onClick={() => cambiar({ datosEjemplo: true })}>Mostrar</button>
+          <button aria-pressed={!ajustes.datosEjemplo} onClick={() => cambiar({ datosEjemplo: false })}>Ocultar</button>
+        </div>
+        <p className="nota">Cursos, clases y tareas inventados para ver cómo luce Astia. Tus datos reales llegan con la base de datos.</p>
+      </div>
     </section>
   )
 }

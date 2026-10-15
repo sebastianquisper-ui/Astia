@@ -50,3 +50,40 @@ test('la app es instalable: manifest con nombre, icono y modo app', async ({ pag
   const iconoIos = await request.get('/icons/apple-touch-icon.png')
   expect(iconoIos.ok()).toBe(true)
 })
+
+test('Hoy: al marcar una tarea Astia reacciona y avisa', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.locator('.tarea')).toHaveCount(3)
+  await page.getByRole('button', { name: /Marcar hecha/ }).first().click()
+  await expect(page.getByRole('status')).toContainText('Hecha')
+  await expect(page.locator('.burbuja')).toContainText('Una menos')
+  await expect(page.locator('.avatar')).toHaveClass(/contenta/)
+})
+
+test('Hoy: tocar a Astia la hace hablar', async ({ page }) => {
+  await page.goto('/')
+  const antes = await page.locator('.burbuja').innerText()
+  await page.getByRole('button', { name: 'Hablar con Astia' }).click()
+  await expect(page.locator('.burbuja')).not.toHaveText(antes)
+})
+
+test('Hoy: el selector de área filtra a Mi Órbita (tareas personales)', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Mi Órbita' }).click()
+  await expect(page.locator('.tarea')).toHaveCount(2)
+  await expect(page.locator('.tarea').first()).toContainText(/Familia|Trámites/)
+})
+
+test('Tareas: separa vencidas y permite ver las hechas', async ({ page }) => {
+  await page.goto('/#/tareas')
+  await expect(page.getByRole('heading', { name: 'Vencidas' })).toBeVisible()
+  await page.getByRole('button', { name: 'Hechas' }).click()
+  await expect(page.locator('.tarea')).toHaveCount(1)
+})
+
+test('ocultar los datos de ejemplo deja la app vacía y clara', async ({ page }) => {
+  await page.goto('/#/mas/ajustes')
+  await page.getByRole('button', { name: 'Ocultar' }).click()
+  await page.goto('/#/hoy')
+  await expect(page.getByText('Sin tareas todavía')).toBeVisible()
+})

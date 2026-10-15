@@ -283,3 +283,169 @@ button { cursor: pointer; border: 0; background: none; padding: 0; }
 
 /* Sobre la tarjeta "Ahora" (fondo surface2) el botón suave usa el color de superficie para no perderse */
 .tarjeta-ahora .btn.suave { background: var(--surface); }
+
+/* =====================================================================
+   OBSERVATORIO: cielo, avatar, órbita (tema espacial de Astia)
+   ===================================================================== */
+
+/* ---------- cielo de fondo ---------- */
+.cielo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  color: var(--estrella); /* las estrellas usan currentColor: de día son invisibles */
+  background:
+    radial-gradient(70% 38% at 85% -4%, rgb(120 140 235 / 0.2), transparent 70%),
+    radial-gradient(55% 32% at -5% 34%, rgb(236 170 100 / 0.08), transparent 70%);
+}
+:root[data-theme='light'] .cielo {
+  background:
+    radial-gradient(80% 40% at 85% -6%, rgb(130 150 235 / 0.2), transparent 70%),
+    radial-gradient(60% 30% at -5% 30%, rgb(240 190 120 / 0.14), transparent 70%);
+}
+.estrellas { position: absolute; top: 0; left: 0; width: 1px; height: 1px; border-radius: 50%; }
+.estrellas.e1 { opacity: 0.4; }
+.estrellas.e2 { opacity: 0.6; }
+.estrellas.e3 { animation: titilar 4.5s ease-in-out infinite alternate; }
+@keyframes titilar { from { opacity: 0.1; } to { opacity: 0.7; } }
+
+.app { position: relative; z-index: 1; }
+
+/* ---------- cristal: las tarjetas dejan ver el cielo ---------- */
+:root[data-theme='dark'] .tarjeta,
+:root[data-theme='dark'] .lista,
+:root[data-theme='dark'] .tarea,
+:root[data-theme='dark'] .burbuja {
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+}
+
+/* ---------- héroe: avatar + burbuja ---------- */
+.hero { display: flex; align-items: center; gap: 6px; margin-top: 14px; }
+.avatar-btn {
+  flex: none;
+  position: relative;
+  border-radius: 50%;
+  -webkit-tap-highlight-color: transparent;
+}
+.avatar-btn::before { /* resplandor detrás de la estrella */
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(242 200 121 / 0.38), transparent 70%);
+  animation: pulso 3.6s ease-in-out infinite;
+}
+.avatar { position: relative; display: block; animation: flotar 4.2s ease-in-out infinite; }
+.avatar svg { display: block; filter: drop-shadow(0 6px 14px rgb(233 176 78 / 0.35)); }
+.avatar-btn:active .avatar { animation: salto 0.35s ease-out; }
+@keyframes flotar { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-6px) rotate(1.5deg); } }
+@keyframes pulso { 0%, 100% { opacity: 0.6; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.1); } }
+@keyframes salto { 0% { transform: scale(1); } 40% { transform: scale(1.14) rotate(-6deg); } 100% { transform: scale(1); } }
+.ojo { transform-box: fill-box; transform-origin: center; animation: parpadeo 5.5s infinite; }
+@keyframes parpadeo { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.08); } }
+.boca-habla { transform-box: fill-box; transform-origin: center; animation: hablar 0.26s ease-in-out infinite alternate; }
+@keyframes hablar { from { transform: scaleY(0.35); } to { transform: scaleY(1.2); } }
+.zzz { position: absolute; top: 4px; right: -4px; font-family: var(--display); font-weight: 800; color: var(--accent); font-size: 1.1rem; animation: flotar 3s ease-in-out infinite; }
+.zzz small { font-size: 0.8rem; margin-left: 1px; }
+.avatar.alerta { animation: flotar 2.2s ease-in-out infinite; }
+
+.burbuja {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: var(--surface);
+  border-radius: 20px 20px 20px 6px;
+  padding: 12px 15px;
+  font-weight: 500;
+  box-shadow: var(--sombra);
+}
+.burbuja::before { /* colita que apunta a Astia */
+  content: '';
+  position: absolute;
+  left: -7px;
+  bottom: 12px;
+  width: 14px;
+  height: 14px;
+  background: inherit;
+  border-left: inherit;
+  border-bottom: inherit;
+  transform: rotate(45deg);
+  border-radius: 0 0 0 4px;
+}
+
+.bloque { margin-top: 16px; }
+
+/* ---------- tarjeta "Ahora": órbita ---------- */
+.tarjeta-ahora { margin-top: 16px; padding: 18px; border-radius: 28px; background: var(--surface2); }
+:root[data-theme='dark'] .tarjeta-ahora { background: linear-gradient(160deg, rgb(52 62 120 / 0.6), rgb(26 32 66 / 0.6)); }
+.orbita-fila { display: flex; align-items: center; gap: 16px; }
+.orbita { position: relative; width: 124px; height: 124px; flex: none; }
+.orbita svg { width: 100%; height: 100%; overflow: visible; }
+.orbita-pista { fill: none; stroke: var(--line); stroke-width: 5; stroke-dasharray: 2 7; stroke-linecap: round; }
+.orbita-avance { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+.planeta { transition: transform 0.8s ease; filter: drop-shadow(0 0 6px currentColor); }
+.orbita-centro { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.orbita-centro b { font-family: var(--display); font-weight: 800; font-size: 1.9rem; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.orbita-centro small { color: var(--muted); font-size: 0.78rem; font-weight: 600; }
+.orbita-texto { min-width: 0; flex: 1; }
+.orbita-texto .grande { margin-top: 2px; overflow-wrap: anywhere; }
+.tarjeta-ahora .btn.suave { background: var(--surface); }
+:root[data-theme='dark'] .tarjeta-ahora .btn.suave { background: rgb(255 255 255 / 0.1); color: var(--text); }
+
+/* ---------- chips ---------- */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.chip { padding: 5px 12px; border-radius: 999px; background: var(--surface2); font-size: 0.8125rem; font-weight: 600; color: var(--muted); }
+.chip.vencida { background: color-mix(in srgb, var(--red) 20%, transparent); color: var(--red); }
+.chip.roja { background: color-mix(in srgb, var(--red) 14%, transparent); color: var(--red); }
+.chip.ambar { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); }
+
+/* ---------- tareas ---------- */
+.tlista { display: flex; flex-direction: column; gap: 9px; }
+.tarea {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 13px 14px;
+  border-left: 5px solid var(--line);
+  box-shadow: var(--sombra);
+}
+:root[data-theme='dark'] .tarea { border-left: 5px solid var(--line); }
+.tarea.u-vencida, :root[data-theme='dark'] .tarea.u-vencida { border-left-color: var(--red); }
+.tarea.u-roja, :root[data-theme='dark'] .tarea.u-roja { border-left-color: var(--red); }
+.tarea.u-ambar, :root[data-theme='dark'] .tarea.u-ambar { border-left-color: var(--amber); }
+.tarea.u-verde, :root[data-theme='dark'] .tarea.u-verde { border-left-color: var(--green); }
+.tarea.u-hecha { opacity: 0.7; }
+.check {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+  display: grid;
+  place-items: center;
+  color: var(--accent-ink);
+  background: transparent;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  position: relative;
+}
+.check::after { content: ''; position: absolute; inset: -8px; } /* zona de toque más grande */
+.check:active { transform: scale(0.88); }
+.check.on { background: var(--green); border-color: var(--green); }
+.tarea-texto { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.tarea-titulo { font-weight: 600; font-size: 0.97rem; overflow-wrap: anywhere; }
+.tarea-titulo.tachada { text-decoration: line-through; color: var(--muted); }
+.tarea-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: 0.8125rem; color: var(--muted); }
+.punto { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+.punto.personal { background: var(--gold); }
+.etiqueta { font-weight: 700; }
+.etiqueta.vencida, .etiqueta.roja { color: var(--red); }
+.etiqueta.ambar { color: var(--amber); }
+.etiqueta.verde { color: var(--green); }
+.titulo.rojo { color: var(--red); }

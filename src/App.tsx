@@ -3,10 +3,14 @@ import { hashDe, leerRuta, type Pestana, type Ruta } from './lib/ruta'
 import { Estrella } from './ui/Icono'
 import { NavInferior } from './ui/NavInferior'
 import { Hoy } from './pantallas/Hoy'
-import { Cursos, Semana, Tareas } from './pantallas/Simples'
+import { Cursos, Semana } from './pantallas/Simples'
+import { Tareas } from './pantallas/Tareas'
+import { Cielo } from './ui/Cielo'
+import { useAjustes } from './ajustes/AjustesProvider'
 import { Mas } from './pantallas/Mas'
 
 export default function App() {
+  const { ajustes } = useAjustes()
   const [ruta, setRuta] = useState<Ruta>(() => leerRuta(window.location.hash))
 
   // Escucha el hash: así funciona el gesto "volver" del iPhone
@@ -27,6 +31,7 @@ export default function App() {
 
   return (
     <>
+      <Cielo />
       <div className="app">
         <header className="cabecera">
           <div className="marca">
@@ -34,7 +39,7 @@ export default function App() {
             Astia
           </div>
           <div className="estado" title="La nube se conecta en la fase 2">
-            <i /> Solo en este teléfono
+            <i /> {ajustes.datosEjemplo ? 'Datos de ejemplo' : 'Solo en este teléfono'}
           </div>
         </header>
         <main>

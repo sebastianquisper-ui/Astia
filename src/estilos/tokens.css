@@ -14,6 +14,7 @@
   --amber: #9c5a1a;
   --green: #2d7556;
   --sombra: 0 1px 2px rgb(38 43 56 / 0.06), 0 6px 18px rgb(38 43 56 / 0.06);
+  --estrella: transparent;
 
   --display: 'Bricolage Grotesque Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --body: 'Figtree Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -24,18 +25,19 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: #1f2230;
-  --surface: #282c3c;
-  --surface2: #313649;
-  --line: #3e4459;
-  --text: #dadfea;
-  --muted: #aab1c3;
-  --accent: #9daae2;
-  --accent-ink: #1c2030;
-  --gold: #ddb56e;
-  --red: #de8c97;
-  --amber: #dda570;
-  --green: #80c3a2;
-  --sombra: 0 1px 2px rgb(0 0 0 / 0.25), 0 6px 18px rgb(0 0 0 / 0.2);
+  --bg: #080b18;
+  --surface: rgb(24 30 60 / 0.72);
+  --surface2: rgb(48 56 104 / 0.55);
+  --line: rgb(130 145 220 / 0.2);
+  --text: #e6e9f6;
+  --muted: #a9b2d0;
+  --accent: #a9b8ff;
+  --accent-ink: #11152b;
+  --gold: #f2c879;
+  --red: #ff8fa3;
+  --amber: #ffb879;
+  --green: #7fddb0;
+  --sombra: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px rgb(2 4 18 / 0.45);
+  --estrella: #ffffff;
   color-scheme: dark;
 }

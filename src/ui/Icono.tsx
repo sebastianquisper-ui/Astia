@@ -15,6 +15,7 @@ const TRAZOS = {
   enfoque: '<path d="M13 3 5 13.5h6L10 21l8-10.5h-6z"/>',
   ajustes: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
   mejora: '<path d="M4 5h16v11H9l-5 4z"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
   orbita: '<circle cx="12" cy="12" r="2.2"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-30 12 12)"/>',
 } as const
 

@@ -9,10 +9,12 @@ export interface Ajustes {
   nombre: string
   modoTema: ModoTema
   tamanoLetra: TamanoLetra
+  /** Muestra cursos, clases y tareas inventados para ver cómo luce la app. */
+  datosEjemplo: boolean
 }
 
 const CLAVE = 'astia.ajustes'
-const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal' }
+const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: true }
 
 interface Contexto {
   ajustes: Ajustes

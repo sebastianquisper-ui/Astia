@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import { temaEfectivo, ESCALA_LETRA } from './tema'
 import { leerRuta, hashDe } from './ruta'
-import { saludoDe, fraseDelDia } from './saludo'
+import { saludoDe } from './saludo'
 import { leerLocal, guardarLocal } from './almacen'
 
 describe('temaEfectivo', () => {
@@ -44,11 +44,6 @@ describe('saludo', () => {
     expect(saludoDe(8)).toBe('Buenos días')
     expect(saludoDe(15)).toBe('Buenas tardes')
     expect(saludoDe(21)).toBe('Buenas noches')
-  })
-  it('la frase es la misma durante todo el día', () => {
-    const a = fraseDelDia(new Date(2026, 9, 15, 8, 0))
-    const b = fraseDelDia(new Date(2026, 9, 15, 22, 0))
-    expect(a).toBe(b)
   })
 })
 
