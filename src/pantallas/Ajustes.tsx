@@ -27,6 +27,8 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
   const [semanas, setSemanas] = useState(String(perfil.semanasCiclo))
   const [pendiente, setPendiente] = useState<Extract<Importacion, { ok: true }> | null>(null)
   const archivo = useRef<HTMLInputElement>(null)
+  // En la vista previa web no se pueden descargar archivos: solo se ofrece "Copiar"
+  const esVista = import.meta.env.VITE_VISTA === '1'
   const semanaActual = semanaDelCiclo(perfil.inicioCiclo, new Date())
 
   const guardarSemanas = () => {
@@ -172,11 +174,11 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
         <span className="etiqueta">Respaldo</span>
         <div className="acciones" style={{ marginTop: 0 }}>
           <button className="btn suave" onClick={() => archivo.current?.click()}>Importar</button>
-          <button className="btn suave" onClick={descargar}>Descargar</button>
+          {!esVista && <button className="btn suave" onClick={descargar}>Descargar</button>}
           <button className="btn suave" onClick={copiar}>Copiar</button>
         </div>
         <input ref={archivo} id="archivo-respaldo" type="file" accept=".json,application/json" hidden onChange={elegirArchivo} aria-label="Archivo de respaldo" />
-        <p className="nota">Importa el respaldo de Astia v1 (Ajustes → Descargar respaldo) o uno de esta versión. Si tu navegador no descarga archivos, usa "Copiar".</p>
+        <p className="nota">Importa el respaldo de Astia v1 (Ajustes → Descargar respaldo) o uno de esta versión. {esVista ? 'En esta vista previa no se pueden descargar archivos: usa "Copiar".' : 'Si tu navegador no descarga archivos, usa "Copiar".'}</p>
       </div>
 
       <Hoja titulo="Importar respaldo" abierta={pendiente !== null} alCerrar={() => setPendiente(null)}>

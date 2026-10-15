@@ -9,5 +9,7 @@ export default defineConfig({
   resolve: {
     alias: { 'virtual:pwa-register': fileURLToPath(new URL('./scripts/sin-pwa.ts', import.meta.url)) },
   },
+  // En la vista previa (página alojada) los navegadores no permiten descargar archivos
+  define: { 'import.meta.env.VITE_VISTA': JSON.stringify('1') },
   build: { outDir: 'dist-vista', emptyOutDir: true, assetsInlineLimit: 100_000_000 },
 })
