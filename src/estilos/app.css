@@ -1,0 +1,285 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px; /* el tamaño de letra de Ajustes cambia este valor */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- estructura ---------- */
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  /* env(...) respeta el notch y la barra inferior del iPhone */
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px calc(var(--nav-alto) + env(safe-area-inset-bottom, 0px) + 28px);
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0 16px;
+}
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+}
+.marca svg { color: var(--gold); }
+.estado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.estado i { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+
+/* La pantalla aparece con una animación suave al cambiar de pestaña */
+.pantalla { animation: entra 0.22s ease-out; }
+@keyframes entra {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- tipografía ---------- */
+.saludo {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.875rem;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+.frase { margin-top: 8px; font-weight: 500; font-size: 1rem; }
+.titulo {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.015em;
+}
+.sub { color: var(--muted); font-size: 0.84rem; }
+.seccion { margin-top: 26px; }
+.seccion > .titulo { margin-bottom: 10px; }
+
+/* ---------- tarjetas y botones ---------- */
+.tarjeta {
+  background: var(--surface);
+  border-radius: var(--radio);
+  padding: 16px;
+  box-shadow: var(--sombra);
+}
+.tarjeta + .tarjeta { margin-top: 10px; }
+.tarjeta-ahora {
+  margin-top: 20px;
+  background: var(--surface2);
+  border-radius: 30px;
+  padding: 20px;
+  box-shadow: none;
+}
+.grande {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.1875rem;
+  line-height: 1.2;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn.suave { background: var(--surface2); color: var(--text); }
+.btn[disabled] { opacity: 0.5; cursor: default; }
+.acciones { display: flex; gap: 10px; margin-top: 18px; }
+.acciones .btn { flex: 1; }
+
+/* ---------- vacío ---------- */
+.vacio {
+  background: var(--surface);
+  border: 1.5px dashed var(--line);
+  border-radius: 18px;
+  padding: 24px 18px;
+  text-align: center;
+  color: var(--muted);
+}
+.vacio b {
+  display: block;
+  color: var(--text);
+  font-family: var(--display);
+  font-size: 1.0625rem;
+  margin-bottom: 4px;
+}
+
+/* ---------- listas ---------- */
+.lista {
+  background: var(--surface);
+  border-radius: var(--radio);
+  overflow: hidden;
+  box-shadow: var(--sombra);
+}
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  min-height: 60px;
+}
+.fila:last-child { border-bottom: 0; }
+.fila:active { background: var(--surface2); }
+.fila .texto { flex: 1; min-width: 0; }
+.fila .texto b { display: block; font-weight: 600; }
+.fila .texto span { color: var(--muted); font-size: 0.8125rem; }
+.fila svg { color: var(--muted); flex: none; }
+.fila .ico { color: var(--accent); }
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  margin: 0 0 8px -6px;
+  padding-right: 10px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- ajustes ---------- */
+.campo { margin-top: 18px; }
+.campo > label, .campo > .etiqueta {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.campo input[type='text'] {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-size: 1rem;
+  min-height: 48px;
+}
+.campo input[type='text']:focus { border-color: var(--accent); outline: 0; }
+.seg {
+  display: flex;
+  background: var(--surface2);
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+}
+.seg button {
+  flex: 1;
+  min-height: 42px;
+  border-radius: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: background-color 0.15s ease;
+}
+.seg button[aria-pressed='true'] { background: var(--surface); color: var(--text); box-shadow: var(--sombra); }
+.nota { font-size: 0.8125rem; color: var(--muted); margin-top: 8px; }
+
+/* ---------- navegación inferior ---------- */
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.nav .dentro {
+  max-width: 560px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+.nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: var(--nav-alto);
+  padding: 8px 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.nav button .pastilla {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 30px;
+  border-radius: 15px;
+  transition: background-color 0.2s ease;
+}
+.nav button[aria-current='page'] { color: var(--accent); }
+.nav button[aria-current='page'] .pastilla { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+
+/* ---------- aviso (toast) ---------- */
+.aviso {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-alto) + env(safe-area-inset-bottom, 0px) + 14px);
+  transform: translateX(-50%);
+  z-index: 80;
+  max-width: 90%;
+  padding: 11px 18px;
+  border-radius: 14px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  animation: entra 0.2s ease-out;
+}
+.aviso.error { background: var(--red); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* Sobre la tarjeta "Ahora" (fondo surface2) el botón suave usa el color de superficie para no perderse */
+.tarjeta-ahora .btn.suave { background: var(--surface); }

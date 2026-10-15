@@ -1,0 +1,41 @@
+/* Colores y medidas de Astia. Mismos colores suaves de la v1, ahora como "tokens".
+   Para cambiar el look de toda la app basta con editar este archivo. */
+:root {
+  --bg: #e7eaee;
+  --surface: #f4f5f7;
+  --surface2: #dce1e8;
+  --line: #c8cfd9;
+  --text: #262b38;
+  --muted: #4f586b;
+  --accent: #4655a8;
+  --accent-ink: #f4f5f7;
+  --gold: #94680f;
+  --red: #a94452;
+  --amber: #9c5a1a;
+  --green: #2d7556;
+  --sombra: 0 1px 2px rgb(38 43 56 / 0.06), 0 6px 18px rgb(38 43 56 / 0.06);
+
+  --display: 'Bricolage Grotesque Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --body: 'Figtree Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --radio: 20px;
+  --nav-alto: 64px;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #1f2230;
+  --surface: #282c3c;
+  --surface2: #313649;
+  --line: #3e4459;
+  --text: #dadfea;
+  --muted: #aab1c3;
+  --accent: #9daae2;
+  --accent-ink: #1c2030;
+  --gold: #ddb56e;
+  --red: #de8c97;
+  --amber: #dda570;
+  --green: #80c3a2;
+  --sombra: 0 1px 2px rgb(0 0 0 / 0.25), 0 6px 18px rgb(0 0 0 / 0.2);
+  color-scheme: dark;
+}
