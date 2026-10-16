@@ -15,6 +15,10 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   (Cursos o Hábitos), Pendientes y Más. Mi Órbita tiene apartados (Deporte, Salud, Mente, Hogar, Familia,
   Dinero, Trámites), hábitos con rachas y calendario, rutinas y entrenamientos con descansos, y pendientes
   simples (sin tipo, prioridad ni examen).
+- **Métodos de estudio y sesión guiada:** completo. 10 métodos (Pomodoro, Feynman, recuperación activa,
+  repetición espaciada, Cornell, práctica intercalada, SQ3R, mapa mental, tarjetas, resolver problemas por pasos)
+  y "Solo 10 minutos". Astia sugiere uno por tarea (se puede cambiar en el formulario). Se usan desde
+  Hoy → Empezar ya, desde Más → Enfoque y descanso, y el enfoque se suma al progreso del día.
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 
 ## Comandos

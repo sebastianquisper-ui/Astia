@@ -1,5 +1,6 @@
 import type { Curso, Tarea } from '../dominio/tipos'
 import { apartadoDe } from '../lib/apartados'
+import { metodoPorId, sugerirMetodo } from '../lib/metodos'
 import { textoVence, urgenciaDe } from '../lib/urgencia'
 import { Icono } from './Icono'
 
@@ -18,6 +19,7 @@ export function FilaTarea({ tarea, curso, ahora, alAlternar, alAbrir }: { tarea:
           <span><i className="punto personal" />Sin curso</span>
         )}
         {tarea.area !== 'personal' && tarea.tipo === 'examen' && <span className="etiqueta ambar">Examen</span>}
+        {tarea.area === 'universidad' && !hecha && <span className="metodo-tag">{metodoPorId(sugerirMetodo(tarea, curso?.nombre)).nombre}</span>}
         <span className={'etiqueta ' + urgencia}>{textoVence(tarea, ahora)}</span>
       </span>
     </>

@@ -2,6 +2,7 @@ import { useAjustes, type Modo } from '../ajustes/AjustesProvider'
 import { Icono, type NombreIcono } from '../ui/Icono'
 import { Vacio } from '../ui/Vacio'
 import { Ajustes } from './Ajustes'
+import { Enfoque } from './Enfoque'
 import { Horario } from './Horario'
 import { Rutinas } from './Rutinas'
 
@@ -22,7 +23,7 @@ const ENTRADAS: Entrada[] = [
   { id: 'calendario', titulo: 'Calendario', detalle: 'Fechas importantes del mes', icono: 'calendario', modos: ['academico', 'personal'] },
   { id: 'ciclo', titulo: 'Ciclo completo', detalle: 'Las 16 semanas y su carga', icono: 'ciclo', modos: ['academico'] },
   { id: 'progreso', titulo: 'Progreso y rachas', detalle: 'Cuántos días seguidos cumples', icono: 'progreso', modos: ['academico', 'personal'] },
-  { id: 'enfoque', titulo: 'Enfoque y descanso', detalle: 'Métodos de estudio y temporizador', icono: 'enfoque', modos: ['academico'] },
+  { id: 'enfoque', titulo: 'Enfoque y descanso', detalle: 'Pomodoro, Feynman, Cornell y más técnicas', icono: 'enfoque', modos: ['academico'] },
   { id: 'ajustes', titulo: 'Ajustes', detalle: 'Tema, tamaño de letra, respaldo', icono: 'ajustes', modos: ['academico', 'personal'] },
   { id: 'mejora', titulo: 'Pedir mejora', detalle: 'Cuéntame qué le falta a Astia', icono: 'mejora', modos: ['academico', 'personal'] },
 ]
@@ -31,6 +32,7 @@ export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => v
   const { ajustes } = useAjustes()
   if (sub === 'ajustes') return <Ajustes alVolver={() => alAbrir('')} />
   if (sub === 'horario') return <Horario alVolver={() => alAbrir('')} />
+  if (sub === 'enfoque') return <Enfoque alVolver={() => alAbrir('')} />
   if (sub === 'rutinas') return <Rutinas alVolver={() => alAbrir('')} />
 
   const entrada = ENTRADAS.find((e) => e.id === sub)

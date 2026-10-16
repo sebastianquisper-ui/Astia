@@ -3,6 +3,7 @@ import type { Area, Curso, Prioridad, Tarea, TipoTarea } from '../dominio/tipos'
 import { crearId } from '../datos/almacenamiento'
 import { APARTADOS, apartadoDe } from '../lib/apartados'
 import { ymd } from '../lib/fechas'
+import { METODOS, metodoPorId, sugerirMetodo, type MetodoId } from '../lib/metodos'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
 
@@ -39,8 +40,11 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
   const [hora, setHora] = useState(inicial?.hora ?? plantilla?.hora ?? '')
   const [prioridad, setPrioridad] = useState<Prioridad>(inicial?.prioridad ?? 'media')
   const [evidencia, setEvidencia] = useState(inicial?.pideEvidencia ?? false)
+  const [metodo, setMetodo] = useState<string>(inicial?.metodo ?? '') // '' = que Astia lo sugiera
   const [confirmaBorrar, setConfirmaBorrar] = useState(false)
   const apartado = apartadoDe(categoria)
+  const nombreCurso = cursos.find((c) => c.id === cursoId)?.nombre ?? ''
+  const sugerido: MetodoId = sugerirMetodo({ titulo, tipo, metodo: undefined }, nombreCurso)
 
   const guardar = () => {
     const limpio = titulo.trim()
@@ -50,8 +54,8 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
     alGuardar(
       personal
         ? // Lo personal siempre es una tarea simple: sin tipo, prioridad ni evidencia
-          { ...base, titulo: limpio, area, cursoId: null, categoria, tipo: 'tarea', fecha, hora: hora || undefined, prioridad: 'media', pideEvidencia: false }
-        : { ...base, titulo: limpio, area, cursoId: cursoId || null, categoria: undefined, tipo, fecha, hora: hora || undefined, prioridad, pideEvidencia: evidencia },
+          { ...base, titulo: limpio, area, cursoId: null, categoria, tipo: 'tarea', fecha, hora: hora || undefined, prioridad: 'media', pideEvidencia: false, metodo: undefined }
+        : { ...base, titulo: limpio, area, cursoId: cursoId || null, categoria: undefined, tipo, fecha, hora: hora || undefined, prioridad, pideEvidencia: evidencia, metodo: metodo || undefined },
     )
   }
 
@@ -127,6 +131,16 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
               <option value="media">Media</option>
               <option value="baja">Baja</option>
             </select>
+          </div>
+          <div className="campo">
+            <label htmlFor="ft-metodo">Método de estudio</label>
+            <select id="ft-metodo" value={metodo} onChange={(e) => setMetodo(e.target.value)}>
+              <option value="">Que Astia lo sugiera ({metodoPorId(sugerido).nombre})</option>
+              {METODOS.map((m) => (
+                <option key={m.id} value={m.id}>{m.nombre}</option>
+              ))}
+            </select>
+            <p className="nota">{metodoPorId((metodo || sugerido) as MetodoId).paraQue}. {metodoPorId((metodo || sugerido) as MetodoId).porque}</p>
           </div>
           <label className="interruptor">
             <input type="checkbox" checked={evidencia} onChange={(e) => setEvidencia(e.target.checked)} />

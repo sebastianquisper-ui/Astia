@@ -107,6 +107,23 @@ export function alternarFecha(registro: string[], fecha: string): string[] {
   return registro.includes(fecha) ? registro.filter((f) => f !== fecha) : [...registro, fecha].sort()
 }
 
+export interface MinutosSesion {
+  enfoque?: number
+  descanso?: number
+  pomodoros?: number
+}
+
+/** Suma minutos de enfoque o descanso (y pomodoros) al progreso de un día. */
+export function sumarMinutos(progreso: ProgresoDia[], fecha: string, suma: MinutosSesion, ahora: number): ProgresoDia[] {
+  const previo = progreso.find((p) => p.id === fecha)
+  const base: ProgresoDia = previo ?? { id: fecha, fecha, hechas: 0, enfoque: 0, descanso: 0, pomodoros: 0, actualizadoEn: ahora }
+  return guardarRegistro(
+    progreso,
+    { ...base, enfoque: base.enfoque + (suma.enfoque ?? 0), descanso: base.descanso + (suma.descanso ?? 0), pomodoros: base.pomodoros + (suma.pomodoros ?? 0) },
+    ahora,
+  )
+}
+
 /** Marca o desmarca un hábito en esa fecha ("AAAA-MM-DD"). */
 export function alternarHabito(datos: Datos, id: string, fecha: string, ahora: number): Datos {
   const h = datos.habitos.find((x) => x.id === id && x.borradoEn === undefined)

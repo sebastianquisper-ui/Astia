@@ -1,15 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
+import { metodoPorId, sugerirMetodo } from '../lib/metodos'
+import { useSesion } from '../sesion/useSesion'
+import { Hoja } from '../ui/Hoja'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
 import { useEditorTarea } from '../formularios/EditorTarea'
 import { animoDe, fraseDe, frasesToque, type Animo } from '../lib/avatar'
 import { claseAhora } from '../lib/ahora'
-import { diffDays } from '../lib/fechas'
+import { diffDays, ymd } from '../lib/fechas'
 import { cumplimientoDeHoy } from '../lib/habitos'
 import { planDeHoy } from '../lib/plan'
 import { saludoDe } from '../lib/saludo'
 import { urgenciaDe } from '../lib/urgencia'
 import { Avatar } from '../ui/Avatar'
+import { Icono } from '../ui/Icono'
 import { useAviso } from '../ui/Aviso'
 import { FilaTarea } from '../ui/FilaTarea'
 import { TarjetaAhora } from '../ui/TarjetaAhora'
@@ -19,7 +23,9 @@ import { Vacio } from '../ui/Vacio'
 /** Hoy en modo Académico: clase actual, urgencias y tus 3 de hoy de la universidad. */
 export function HoyAcademico() {
   const { ajustes, cambiar } = useAjustes()
-  const { tareas, planes, cursos, clases, habitos, alternar } = useDatos()
+  const { tareas, planes, cursos, clases, habitos, progreso, alternar } = useDatos()
+  const sesion = useSesion()
+  const [menuEmpezar, setMenuEmpezar] = useState(false)
   const { abrir, nodo } = useEditorTarea()
   const avisar = useAviso()
   const ahora = useAhora()
@@ -82,6 +88,8 @@ export function HoyAcademico() {
   const estado = claseAhora(clases, ahora)
   const curso = cursos.find((c) => c.id === estado.clase?.cursoId)
   const orbita = cumplimientoDeHoy(habitos, ahora)
+  const enfoqueHoy = progreso.find((p) => p.fecha === ymd(ahora))?.enfoque ?? 0
+  const porEmpezar = plan.filter((t) => t.estado === 'pendiente')
 
   return (
     <section className="pantalla">
@@ -101,7 +109,7 @@ export function HoyAcademico() {
       <TarjetaAhora
         estado={estado}
         curso={curso}
-        alEmpezar={() => avisar('El temporizador de estudio llega en la fase 4.')}
+        alEmpezar={() => setMenuEmpezar(true)}
         alDictar={() => avisar('El dictado por voz llega en la fase 5.')}
       />
 
@@ -110,6 +118,7 @@ export function HoyAcademico() {
           <span className={'chip' + (vencidas ? ' vencida' : '')}>{vencidas} {vencidas === 1 ? 'vencida' : 'vencidas'}</span>
           <span className={'chip' + (en48 ? ' roja' : '')}>{en48} en 48 h</span>
           <span className={'chip' + (semana ? ' ambar' : '')}>{semana} esta semana</span>
+          {enfoqueHoy > 0 && <span className="chip verde">{enfoqueHoy} min de enfoque hoy</span>}
         </div>
       )}
 
@@ -138,6 +147,32 @@ export function HoyAcademico() {
           <span>Ir →</span>
         </button>
       )}
+      <Hoja titulo="Empezar ya" abierta={menuEmpezar} alCerrar={() => setMenuEmpezar(false)}>
+        <p className="sub">Astia te propone un método según cada tarea. Si no tienes ganas, empieza con diez minutos.</p>
+        <div className="acciones">
+          <button className="btn" onClick={() => { setMenuEmpezar(false); sesion.iniciar('arranque', porEmpezar[0]?.id) }}>Solo 10 minutos para arrancar</button>
+        </div>
+        {porEmpezar.length > 0 && (
+          <div className="lista" style={{ marginTop: 16 }}>
+            {porEmpezar.map((t) => {
+              const metodo = metodoPorId(sugerirMetodo(t, cursos.find((c) => c.id === t.cursoId)?.nombre))
+              return (
+                <button key={t.id} className="fila" onClick={() => { setMenuEmpezar(false); sesion.iniciar(metodo.id, t.id) }} aria-label={`Empezar ${t.titulo} con ${metodo.nombre}`}>
+                  <span className="texto">
+                    <b>{t.titulo}</b>
+                    <span>Método sugerido: {metodo.nombre}</span>
+                  </span>
+                  <Icono nombre="play" tam={20} />
+                </button>
+              )
+            })}
+          </div>
+        )}
+        <div className="acciones">
+          <button className="btn suave" onClick={() => { setMenuEmpezar(false); window.location.hash = '#/mas/enfoque' }}>Ver todos los métodos</button>
+        </div>
+      </Hoja>
+      {sesion.nodo}
       {nodo}
     </section>
   )

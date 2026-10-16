@@ -3,7 +3,8 @@ import { expect, test } from '@playwright/test'
 // Todas las pruebas "viven" en el jueves 15 de octubre de 2026, 10:30 (así no dependen de la hora real:
 // por ejemplo, de noche Astia se duerme y las rachas cambian).
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date(2026, 9, 15, 10, 30))
+  // El reloj arranca ahí y sigue corriendo; una prueba puede adelantarlo con fastForward
+  await page.clock.install({ time: new Date(2026, 9, 15, 10, 30) })
 })
 
 test('Hoy muestra el saludo y la navegación tiene 5 pestañas', async ({ page }) => {
@@ -474,4 +475,139 @@ test('la pestaña Más muestra Rutinas en Mi Órbita y Horario en Académico', a
   await MODO(page).getByRole('button', { name: 'Mi Órbita' }).click()
   await expect(page.getByRole('button', { name: /^Rutinas/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /Horario de clases/ })).toHaveCount(0)
+})
+
+// ---------- métodos de estudio y sesión guiada ----------
+
+const SESION = (page: import('@playwright/test').Page, nombre: string) => page.getByRole('dialog', { name: `Sesión: ${nombre}` })
+
+test('Enfoque y descanso: la biblioteca tiene los 10 métodos y muestra sus pasos', async ({ page }) => {
+  await page.goto('/#/mas/enfoque')
+  await expect(page.locator('.metodo-card')).toHaveCount(10)
+  for (const nombre of ['Pomodoro', 'Feynman', 'Recuperación activa', 'Repetición espaciada', 'Cornell', 'Práctica intercalada', 'SQ3R', 'Mapa mental', 'Tarjetas de estudio', 'Resolver problemas por pasos']) {
+    await expect(page.locator('.metodo-card', { hasText: nombre })).toBeVisible()
+  }
+  await page.locator('.metodo-cab', { hasText: 'Feynman' }).click()
+  await expect(page.getByText('Explícalo sin mirar')).toBeVisible()
+  await expect(page.getByText('Busca los huecos')).toBeVisible()
+})
+
+test('Más → Enfoque y descanso es una entrada visible de Académico', async ({ page }) => {
+  await page.goto('/#/mas')
+  await page.getByRole('button', { name: /Enfoque y descanso/ }).click()
+  await expect(page.getByRole('heading', { name: 'Enfoque y descanso' })).toBeVisible()
+})
+
+test('los tiempos del Pomodoro se guardan y la sesión los usa', async ({ page }) => {
+  await page.goto('/#/mas/enfoque')
+  await page.getByLabel('Enfoque (min)').fill('40')
+  await page.getByLabel('Descanso (min)').fill('10')
+  await page.getByLabel('Descanso (min)').blur()
+  await expect(page.getByRole('status')).toContainText('Tiempos del Pomodoro guardados')
+  await page.locator('.metodo-cab', { hasText: 'Pomodoro' }).click()
+  await page.getByRole('button', { name: 'Empezar Pomodoro' }).click()
+  await expect(SESION(page, 'Pomodoro').getByRole('timer')).toContainText('40:00')
+  await expect(SESION(page, 'Pomodoro')).toContainText('Paso 1 de 2')
+})
+
+test('sesión guiada: recorre las fases y termina con el mensaje de Astia', async ({ page }) => {
+  await page.goto('/#/mas/enfoque')
+  await page.locator('.metodo-cab', { hasText: 'Feynman' }).click()
+  await page.getByRole('button', { name: 'Empezar Feynman' }).click()
+  const sesion = SESION(page, 'Feynman')
+  await expect(sesion).toContainText('Estudia el tema')
+  await expect(sesion).toContainText('Paso 1 de 4')
+  await expect(sesion.getByRole('timer')).toContainText('20:00')
+  await sesion.getByRole('button', { name: 'Saltar paso' }).click()
+  await expect(sesion).toContainText('Explícalo sin mirar')
+  await sesion.getByRole('button', { name: 'Saltar paso' }).click()
+  await sesion.getByRole('button', { name: 'Saltar paso' }).click()
+  await expect(sesion).toContainText('Paso 4 de 4')
+  await sesion.getByRole('button', { name: 'Terminar' }).click()
+  await expect(sesion).toContainText('Sesión de Feynman terminada. Descansa 5 minutos, ni uno más.')
+  await sesion.getByRole('button', { name: 'Cerrar', exact: true }).click()
+  await expect(sesion).toHaveCount(0)
+})
+
+test('Pausar y Seguir cambian el botón', async ({ page }) => {
+  await page.goto('/#/mas/enfoque')
+  await page.getByRole('button', { name: 'Empezar 10 minutos' }).click()
+  const sesion = SESION(page, 'Solo 10 minutos')
+  await sesion.getByRole('button', { name: 'Pausar' }).click()
+  await expect(sesion.getByRole('button', { name: 'Seguir' })).toBeVisible()
+  await sesion.getByRole('button', { name: 'Seguir' }).click()
+  await expect(sesion.getByRole('button', { name: 'Pausar' })).toBeVisible()
+})
+
+test('Solo 10 minutos para arrancar: una fase corta y el mensaje de ánimo', async ({ page }) => {
+  await page.goto('/#/mas/enfoque')
+  await page.getByRole('button', { name: 'Empezar 10 minutos' }).click()
+  const sesion = SESION(page, 'Solo 10 minutos')
+  await expect(sesion.getByRole('timer')).toContainText('10:00')
+  await sesion.getByRole('button', { name: 'Terminar' }).click()
+  await expect(sesion).toContainText('Ya empezaste, lo difícil pasó')
+})
+
+test('Hoy → Empezar ya propone un método por tarea y arranca esa sesión', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Empezar ya' }).click()
+  const menu = page.getByRole('dialog', { name: 'Empezar ya' })
+  await expect(menu).toContainText('Solo 10 minutos para arrancar')
+  await expect(menu).toContainText('Método sugerido: Recuperación activa') // el examen de Física
+  await menu.getByRole('button', { name: 'Empezar Examen parcial de Física con Recuperación activa' }).click()
+  const sesion = SESION(page, 'Recuperación activa')
+  await expect(sesion).toContainText('Examen parcial de Física')
+  await expect(sesion).toContainText('Repaso rápido')
+  for (let i = 0; i < 4; i++) await sesion.getByRole('button', { name: 'Saltar paso' }).click()
+  await sesion.getByRole('button', { name: 'Terminar' }).click()
+  await sesion.getByRole('button', { name: 'Marcar la tarea como hecha' }).click()
+  await expect(page.getByRole('status')).toContainText('Hecha')
+  await expect(sesion).toHaveCount(0)
+  await page.goto('/#/tareas')
+  await page.getByRole('button', { name: 'Hechas' }).click()
+  await expect(page.getByText('Examen parcial de Física')).toBeVisible()
+})
+
+test('Solo 10 minutos con una tarea ofrece seguir con su método', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Empezar ya' }).click()
+  await page.getByRole('button', { name: 'Solo 10 minutos para arrancar' }).click()
+  const sesion = SESION(page, 'Solo 10 minutos')
+  await sesion.getByRole('button', { name: 'Terminar' }).click()
+  await expect(sesion).toContainText('Sigue con')
+  await sesion.getByRole('button', { name: /^Seguir con/ }).click()
+  await expect(page.getByRole('dialog', { name: /^Sesión: (?!Solo)/ })).toBeVisible()
+})
+
+test('el formulario de tarea sugiere un método y deja cambiarlo; la lista lo muestra', async ({ page }) => {
+  await page.goto('/#/tareas')
+  await page.getByRole('button', { name: '+ Nueva tarea' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Nueva tarea' })
+  await hoja.getByLabel('Qué hay que hacer').fill('Hacer un resumen del tema 4')
+  await expect(hoja.getByLabel('Método de estudio')).toContainText('Que Astia lo sugiera (Mapa mental)')
+  await hoja.getByLabel('Método de estudio').selectOption({ label: 'Tarjetas de estudio' })
+  await expect(hoja).toContainText('Memorizar definiciones, fórmulas y vocabulario')
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.locator('.tarea', { hasText: 'Hacer un resumen del tema 4' })).toContainText('Tarjetas de estudio')
+})
+
+test('cada tarea académica muestra su método sugerido, y las personales no', async ({ page }) => {
+  await page.goto('/#/tareas')
+  await expect(page.locator('.tarea', { hasText: 'Examen parcial de Física' })).toContainText('Recuperación activa')
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Mi Órbita' }).click()
+  await expect(page.locator('.tarea', { hasText: 'Llamar a mi abuela' })).not.toContainText('Pomodoro')
+  await expect(page.locator('.metodo-tag')).toHaveCount(0)
+})
+
+test('un Pomodoro completo registra los 25 minutos de enfoque y se ve en Hoy', async ({ page }) => {
+  await page.goto('/#/mas/enfoque')
+  await page.locator('.metodo-cab', { hasText: 'Pomodoro' }).click()
+  await page.getByRole('button', { name: 'Empezar Pomodoro' }).click()
+  const sesion = SESION(page, 'Pomodoro')
+  await expect(sesion).toContainText('Enfoque')
+  await page.clock.fastForward('25:05') // pasan 25 minutos
+  await expect(sesion).toContainText('Descanso') // pasó a la segunda fase
+  await sesion.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await page.goto('/#/hoy')
+  await expect(page.locator('.chips')).toContainText('25 min de enfoque hoy')
 })

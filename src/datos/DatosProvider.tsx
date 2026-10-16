@@ -5,7 +5,7 @@ import { useAjustes } from '../ajustes/AjustesProvider'
 import { guardarLocal } from '../lib/almacen'
 import { useAviso } from '../ui/Aviso'
 import { ymd } from '../lib/fechas'
-import { activos, alternarHabito, alternarRutina, alternarTarea, borrarRegistro, datosVacios, guardarRegistro, normalizarDatos, quitarCurso } from './almacenamiento'
+import { activos, sumarMinutos, type MinutosSesion, alternarHabito, alternarRutina, alternarTarea, borrarRegistro, datosVacios, guardarRegistro, normalizarDatos, quitarCurso } from './almacenamiento'
 import { crearRespaldo, type Importacion } from './respaldo'
 
 // Fuente de datos de TODAS las pantallas. Hoy guarda en el teléfono (localStorage);
@@ -62,6 +62,8 @@ export interface Contexto {
   /** Marca o desmarca una rutina como cumplida hoy. */
   alternarRutina: (id: string) => void
   guardarPerfil: (cambios: Partial<Omit<Perfil, 'actualizadoEn'>>) => void
+  /** Suma minutos de enfoque o descanso al progreso de hoy. */
+  registrarMinutos: (suma: MinutosSesion) => void
   importar: (r: Extract<Importacion, { ok: true }>) => void
   exportar: () => string
 }
@@ -121,6 +123,7 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       guardarRutina: (r) => editar((d) => ({ ...d, rutinas: guardarRegistro(d.rutinas, r, ahora()) })),
       borrarRutina: (id) => editar((d) => ({ ...d, rutinas: borrarRegistro(d.rutinas, id, ahora()) })),
       alternarRutina: (id) => editar((d) => alternarRutina(d, id, ymd(new Date()), ahora())),
+      registrarMinutos: (suma) => editar((d) => ({ ...d, progreso: sumarMinutos(d.progreso, ymd(new Date()), suma, ahora()) })),
       guardarPerfil: (cambios) => editar((d) => ({ ...d, perfil: { ...d.perfil, ...cambios, actualizadoEn: ahora() } })),
       importar: (r) => {
         setReales(r.datos)
