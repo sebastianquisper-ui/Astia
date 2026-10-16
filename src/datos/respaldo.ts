@@ -1,4 +1,4 @@
-import type { Clase, Curso, Datos, Meta, Mejora, PlanDia, ProgresoDia, Prioridad, SemanaTema, Tarea, TipoTarea } from '../dominio/tipos'
+import type { Clase, Curso, Datos, Habito, Mejora, PlanDia, ProgresoDia, Prioridad, SemanaTema, Tarea, TipoTarea } from '../dominio/tipos'
 import { datosVacios, normalizarDatos } from './almacenamiento'
 import type { TamanoLetra, ModoTema } from '../lib/tema'
 
@@ -21,7 +21,8 @@ export interface ResumenImportacion {
   tareasPendientes: number
   tareasHechas: number
   semanas: number
-  metas: number
+  habitos: number
+  rutinas: number
   diasDeProgreso: number
   mejoras: number
 }
@@ -51,7 +52,8 @@ export function resumenDe(datos: Datos): ResumenImportacion {
     tareasPendientes: tareas.filter((t) => t.estado === 'pendiente').length,
     tareasHechas: tareas.filter((t) => t.estado === 'hecha').length,
     semanas: vivos(datos.semanas).length,
-    metas: vivos(datos.metas).length,
+    habitos: vivos(datos.habitos).length,
+    rutinas: vivos(datos.rutinas).length,
     diasDeProgreso: vivos(datos.progreso).length,
     mejoras: vivos(datos.mejoras).length,
   }
@@ -188,14 +190,14 @@ function importarV1(r: Obj, ahora: number): Importacion {
   }
   datos.progreso = progreso
 
-  // Metas personales
-  const metas: Meta[] = []
+  // Metas personales de la v1: ahora son hábitos de todos los días (los puedes cambiar después)
+  const habitos: Habito[] = []
   for (const g of arr(goals.items)) {
     if (!esObj(g) || !txt(g.id) || !txt(g.name)) continue
-    const registro = esObj(g.log) ? Object.keys(g.log).filter((f) => FECHA.test(f) && g.log && (g.log as Obj)[f]) : []
-    metas.push({ id: txt(g.id), nombre: txt(g.name), registro, actualizadoEn: ahora })
+    const registro = esObj(g.log) ? Object.keys(g.log).filter((f) => FECHA.test(f) && g.log && (g.log as Obj)[f]).sort() : []
+    habitos.push({ id: txt(g.id), nombre: txt(g.name), categoria: 'Otro', color: '#4FD1A5', frecuencia: { tipo: 'diaria' }, registro, actualizadoEn: ahora })
   }
-  datos.metas = metas
+  datos.habitos = habitos
 
   // "Pedir mejora"
   const mejoras: Mejora[] = []

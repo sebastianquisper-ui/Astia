@@ -126,7 +126,7 @@ describe('importar el respaldo de la v1', () => {
   if (!r.ok) throw new Error(r.error)
 
   it('trae cursos, horario y tareas válidos', () => {
-    expect(r.resumen).toMatchObject({ cursos: 3, clases: 3, tareasPendientes: 4, tareasHechas: 1, semanas: 2, metas: 1, diasDeProgreso: 2, mejoras: 1 })
+    expect(r.resumen).toMatchObject({ cursos: 3, clases: 3, tareasPendientes: 4, tareasHechas: 1, semanas: 2, habitos: 1, rutinas: 0, diasDeProgreso: 2, mejoras: 1 })
   })
   it('conserva los ids de la v1 (para no duplicar eventos de Google Calendar)', () => {
     expect(r.datos.tareas.map((t) => t.id)).toContain('0yh6vke4')
@@ -153,7 +153,7 @@ describe('importar el respaldo de la v1', () => {
   it('trae el plan del día sin ids inexistentes, semanas con contenido, metas y progreso', () => {
     expect(r.datos.planes[0].tareaIds).toEqual(['0yh6vke4', 't-examen1'])
     expect(r.datos.semanas.map((s) => s.id).sort()).toEqual(['kcalc01a_7', 'kfis03cc_8'])
-    expect(r.datos.metas[0].registro).toEqual(['2026-10-13', '2026-10-14'])
+    expect(r.datos.habitos[0]).toMatchObject({ nombre: '30 minutos de inglés', categoria: 'Otro', frecuencia: { tipo: 'diaria' }, registro: ['2026-10-13', '2026-10-14'] })
     expect(r.datos.progreso.find((p) => p.fecha === '2026-10-13')).toMatchObject({ hechas: 2, enfoque: 55, descanso: 10, pomodoros: 2 })
   })
   it('trae el perfil y los ajustes de vista', () => {

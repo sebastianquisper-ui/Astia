@@ -16,9 +16,10 @@ export function useEditorTarea() {
   const abrir = useCallback((id?: string, plantilla?: Partial<Tarea>) => setEstado({ id, plantilla }), [])
   const cerrar = useCallback(() => setEstado(null), [])
   const inicial = estado?.id ? tareas.find((t) => t.id === estado.id) : undefined
+  const personal = (inicial?.area ?? estado?.plantilla?.area) === 'personal'
 
   const nodo = (
-    <Hoja titulo={inicial ? 'Editar tarea' : 'Nueva tarea'} abierta={estado !== null} alCerrar={cerrar}>
+    <Hoja titulo={personal ? (inicial ? 'Editar pendiente' : 'Nuevo pendiente') : inicial ? 'Editar tarea' : 'Nueva tarea'} abierta={estado !== null} alCerrar={cerrar}>
       {estado && (
         <FormTarea
           key={estado.id ?? 'nueva'}
@@ -28,14 +29,14 @@ export function useEditorTarea() {
           alGuardar={(t) => {
             guardarTarea(t)
             cerrar()
-            avisar(inicial ? 'Tarea actualizada.' : 'Tarea agregada.')
+            avisar(personal ? (inicial ? 'Pendiente actualizado.' : 'Pendiente agregado.') : inicial ? 'Tarea actualizada.' : 'Tarea agregada.')
           }}
           alBorrar={
             inicial
               ? () => {
                   borrarTarea(inicial.id)
                   cerrar()
-                  avisar('Tarea borrada.')
+                  avisar(personal ? 'Pendiente borrado.' : 'Tarea borrada.')
                 }
               : undefined
           }

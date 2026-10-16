@@ -48,3 +48,55 @@ export function frasesToque(nombre: string): string[] {
     'Tocarme no cuenta como estudiar.',
   ]
 }
+
+// ---------- Mi Órbita (modo personal) ----------
+
+export interface SituacionPersonal {
+  hora: number
+  /** Ya hay hábitos creados. */
+  hayHabitos: boolean
+  /** Pendientes personales vencidos. */
+  vencidas: number
+  habitosHechos: number
+  habitosTotal: number
+  /** La racha más larga entre tus hábitos de hoy. */
+  rachaMax: number
+  /** Nombre de la rutina de este momento del día, si no la has hecho. */
+  rutinaPendiente?: string
+}
+
+export function animoPersonal(s: SituacionPersonal): Animo {
+  if (s.hora >= 23 || s.hora < 5) return 'durmiendo'
+  if (s.vencidas > 0) return 'alerta'
+  if (s.habitosTotal > 0 && s.habitosHechos === s.habitosTotal) return 'contenta'
+  return 'seria'
+}
+
+export function frasePersonal(s: SituacionPersonal, nombre: string, semilla: number): string {
+  const animo = animoPersonal(s)
+  if (animo === 'durmiendo') return rotar([`${nombre}, a dormir. Dormir bien también es un hábito.`, 'Pantalla fuera. Mañana cumples mejor descansado.'], semilla)
+  if (!s.hayHabitos) return 'Aún no tienes hábitos. Crea el primero: uno solo, el más fácil, y lo cumples hoy.'
+  if (animo === 'alerta') {
+    const que = s.vencidas === 1 ? 'Tienes 1 pendiente personal vencido' : `Tienes ${s.vencidas} pendientes personales vencidos`
+    return rotar([`${que}. Lo personal también cuenta. Hazlo hoy.`, `${que}. No se resuelve solo. Empieza ya.`], semilla)
+  }
+  if (animo === 'contenta') {
+    const racha = s.rachaMax >= 3 ? ` Racha de ${s.rachaMax} días.` : ''
+    return rotar([`Todos tus hábitos de hoy, cumplidos.${racha} Descansa sin culpa.`, `Hoy cumpliste contigo.${racha} Eso es disciplina.`], semilla)
+  }
+  if (s.rutinaPendiente) return rotar([`Tu ${s.rutinaPendiente} sigue pendiente. Empieza ya.`, `Hora de tu ${s.rutinaPendiente}. Sin negociar.`], semilla)
+  const faltan = s.habitosTotal - s.habitosHechos
+  const cuantos = faltan === 1 ? 'Te falta 1 hábito' : `Te faltan ${faltan} hábitos`
+  return rotar([`${cuantos} de hoy. Empieza por el más corto.`, `${cuantos}. La versión mínima también cuenta.`], semilla)
+}
+
+export function frasesToquePersonal(nombre: string): string[] {
+  return [
+    'Un hábito no se cumple mirando la pantalla.',
+    `${nombre}, la versión mínima también vale. Empieza con eso.`,
+    'Cinco minutos. Solo cinco. Ya.',
+    'Tu yo de la próxima semana te lo va a agradecer.',
+    'La motivación no llega sola: llega cuando ya empezaste.',
+    'Tocarme no cuenta como ejercicio.',
+  ]
+}

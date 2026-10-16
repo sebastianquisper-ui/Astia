@@ -1,4 +1,4 @@
-import type { Clase, Curso, Datos, Meta, Mejora, PlanDia, ProgresoDia, Registro, SemanaTema, Tarea } from '../dominio/tipos'
+import type { Clase, Curso, Datos, Frecuencia, Habito, Mejora, Momento, PasoRutina, PlanDia, ProgresoDia, Registro, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
 import { ymd } from '../lib/fechas'
 
 // Funciones puras para manejar los datos. Todas devuelven objetos NUEVOS (nunca modifican
@@ -11,7 +11,8 @@ export const datosVacios = (): Datos => ({
   clases: [],
   tareas: [],
   semanas: [],
-  metas: [],
+  habitos: [],
+  rutinas: [],
   mejoras: [],
   progreso: [],
   planes: [],
@@ -60,7 +61,8 @@ export function fusionarDatos(local: Datos, remoto: Datos): Datos {
     clases: fusionarLista(local.clases, remoto.clases),
     tareas: fusionarLista(local.tareas, remoto.tareas),
     semanas: fusionarLista(local.semanas, remoto.semanas),
-    metas: fusionarLista(local.metas, remoto.metas),
+    habitos: fusionarLista(local.habitos, remoto.habitos),
+    rutinas: fusionarLista(local.rutinas, remoto.rutinas),
     mejoras: fusionarLista(local.mejoras, remoto.mejoras),
     progreso: fusionarLista(local.progreso, remoto.progreso),
     planes: fusionarLista(local.planes, remoto.planes),
@@ -100,6 +102,25 @@ export function alternarTarea(datos: Datos, id: string, ahora: Date): Datos {
   return { ...datos, tareas: guardarRegistro(datos.tareas, hecha, ms), progreso: sumarHechas(datos.progreso, ymd(ahora), 1, ms) }
 }
 
+/** Agrega la fecha si no está, o la quita si ya estaba. Devuelve una lista nueva y ordenada. */
+export function alternarFecha(registro: string[], fecha: string): string[] {
+  return registro.includes(fecha) ? registro.filter((f) => f !== fecha) : [...registro, fecha].sort()
+}
+
+/** Marca o desmarca un hábito en esa fecha ("AAAA-MM-DD"). */
+export function alternarHabito(datos: Datos, id: string, fecha: string, ahora: number): Datos {
+  const h = datos.habitos.find((x) => x.id === id && x.borradoEn === undefined)
+  if (!h) return datos
+  return { ...datos, habitos: guardarRegistro(datos.habitos, { ...h, registro: alternarFecha(h.registro, fecha) }, ahora) }
+}
+
+/** Marca o desmarca una rutina como cumplida en esa fecha. */
+export function alternarRutina(datos: Datos, id: string, fecha: string, ahora: number): Datos {
+  const r = datos.rutinas.find((x) => x.id === id && x.borradoEn === undefined)
+  if (!r) return datos
+  return { ...datos, rutinas: guardarRegistro(datos.rutinas, { ...r, registro: alternarFecha(r.registro, fecha) }, ahora) }
+}
+
 // ---------- lectura segura (por si el guardado está dañado) ----------
 
 const esObjeto = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x)
@@ -107,6 +128,65 @@ const esObjeto = (x: unknown): x is Record<string, unknown> => typeof x === 'obj
 function lista<T extends Registro>(x: unknown): T[] {
   if (!Array.isArray(x)) return []
   return x.filter((e): e is T => esObjeto(e) && typeof e.id === 'string' && typeof e.actualizadoEn === 'number')
+}
+
+type Dic = Registro & Record<string, unknown>
+const FECHA = /^\d{4}-\d{2}-\d{2}$/
+const texto = (v: unknown, def = ''): string => (typeof v === 'string' ? v : def)
+const fechas = (x: unknown): string[] => (Array.isArray(x) ? [...new Set(x.filter((f): f is string => typeof f === 'string' && FECHA.test(f)))].sort() : [])
+const diasValidos = (x: unknown): number[] => (Array.isArray(x) ? [...new Set(x.filter((d): d is number => Number.isInteger(d) && d >= 0 && d <= 6))].sort() : [])
+
+/** Cualquier cosa guardada se convierte en una frecuencia válida (si no se entiende: todos los días). */
+export function frecuenciaDe(x: unknown): Frecuencia {
+  if (esObjeto(x)) {
+    if (x.tipo === 'dias') {
+      const dias = diasValidos(x.dias)
+      if (dias.length) return { tipo: 'dias', dias }
+    }
+    if (x.tipo === 'semanal') {
+      const v = typeof x.veces === 'number' && Number.isFinite(x.veces) ? Math.round(x.veces) : 3
+      return { tipo: 'semanal', veces: Math.min(7, Math.max(1, v)) }
+    }
+  }
+  return { tipo: 'diaria' }
+}
+
+const conBorrado = (r: Registro): Pick<Registro, 'borradoEn'> => (typeof r.borradoEn === 'number' ? { borradoEn: r.borradoEn } : {})
+
+function normalizarHabito(h: Dic): Habito {
+  const minimo = texto(h.minimo).trim()
+  return {
+    id: h.id,
+    actualizadoEn: h.actualizadoEn,
+    ...conBorrado(h),
+    nombre: texto(h.nombre, 'Hábito'),
+    categoria: texto(h.categoria, 'Otro'),
+    color: texto(h.color, '#4FD1A5'),
+    frecuencia: frecuenciaDe(h.frecuencia),
+    ...(minimo ? { minimo } : {}),
+    registro: fechas(h.registro),
+  }
+}
+
+const MOMENTOS: Momento[] = ['manana', 'tarde', 'noche', 'libre']
+
+function normalizarRutina(r: Dic): Rutina {
+  const pasos: PasoRutina[] = (Array.isArray(r.pasos) ? r.pasos : [])
+    .filter(esObjeto)
+    .map((p) => ({ texto: texto(p.texto).trim(), detalle: texto(p.detalle).trim() }))
+    .filter((p) => p.texto)
+    .map((p) => (p.detalle ? { texto: p.texto, detalle: p.detalle } : { texto: p.texto }))
+  return {
+    id: r.id,
+    actualizadoEn: r.actualizadoEn,
+    ...conBorrado(r),
+    nombre: texto(r.nombre, 'Rutina'),
+    categoria: texto(r.categoria, 'Otro'),
+    momento: MOMENTOS.includes(r.momento as Momento) ? (r.momento as Momento) : 'libre',
+    dias: diasValidos(r.dias),
+    pasos,
+    registro: fechas(r.registro),
+  }
 }
 
 /** Convierte cualquier cosa leída del teléfono o de un respaldo en `Datos` válidos. */
@@ -127,7 +207,9 @@ export function normalizarDatos(bruto: unknown): Datos {
     clases: lista<Clase>(bruto.clases),
     tareas: lista<Tarea>(bruto.tareas).map((t) => ({ ...t, pasos: Array.isArray(t.pasos) ? t.pasos : [] })),
     semanas: lista<SemanaTema>(bruto.semanas),
-    metas: lista<Meta>(bruto.metas).map((m) => ({ ...m, registro: Array.isArray(m.registro) ? m.registro : [] })),
+    // Los respaldos viejos de esta versión guardaban los hábitos como "metas"
+    habitos: lista<Dic>(bruto.habitos ?? bruto.metas).map(normalizarHabito),
+    rutinas: lista<Dic>(bruto.rutinas).map(normalizarRutina),
     mejoras: lista<Mejora>(bruto.mejoras),
     progreso: lista<ProgresoDia>(bruto.progreso),
     planes: lista<PlanDia>(bruto.planes).map((p2) => ({ ...p2, tareaIds: Array.isArray(p2.tareaIds) ? p2.tareaIds : [] })),

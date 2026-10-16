@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { PGlite } from '@electric-sql/pglite'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { aFilas, deFilas, type Filas } from '../src/datos/nube'
+import { habitosEjemplo, rutinasEjemplo } from '../src/demo/datosEjemplo'
 import { importarRespaldo } from '../src/datos/respaldo'
 
 // Prueba el esquema SQL de verdad, con un Postgres completo en memoria.
@@ -116,6 +117,8 @@ describe('validaciones de la base de datos', () => {
     await expect(como(ANA, `insert into public.tareas (id, titulo, area, fecha, actualizado_en) values ('x','t','otra','2026-10-20',1)`)).rejects.toThrow(/check/)
     await expect(como(ANA, `insert into public.planes_dia (id, fecha, tarea_ids, actualizado_en) values ('2026-10-20','2026-10-20','{a,b,c,d}',1)`)).rejects.toThrow(/check/)
     await expect(como(ANA, `insert into public.perfiles (semanas_ciclo) values (99)`)).rejects.toThrow(/check/)
+    await expect(como(ANA, `insert into public.habitos (id, nombre, frecuencia, actualizado_en) values ('x','h','{"tipo":"quincenal"}',1)`)).rejects.toThrow(/check/)
+    await expect(como(ANA, `insert into public.rutinas (id, nombre, momento, actualizado_en) values ('x','r','medianoche',1)`)).rejects.toThrow(/check/)
   })
 })
 
@@ -124,7 +127,8 @@ describe('los datos de la app caben en las tablas y vuelven iguales', () => {
     const respaldo = JSON.parse(readFileSync(resolve(process.cwd(), 'e2e/fixtures/respaldo-v1.json'), 'utf8'))
     const imp = importarRespaldo(respaldo, 1_760_000_000_000)
     if (!imp.ok) throw new Error(imp.error)
-    const original = imp.datos
+    // Además del respaldo de la v1, hábitos de todos los tipos y rutinas con pasos
+    const original = { ...imp.datos, habitos: [...imp.datos.habitos, ...habitosEjemplo(new Date(2026, 9, 15))], rutinas: rutinasEjemplo() }
     const filas = aFilas(original)
 
     // Insertar cada tabla tal como la mandaría la app
@@ -151,7 +155,8 @@ describe('los datos de la app caben en las tablas y vuelven iguales', () => {
     expect(porId(vuelta.clases)).toEqual(porId(original.clases))
     expect(porId(vuelta.tareas)).toEqual(porId(original.tareas))
     expect(porId(vuelta.semanas)).toEqual(porId(original.semanas))
-    expect(porId(vuelta.metas)).toEqual(porId(original.metas))
+    expect(porId(vuelta.habitos)).toEqual(porId(original.habitos))
+    expect(porId(vuelta.rutinas)).toEqual(porId(original.rutinas))
     expect(porId(vuelta.mejoras)).toEqual(porId(original.mejoras))
     expect(porId(vuelta.progreso)).toEqual(porId(original.progreso))
     expect(porId(vuelta.planes)).toEqual(porId(original.planes))

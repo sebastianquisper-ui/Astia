@@ -1,8 +1,8 @@
 // Rutas con "hash" (#/hoy, #/mas/ajustes). Así el gesto de volver del iPhone funciona
 // y más adelante los atajos de iOS podrán abrir una pantalla exacta.
 
-export type Pestana = 'hoy' | 'semana' | 'cursos' | 'tareas' | 'mas'
-export const PESTANAS: Pestana[] = ['hoy', 'semana', 'cursos', 'tareas', 'mas']
+export type Pestana = 'hoy' | 'semana' | 'cursos' | 'habitos' | 'tareas' | 'mas'
+export const PESTANAS: Pestana[] = ['hoy', 'semana', 'cursos', 'habitos', 'tareas', 'mas']
 
 export interface Ruta {
   pestana: Pestana

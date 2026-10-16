@@ -1,5 +1,5 @@
-import type { Clase, Curso, Datos, Meta, Mejora, PlanDia, ProgresoDia, SemanaTema, Tarea } from '../dominio/tipos'
-import { datosVacios } from './almacenamiento'
+import type { Clase, Curso, Datos, Habito, Mejora, Momento, PlanDia, ProgresoDia, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
+import { datosVacios, frecuenciaDe } from './almacenamiento'
 
 // Traduce entre los datos de la app (camelCase) y las filas de las tablas de Supabase
 // (snake_case). El esquema está en supabase/migrations. La sincronización (parte 2b)
@@ -13,7 +13,8 @@ export interface Filas {
   clases: Fila[]
   tareas: Fila[]
   semanas: Fila[]
-  metas: Fila[]
+  habitos: Fila[]
+  rutinas: Fila[]
   mejoras: Fila[]
   progreso_diario: Fila[]
   planes_dia: Fila[]
@@ -60,7 +61,12 @@ export function aFilas(d: Datos): Filas {
     semanas: d.semanas.map((s) =>
       limpia({ id: s.id, curso_id: s.cursoId, semana: s.semana, tema: s.tema, notas: s.notas, actualizado_en: s.actualizadoEn, borrado_en: s.borradoEn ?? null }),
     ),
-    metas: d.metas.map((m) => limpia({ id: m.id, nombre: m.nombre, registro: m.registro, actualizado_en: m.actualizadoEn, borrado_en: m.borradoEn ?? null })),
+    habitos: d.habitos.map((h) =>
+      limpia({ id: h.id, nombre: h.nombre, categoria: h.categoria, color: h.color, frecuencia: h.frecuencia, minimo: h.minimo ?? null, registro: h.registro, actualizado_en: h.actualizadoEn, borrado_en: h.borradoEn ?? null }),
+    ),
+    rutinas: d.rutinas.map((r) =>
+      limpia({ id: r.id, nombre: r.nombre, categoria: r.categoria, momento: r.momento, dias: r.dias, pasos: r.pasos, registro: r.registro, actualizado_en: r.actualizadoEn, borrado_en: r.borradoEn ?? null }),
+    ),
     mejoras: d.mejoras.map((m) =>
       limpia({ id: m.id, texto: m.texto, creada_en: m.creadaEn, hecha: m.hecha, actualizado_en: m.actualizadoEn, borrado_en: m.borradoEn ?? null }),
     ),
@@ -123,7 +129,35 @@ export function deFilas(f: Partial<Filas>): Datos {
   d.semanas = (f.semanas ?? []).map((r) =>
     conBorrado<SemanaTema>({ id: String(r.id), cursoId: String(r.curso_id), semana: num(r.semana), tema: String(r.tema ?? ''), notas: String(r.notas ?? ''), actualizadoEn: num(r.actualizado_en) }, r),
   )
-  d.metas = (f.metas ?? []).map((r) => conBorrado<Meta>({ id: String(r.id), nombre: String(r.nombre), registro: Array.isArray(r.registro) ? (r.registro as string[]).map(dia) : [], actualizadoEn: num(r.actualizado_en) }, r))
+  d.habitos = (f.habitos ?? []).map((r) => {
+    const h: Habito = {
+      id: String(r.id),
+      nombre: String(r.nombre),
+      categoria: String(r.categoria ?? 'Otro'),
+      color: String(r.color ?? '#4FD1A5'),
+      frecuencia: frecuenciaDe(r.frecuencia),
+      registro: Array.isArray(r.registro) ? (r.registro as string[]).map(dia) : [],
+      actualizadoEn: num(r.actualizado_en),
+    }
+    const minimo = opt(r.minimo as string | null)
+    if (minimo !== undefined) h.minimo = minimo
+    return conBorrado(h, r)
+  })
+  d.rutinas = (f.rutinas ?? []).map((r) =>
+    conBorrado<Rutina>(
+      {
+        id: String(r.id),
+        nombre: String(r.nombre),
+        categoria: String(r.categoria ?? 'Otro'),
+        momento: (['manana', 'tarde', 'noche', 'libre'].includes(String(r.momento)) ? r.momento : 'libre') as Momento,
+        dias: Array.isArray(r.dias) ? (r.dias as unknown[]).map(Number) : [],
+        pasos: Array.isArray(r.pasos) ? (r.pasos as Rutina['pasos']) : [],
+        registro: Array.isArray(r.registro) ? (r.registro as string[]).map(dia) : [],
+        actualizadoEn: num(r.actualizado_en),
+      },
+      r,
+    ),
+  )
   d.mejoras = (f.mejoras ?? []).map((r) =>
     conBorrado<Mejora>({ id: String(r.id), texto: String(r.texto), creadaEn: num(r.creada_en), hecha: !!r.hecha, actualizadoEn: num(r.actualizado_en) }, r),
   )

@@ -39,3 +39,7 @@ export function semanaDelCiclo(inicioCiclo: string, fecha: Date): number | null 
   if (!inicioCiclo) return null
   return Math.floor(diffDays(lunesDe(fecha), lunesDe(parseYmd(inicioCiclo))) / 7) + 1
 }
+
+export const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+/** Inicial de cada día de la semana, de lunes a domingo. */
+export const INICIALES_DIAS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']

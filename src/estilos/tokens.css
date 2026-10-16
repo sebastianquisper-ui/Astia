@@ -41,3 +41,16 @@
   --estrella: #ffffff;
   color-scheme: dark;
 }
+
+/* ---------- Modo Mi Órbita: mismo cielo, otro tono (verde azulado en vez de índigo) ---------- */
+:root[data-modo='personal'] {
+  --accent: #1f7a64;
+  --accent-ink: #f4f5f7;
+}
+:root[data-modo='personal'][data-theme='dark'] {
+  --accent: #8ee6cf;
+  --accent-ink: #0b1f1a;
+  --line: rgb(120 210 190 / 0.2);
+  --surface: rgb(18 36 48 / 0.72);
+  --surface2: rgb(34 66 80 / 0.55);
+}

@@ -3,7 +3,7 @@ import { Vacio } from '../ui/Vacio'
 // Pantallas que se llenan con datos reales en la fase 3. Por ahora muestran su
 // estado vacío, que también es el que verá un usuario nuevo.
 
-export function Semana() {
+export function SemanaAcademica() {
   return (
     <section className="pantalla">
       <h1 className="titulo">Semana</h1>

@@ -526,3 +526,131 @@ button.tarea-texto { text-align: left; background: none; padding: 0; border: 0; 
 /* Los campos de fecha y hora tienen un ancho mínimo propio en el navegador: sin esto se salían de la hoja */
 .dos > * { min-width: 0; }
 .campo input[type='date'], .campo input[type='time'] { min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; }
+
+/* =====================================================================
+   MODOS (Académico / Mi Órbita), HÁBITOS, RUTINAS
+   ===================================================================== */
+
+/* interruptor de modo */
+.modo-sel { display: flex; background: var(--surface2); border-radius: 14px; padding: 4px; gap: 4px; margin: 0 0 14px; }
+.modo-sel button { flex: 1; min-height: 38px; border-radius: 11px; font-weight: 700; color: var(--muted); transition: background-color 0.2s ease, color 0.2s ease; }
+.modo-sel button[aria-pressed='true'] { background: var(--accent); color: var(--accent-ink); }
+
+/* cielo con tono propio en Mi Órbita */
+:root[data-modo='personal'] .cielo {
+  background:
+    radial-gradient(70% 38% at 85% -4%, rgb(90 220 190 / 0.18), transparent 70%),
+    radial-gradient(55% 32% at -5% 34%, rgb(120 160 255 / 0.09), transparent 70%);
+}
+:root[data-modo='personal'][data-theme='light'] .cielo {
+  background:
+    radial-gradient(80% 40% at 85% -6%, rgb(110 215 190 / 0.25), transparent 70%),
+    radial-gradient(60% 30% at -5% 30%, rgb(190 215 250 / 0.22), transparent 70%);
+}
+
+/* enlace para pasar al otro modo */
+.enlace-modo { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin-top: 24px; padding: 14px 16px; border-radius: 16px; background: var(--surface2); color: var(--text); font-weight: 600; text-align: left; }
+.enlace-modo span:last-child { color: var(--accent); }
+
+/* apartados */
+.apartados { display: flex; flex-wrap: wrap; gap: 8px; }
+.apartado-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 13px; border-radius: 999px; background: var(--surface2); font-weight: 600; font-size: 0.875rem; border: 2px solid transparent; }
+.apartado-chip svg { color: var(--color); }
+.apartado-chip[aria-pressed='true'] { border-color: var(--color); background: color-mix(in srgb, var(--color) 18%, transparent); }
+.con-icono { display: inline-flex; align-items: center; gap: 5px; }
+
+/* técnica sugerida */
+.tecnica { display: flex; flex-direction: column; gap: 4px; margin-top: 18px; padding: 13px 15px; border-radius: 16px; background: color-mix(in srgb, var(--accent) 12%, transparent); font-size: 0.875rem; }
+.tecnica b { font-weight: 700; }
+.tecnica span { color: var(--muted); }
+
+/* ideas rápidas */
+.ideas { display: flex; flex-wrap: wrap; gap: 8px; }
+.idea { min-height: 40px; padding: 0 14px; border-radius: 999px; background: var(--surface2); font-weight: 600; font-size: 0.875rem; text-align: left; }
+.idea:active { transform: scale(0.97); }
+
+/* hábitos */
+.habito-card { background: var(--surface); border-radius: 18px; padding: 12px 14px; box-shadow: var(--sombra); }
+:root[data-theme='dark'] .habito-card { border: 1px solid var(--line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.habito { display: flex; align-items: flex-start; gap: 13px; }
+.habito .check.on { background: var(--color); border-color: var(--color); }
+.habito .check { border-color: color-mix(in srgb, var(--color) 70%, var(--muted)); }
+.habito-texto { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; text-align: left; color: inherit; }
+button.habito-texto { background: none; padding: 0; border: 0; }
+.habito-nombre { font-weight: 600; font-size: 0.97rem; overflow-wrap: anywhere; }
+.habito-nombre.tachada { color: var(--muted); text-decoration: line-through; }
+.habito-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.8125rem; color: var(--muted); }
+.habito-minimo { font-size: 0.8125rem; color: var(--accent); font-weight: 600; }
+.racha { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); font-weight: 700; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.racha small { font-size: 0.72rem; font-weight: 600; }
+
+/* puntitos de la semana */
+.puntos-semana { display: flex; justify-content: space-between; margin: 12px 4px 0 45px; max-width: 280px; }
+.dia-punto { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.dia-punto i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); }
+.dia-punto small { font-size: 0.65rem; color: var(--muted); }
+.dia-punto.hecho i { background: var(--color); border-color: var(--color); }
+.dia-punto.falto i { border-color: var(--red); background: transparent; opacity: 0.8; }
+.dia-punto.hoy i { border-color: var(--color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color) 25%, transparent); }
+.dia-punto.libre i, .dia-punto.futuro i { opacity: 0.35; }
+
+/* detalle del hábito */
+.estadisticas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.estadisticas div { background: var(--surface2); border-radius: 14px; padding: 12px 8px; text-align: center; display: flex; flex-direction: column; gap: 2px; }
+.estadisticas b { font-family: var(--display); font-weight: 800; font-size: 1.5rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.estadisticas span { font-size: 0.72rem; color: var(--muted); }
+.mes-cab { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.mes-cab b { font-family: var(--display); font-size: 1.0625rem; text-transform: capitalize; }
+.mes-cab .icono-btn[disabled] { opacity: 0.35; }
+.mes-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
+.mes-dia-nombre { text-align: center; font-size: 0.75rem; color: var(--muted); font-weight: 600; padding: 2px 0; }
+.mes-celda { aspect-ratio: 1; border-radius: 11px; background: var(--surface2); font-weight: 600; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.mes-celda.hecho { background: var(--color); color: var(--accent-ink); }
+.mes-celda.hoy { box-shadow: 0 0 0 2px var(--color); }
+.mes-celda[disabled] { opacity: 0.3; }
+
+/* semana en modo Mi Órbita */
+.semana-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+.semana-nav > div { text-align: center; }
+.cuadricula { display: flex; flex-direction: column; gap: 6px; }
+.cuadricula-fila { display: grid; grid-template-columns: minmax(0, 1fr) repeat(7, 34px); gap: 4px; align-items: center; background: var(--surface); border-radius: 14px; padding: 8px 8px 8px 12px; }
+:root[data-theme='dark'] .cuadricula-fila { border: 1px solid var(--line); }
+.cuadricula-fila.cabecera { background: none; border: 0; padding-top: 0; padding-bottom: 0; }
+.cuadricula-dia { display: flex; flex-direction: column; align-items: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); line-height: 1.2; }
+.cuadricula-dia small { font-weight: 500; font-size: 0.68rem; }
+.cuadricula-dia.hoy { color: var(--accent); }
+.cuadricula-nombre { font-weight: 600; font-size: 0.875rem; overflow-wrap: anywhere; line-height: 1.25; }
+.cuadricula-nombre small { display: block; font-weight: 500; color: var(--muted); font-size: 0.72rem; }
+.cuadricula-celda { width: 34px; height: 34px; border-radius: 10px; background: var(--surface2); display: grid; place-items: center; color: var(--accent-ink); }
+.cuadricula-celda.hecho { background: var(--color); }
+.cuadricula-celda.falto { background: color-mix(in srgb, var(--red) 16%, transparent); }
+.cuadricula-celda.hoy { box-shadow: inset 0 0 0 2px var(--color); }
+.cuadricula-celda.libre { opacity: 0.45; }
+.cuadricula-celda.futuro { opacity: 0.25; }
+
+/* rutinas */
+.rutina-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: 18px; padding: 13px 14px; border-left: 5px solid var(--color); box-shadow: var(--sombra); }
+:root[data-theme='dark'] .rutina-card { border: 1px solid var(--line); border-left: 5px solid var(--color); }
+.rutina-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; text-align: left; color: inherit; background: none; padding: 0; }
+.rutina-info b { font-weight: 600; font-size: 0.97rem; overflow-wrap: anywhere; }
+.pasos-editor { display: flex; flex-direction: column; gap: 10px; }
+.paso-fila { display: flex; gap: 8px; align-items: flex-start; }
+.paso-num { flex: none; width: 24px; height: 24px; margin-top: 12px; border-radius: 50%; background: var(--surface2); display: grid; place-items: center; font-size: 0.75rem; font-weight: 700; }
+.paso-campos { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.paso-botones { flex: none; display: flex; flex-direction: column; gap: 4px; }
+.icono-btn.pequeno { width: 32px; height: 32px; }
+.icono-btn[disabled] { opacity: 0.35; }
+
+/* ejecutor de rutina */
+.pasos-lista { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.paso { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 14px; background: var(--surface2); text-align: left; color: inherit; }
+.paso.hecho { opacity: 0.65; }
+.paso.hecho .paso-texto b { text-decoration: line-through; }
+.paso .check { margin: 0; flex: none; }
+.paso-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.paso-texto small { color: var(--muted); font-size: 0.8125rem; }
+.descanso { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 12px 14px; border-radius: 14px; border: 1.5px dashed var(--line); flex-wrap: wrap; }
+.descanso-botones { display: flex; gap: 8px; }
+.descanso-cuenta { font-family: var(--display); font-weight: 800; font-size: 2rem; font-variant-numeric: tabular-nums; color: var(--accent); }
+.meter { height: 8px; border-radius: 4px; background: var(--surface2); overflow: hidden; margin-top: 8px; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease; }

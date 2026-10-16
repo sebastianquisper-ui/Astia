@@ -77,11 +77,32 @@ create table public.semanas (
   primary key (user_id, id)
 );
 
-create table public.metas (
+-- Mi Órbita: hábitos con su tracker (`registro` = fechas "AAAA-MM-DD" cumplidas)
+create table public.habitos (
   user_id        uuid not null default auth.uid() references auth.users (id) on delete cascade,
   id             text not null,
   nombre         text not null,
-  registro       text[] not null default '{}',                      -- fechas "AAAA-MM-DD" cumplidas
+  categoria      text not null default 'Otro',                      -- apartado: Deporte, Salud, Mente...
+  color          text not null default '#4FD1A5',
+  frecuencia     jsonb not null default '{"tipo":"diaria"}'::jsonb
+                 check (frecuencia ->> 'tipo' in ('diaria', 'dias', 'semanal')),
+  minimo         text,                                              -- versión mínima para días sin ganas
+  registro       text[] not null default '{}',
+  actualizado_en bigint not null,
+  borrado_en     bigint,
+  primary key (user_id, id)
+);
+
+-- Mi Órbita: rutinas (de la mañana, de la noche, entrenamientos...) con sus pasos en orden
+create table public.rutinas (
+  user_id        uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  id             text not null,
+  nombre         text not null,
+  categoria      text not null default 'Otro',
+  momento        text not null default 'libre' check (momento in ('manana', 'tarde', 'noche', 'libre')),
+  dias           smallint[] not null default '{}',                  -- 0 = lunes; vacío = cuando quieras
+  pasos          jsonb not null default '[]'::jsonb,
+  registro       text[] not null default '{}',                      -- fechas completadas
   actualizado_en bigint not null,
   borrado_en     bigint,
   primary key (user_id, id)
@@ -164,7 +185,7 @@ $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['perfiles', 'cursos', 'clases', 'tareas', 'semanas', 'metas', 'mejoras', 'progreso_diario', 'planes_dia', 'suscripciones_push']
+  foreach t in array array['perfiles', 'cursos', 'clases', 'tareas', 'semanas', 'habitos', 'rutinas', 'mejoras', 'progreso_diario', 'planes_dia', 'suscripciones_push']
   loop
     execute format(
       'create trigger ignorar_versiones_viejas before update on public.%I for each row execute function public.ignorar_versiones_viejas()', t);
@@ -187,7 +208,7 @@ create index cursos_por_cambio on public.cursos (user_id, actualizado_en);
 do $$
 declare t text;
 begin
-  foreach t in array array['perfiles', 'cursos', 'clases', 'tareas', 'semanas', 'metas', 'mejoras', 'progreso_diario', 'planes_dia', 'suscripciones_push', 'diagnosticos']
+  foreach t in array array['perfiles', 'cursos', 'clases', 'tareas', 'semanas', 'habitos', 'rutinas', 'mejoras', 'progreso_diario', 'planes_dia', 'suscripciones_push', 'diagnosticos']
   loop
     execute format('alter table public.%I enable row level security', t);
     execute format(

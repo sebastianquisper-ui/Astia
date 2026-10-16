@@ -1,4 +1,5 @@
 import type { Curso, Tarea } from '../dominio/tipos'
+import { apartadoDe } from '../lib/apartados'
 import { textoVence, urgenciaDe } from '../lib/urgencia'
 import { Icono } from './Icono'
 
@@ -9,12 +10,14 @@ export function FilaTarea({ tarea, curso, ahora, alAlternar, alAbrir }: { tarea:
     <>
       <span className={'tarea-titulo' + (hecha ? ' tachada' : '')}>{tarea.titulo}</span>
       <span className="tarea-meta">
-        {curso ? (
+        {tarea.area === 'personal' ? (
+          <span><i className="punto" style={{ background: apartadoDe(tarea.categoria).color }} />{apartadoDe(tarea.categoria).nombre}</span>
+        ) : curso ? (
           <span><i className="punto" style={{ background: curso.color }} />{curso.nombre}</span>
         ) : (
-          <span><i className="punto personal" />{tarea.area === 'personal' ? (tarea.categoria ?? 'Personal') : 'Sin curso'}</span>
+          <span><i className="punto personal" />Sin curso</span>
         )}
-        {tarea.tipo === 'examen' && <span className="etiqueta ambar">Examen</span>}
+        {tarea.area !== 'personal' && tarea.tipo === 'examen' && <span className="etiqueta ambar">Examen</span>}
         <span className={'etiqueta ' + urgencia}>{textoVence(tarea, ahora)}</span>
       </span>
     </>

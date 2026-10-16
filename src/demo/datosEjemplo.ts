@@ -1,4 +1,4 @@
-import type { Clase, Curso, Datos, Tarea } from '../dominio/tipos'
+import type { Clase, Curso, Datos, Habito, Rutina, Tarea } from '../dominio/tipos'
 import { datosVacios } from '../datos/almacenamiento'
 import { addDays, ymd } from '../lib/fechas'
 
@@ -51,6 +51,8 @@ export function tareasEjemplo(ahora: Date): Tarea[] {
     { id: 't4', titulo: 'Leer teoría de grafos', area: 'universidad', cursoId: 'c-disc', tipo: 'estudio', fecha: en(2), estado: 'pendiente' },
     { id: 't5', titulo: 'Pagar el recibo de luz', area: 'personal', cursoId: null, categoria: 'Trámites', tipo: 'tarea', fecha: en(1), hora: '17:00', estado: 'pendiente' },
     { id: 't6', titulo: 'Llamar a mi abuela', area: 'personal', cursoId: null, categoria: 'Familia', tipo: 'tarea', fecha: en(0), hora: '20:00', estado: 'pendiente' },
+    { id: 't10', titulo: 'Sacar cita en el dentista', area: 'personal', cursoId: null, categoria: 'Salud', tipo: 'tarea', fecha: en(3), estado: 'pendiente' },
+    { id: 't11', titulo: 'Comprar zapatillas para correr', area: 'personal', cursoId: null, categoria: 'Deporte', tipo: 'tarea', fecha: en(6), estado: 'pendiente' },
     { id: 't7', titulo: 'Proyecto de Programación', area: 'universidad', cursoId: 'c-prog', tipo: 'tarea', fecha: en(5), estado: 'pendiente' },
     { id: 't8', titulo: 'Ensayo de Física', area: 'universidad', cursoId: 'c-fis', tipo: 'tarea', fecha: en(12), estado: 'pendiente' },
     { id: 't9', titulo: 'Guía de Matemática Discreta', area: 'universidad', cursoId: 'c-disc', tipo: 'tarea', fecha: en(-2), estado: 'hecha', hechaEn: addDays(ahora, -2).toISOString() },
@@ -60,5 +62,37 @@ export function tareasEjemplo(ahora: Date): Tarea[] {
 
 /** El conjunto completo de datos de ejemplo, listo para usar como `Datos`. */
 export function datosDeEjemplo(ahora: Date): Datos {
-  return { ...datosVacios(), cursos: CURSOS_EJEMPLO, clases: CLASES_EJEMPLO, tareas: tareasEjemplo(ahora) }
+  return { ...datosVacios(), cursos: CURSOS_EJEMPLO, clases: CLASES_EJEMPLO, tareas: tareasEjemplo(ahora), habitos: habitosEjemplo(ahora), rutinas: rutinasEjemplo() }
+}
+
+/** Fechas (AAAA-MM-DD) a partir de cuántos días atrás: [1, 2, 3] = ayer, antier, hace 3 días. */
+const atras = (ahora: Date, dias: number[]) => dias.map((n) => ymd(addDays(ahora, -n))).sort()
+
+export function habitosEjemplo(ahora: Date): Habito[] {
+  const base = { actualizadoEn: 0 }
+  return [
+    { ...base, id: 'h-ingles', nombre: '30 minutos de inglés', categoria: 'Mente', color: '#B18CFF', frecuencia: { tipo: 'diaria' }, minimo: 'Solo 5 minutos de una lección', registro: atras(ahora, [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14]) },
+    { ...base, id: 'h-correr', nombre: 'Correr 20 minutos', categoria: 'Deporte', color: '#FF9E6E', frecuencia: { tipo: 'dias', dias: [0, 2, 4] }, minimo: 'Solo 5 minutos trotando', registro: atras(ahora, [2, 4, 7, 9]) },
+    { ...base, id: 'h-agua', nombre: 'Tomar 2 litros de agua', categoria: 'Salud', color: '#4FD1A5', frecuencia: { tipo: 'diaria' }, minimo: 'Un vaso ahora mismo', registro: atras(ahora, [1, 2, 4, 5]) },
+    { ...base, id: 'h-leer', nombre: 'Leer 10 páginas', categoria: 'Mente', color: '#4FC3F7', frecuencia: { tipo: 'semanal', veces: 4 }, minimo: 'Una sola página', registro: atras(ahora, [1, 3, 8, 10, 11, 12]) },
+    { ...base, id: 'h-cuarto', nombre: 'Ordenar mi cuarto', categoria: 'Hogar', color: '#FFB454', frecuencia: { tipo: 'semanal', veces: 2 }, minimo: 'Tender la cama', registro: atras(ahora, [9]) },
+  ]
+}
+
+export function rutinasEjemplo(): Rutina[] {
+  const base = { actualizadoEn: 0, registro: [] as string[] }
+  return [
+    {
+      ...base, id: 'r-manana', nombre: 'Rutina de la mañana', categoria: 'Salud', momento: 'manana', dias: [],
+      pasos: [{ texto: 'Tender la cama', detalle: '2 min' }, { texto: 'Tomar un vaso de agua' }, { texto: 'Estirar', detalle: '5 min' }, { texto: 'Ducha', detalle: '10 min' }, { texto: 'Revisar el plan del día en Astia' }],
+    },
+    {
+      ...base, id: 'r-pecho', nombre: 'Entrenamiento de pecho y tríceps', categoria: 'Deporte', momento: 'tarde', dias: [0, 3],
+      pasos: [{ texto: 'Calentamiento en cinta', detalle: '5 min' }, { texto: 'Press banca', detalle: '4 × 10' }, { texto: 'Aperturas con mancuernas', detalle: '3 × 12' }, { texto: 'Fondos', detalle: '3 × 8' }, { texto: 'Flexiones', detalle: '2 × 15' }, { texto: 'Estiramiento final', detalle: '5 min' }],
+    },
+    {
+      ...base, id: 'r-noche', nombre: 'Rutina de la noche', categoria: 'Mente', momento: 'noche', dias: [],
+      pasos: [{ texto: 'Dejar listo el plan de mañana' }, { texto: 'Preparar la mochila' }, { texto: 'Pantallas fuera', detalle: '30 min antes de dormir' }, { texto: 'Leer', detalle: '10 min' }],
+    },
+  ]
 }

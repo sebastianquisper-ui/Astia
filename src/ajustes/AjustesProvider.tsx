@@ -5,7 +5,11 @@ import { useAviso } from '../ui/Aviso'
 
 // Ajustes de vista. En la fase 2 se sincronizarán con la nube (tabla `profiles`);
 // por ahora viven en el teléfono.
+/** Académico = universidad. Personal = Mi Órbita (hábitos, rutinas, pendientes personales). */
+export type Modo = 'academico' | 'personal'
+
 export interface Ajustes {
+  modo: Modo
   nombre: string
   modoTema: ModoTema
   tamanoLetra: TamanoLetra
@@ -14,7 +18,7 @@ export interface Ajustes {
 }
 
 const CLAVE = 'astia.ajustes'
-const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: true }
+const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: true, modo: 'academico' }
 
 interface Contexto {
   ajustes: Ajustes
@@ -42,9 +46,10 @@ export function AjustesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const raiz = document.documentElement
     raiz.setAttribute('data-theme', tema)
+    raiz.setAttribute('data-modo', ajustes.modo)
     raiz.style.fontSize = 16 * ESCALA_LETRA[ajustes.tamanoLetra] + 'px'
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLOR_BARRA[tema])
-  }, [tema, ajustes.tamanoLetra])
+  }, [tema, ajustes.tamanoLetra, ajustes.modo])
 
   const cambiar = useCallback(
     (parcial: Partial<Ajustes>) => {

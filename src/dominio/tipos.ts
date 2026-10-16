@@ -63,9 +63,41 @@ export interface SemanaTema extends Registro {
   notas: string
 }
 
-export interface Meta extends Registro {
+/** Cada cuánto toca un hábito. `dias`: 0 = lunes ... 6 = domingo. */
+export type Frecuencia =
+  | { tipo: 'diaria' }
+  | { tipo: 'dias'; dias: number[] }
+  | { tipo: 'semanal'; veces: number }
+
+/** Un hábito con su tracker. Pertenece a un apartado de Mi Órbita (Deporte, Salud, Mente...). */
+export interface Habito extends Registro {
   nombre: string
-  /** Fechas "AAAA-MM-DD" en que la cumpliste. */
+  categoria: string
+  color: string
+  frecuencia: Frecuencia
+  /** Versión mínima: lo que haces los días sin ganas ("solo 5 minutos"). */
+  minimo?: string
+  /** Fechas "AAAA-MM-DD" en que lo cumpliste. */
+  registro: string[]
+}
+
+export interface PasoRutina {
+  texto: string
+  /** Ejemplo: "4 × 10" en un ejercicio, o "5 min". */
+  detalle?: string
+}
+
+export type Momento = 'manana' | 'tarde' | 'noche' | 'libre'
+
+/** Una rutina: lista de pasos en orden (de la mañana, de la noche, un entrenamiento...). */
+export interface Rutina extends Registro {
+  nombre: string
+  categoria: string
+  momento: Momento
+  /** Días en que toca (0 = lunes). Vacío = cuando quieras. */
+  dias: number[]
+  pasos: PasoRutina[]
+  /** Fechas "AAAA-MM-DD" en que la completaste. */
   registro: string[]
 }
 
@@ -104,7 +136,8 @@ export interface Datos {
   clases: Clase[]
   tareas: Tarea[]
   semanas: SemanaTema[]
-  metas: Meta[]
+  habitos: Habito[]
+  rutinas: Rutina[]
   mejoras: Mejora[]
   progreso: ProgresoDia[]
   planes: PlanDia[]

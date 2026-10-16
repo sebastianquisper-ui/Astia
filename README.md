@@ -11,6 +11,10 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   Cursos, horario y tareas con alta, edición y borrado; áreas Universidad y Mi Órbita;
   importación del respaldo de la v1 (conserva los ids) y exportación v2;
   esquema SQL de la nube con seguridad por usuario, probado en un Postgres en memoria.
+- **Modos Académico y Mi Órbita:** completo. Un interruptor global cambia Hoy, Semana, la pestaña del medio
+  (Cursos o Hábitos), Pendientes y Más. Mi Órbita tiene apartados (Deporte, Salud, Mente, Hogar, Familia,
+  Dinero, Trámites), hábitos con rachas y calendario, rutinas y entrenamientos con descansos, y pendientes
+  simples (sin tipo, prioridad ni examen).
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 
 ## Comandos

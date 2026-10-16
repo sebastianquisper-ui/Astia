@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { Clase, Curso, Datos, Meta, Mejora, PlanDia, Perfil, ProgresoDia, SemanaTema, Tarea } from '../dominio/tipos'
+import type { Clase, Curso, Datos, Habito, Mejora, PlanDia, Perfil, ProgresoDia, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
 import { datosDeEjemplo } from '../demo/datosEjemplo'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { guardarLocal } from '../lib/almacen'
 import { useAviso } from '../ui/Aviso'
-import { activos, alternarTarea, borrarRegistro, datosVacios, guardarRegistro, normalizarDatos, quitarCurso } from './almacenamiento'
+import { ymd } from '../lib/fechas'
+import { activos, alternarHabito, alternarRutina, alternarTarea, borrarRegistro, datosVacios, guardarRegistro, normalizarDatos, quitarCurso } from './almacenamiento'
 import { crearRespaldo, type Importacion } from './respaldo'
 
 // Fuente de datos de TODAS las pantallas. Hoy guarda en el teléfono (localStorage);
@@ -36,7 +37,8 @@ export interface Contexto {
   clases: Clase[]
   tareas: Tarea[]
   semanas: SemanaTema[]
-  metas: Meta[]
+  habitos: Habito[]
+  rutinas: Rutina[]
   mejoras: Mejora[]
   planes: PlanDia[]
   progreso: ProgresoDia[]
@@ -51,6 +53,14 @@ export interface Contexto {
   borrarCurso: (id: string) => void
   guardarClase: (c: Clase) => void
   borrarClase: (id: string) => void
+  /** Marca o desmarca un hábito. Sin fecha, es hoy. */
+  alternarHabito: (id: string, fecha?: string) => void
+  guardarHabito: (h: Habito) => void
+  borrarHabito: (id: string) => void
+  guardarRutina: (r: Rutina) => void
+  borrarRutina: (id: string) => void
+  /** Marca o desmarca una rutina como cumplida hoy. */
+  alternarRutina: (id: string) => void
   guardarPerfil: (cambios: Partial<Omit<Perfil, 'actualizadoEn'>>) => void
   importar: (r: Extract<Importacion, { ok: true }>) => void
   exportar: () => string
@@ -91,11 +101,12 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       clases: activos(datos.clases),
       tareas: activos(datos.tareas),
       semanas: activos(datos.semanas),
-      metas: activos(datos.metas),
+      habitos: activos(datos.habitos),
+      rutinas: activos(datos.rutinas),
       mejoras: activos(datos.mejoras),
       planes: activos(datos.planes),
       progreso: activos(datos.progreso),
-      hayDatos: activos(datos.cursos).length > 0 || activos(datos.tareas).length > 0,
+      hayDatos: activos(datos.cursos).length > 0 || activos(datos.tareas).length > 0 || activos(datos.habitos).length > 0,
       enEjemplo,
       alternar: (id) => editar((d) => alternarTarea(d, id, new Date())),
       guardarTarea: (t) => editar((d) => ({ ...d, tareas: guardarRegistro(d.tareas, t, ahora()) })),
@@ -104,6 +115,12 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       borrarCurso: (id) => editar((d) => quitarCurso(d, id, ahora())),
       guardarClase: (c) => editar((d) => ({ ...d, clases: guardarRegistro(d.clases, c, ahora()) })),
       borrarClase: (id) => editar((d) => ({ ...d, clases: borrarRegistro(d.clases, id, ahora()) })),
+      alternarHabito: (id, fecha) => editar((d) => alternarHabito(d, id, fecha ?? ymd(new Date()), ahora())),
+      guardarHabito: (h) => editar((d) => ({ ...d, habitos: guardarRegistro(d.habitos, h, ahora()) })),
+      borrarHabito: (id) => editar((d) => ({ ...d, habitos: borrarRegistro(d.habitos, id, ahora()) })),
+      guardarRutina: (r) => editar((d) => ({ ...d, rutinas: guardarRegistro(d.rutinas, r, ahora()) })),
+      borrarRutina: (id) => editar((d) => ({ ...d, rutinas: borrarRegistro(d.rutinas, id, ahora()) })),
+      alternarRutina: (id) => editar((d) => alternarRutina(d, id, ymd(new Date()), ahora())),
       guardarPerfil: (cambios) => editar((d) => ({ ...d, perfil: { ...d.perfil, ...cambios, actualizadoEn: ahora() } })),
       importar: (r) => {
         setReales(r.datos)

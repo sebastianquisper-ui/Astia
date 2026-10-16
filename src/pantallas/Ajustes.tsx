@@ -188,7 +188,8 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
               Respaldo de Astia v{pendiente.version}. Trae <b>{pendiente.resumen.cursos}</b> cursos, <b>{pendiente.resumen.clases}</b> clases,{' '}
               <b>{pendiente.resumen.tareasPendientes}</b> tareas pendientes y <b>{pendiente.resumen.tareasHechas}</b> hechas
               {pendiente.resumen.semanas ? <>, <b>{pendiente.resumen.semanas}</b> semanas con tema</> : null}
-              {pendiente.resumen.metas ? <>, <b>{pendiente.resumen.metas}</b> metas</> : null}.
+              {pendiente.resumen.habitos ? <>, <b>{pendiente.resumen.habitos}</b> hábitos</> : null}
+              {pendiente.resumen.rutinas ? <> y <b>{pendiente.resumen.rutinas}</b> rutinas</> : null}.
             </p>
             {pendiente.avisos.length > 0 && (
               <ul className="avisos-importar">

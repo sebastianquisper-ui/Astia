@@ -1,24 +1,26 @@
 import { useState } from 'react'
+import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
 import { useEditorTarea } from '../formularios/EditorTarea'
 import { porUrgencia, urgenciaDe } from '../lib/urgencia'
 import { useAviso } from '../ui/Aviso'
 import { FilaTarea } from '../ui/FilaTarea'
-import { SelectorArea, type FiltroArea } from '../ui/SelectorArea'
 import { useAhora } from '../ui/useAhora'
 import { Vacio } from '../ui/Vacio'
 
+/** Tareas (Académico) o Pendientes (Mi Órbita): cada modo ve solo lo suyo. */
 export function Tareas() {
-  const { tareas, cursos, hayDatos, alternar } = useDatos()
+  const { ajustes } = useAjustes()
+  const { tareas, cursos, alternar } = useDatos()
   const { abrir, nodo } = useEditorTarea()
   const avisar = useAviso()
   const ahora = useAhora()
   const [filtro, setFiltro] = useState<'pend' | 'hechas'>('pend')
-  const [area, setArea] = useState<FiltroArea>('todo')
+  const personal = ajustes.modo === 'personal'
+  const area = personal ? 'personal' : 'universidad'
 
-  const visibles = tareas
-    .filter((t) => (area === 'todo' || t.area === area) && (filtro === 'pend' ? t.estado === 'pendiente' : t.estado === 'hecha'))
-    .sort(porUrgencia)
+  const delModo = tareas.filter((t) => t.area === area)
+  const visibles = delModo.filter((t) => (filtro === 'pend' ? t.estado === 'pendiente' : t.estado === 'hecha')).sort(porUrgencia)
   const vencidas = visibles.filter((t) => urgenciaDe(t, ahora) === 'vencida')
   const resto = visibles.filter((t) => urgenciaDe(t, ahora) !== 'vencida')
 
@@ -33,7 +35,7 @@ export function Tareas() {
           alAbrir={() => abrir(t.id)}
           alAlternar={() => {
             alternar(t.id)
-            avisar(t.estado === 'hecha' ? 'Tarea reabierta.' : 'Hecha. Una menos.')
+            avisar(t.estado === 'hecha' ? (personal ? 'Pendiente reabierto.' : 'Tarea reabierta.') : 'Hecha. Una menos.')
           }}
         />
       ))}
@@ -43,10 +45,10 @@ export function Tareas() {
   return (
     <section className="pantalla">
       <div className="seccion-cab">
-        <h1 className="titulo">Tareas</h1>
-        <button className="btn pequeno" onClick={() => abrir()}>+ Nueva tarea</button>
+        <h1 className="titulo">{personal ? 'Pendientes' : 'Tareas'}</h1>
+        <button className="btn pequeno" onClick={() => abrir(undefined, { area })}>{personal ? '+ Nuevo pendiente' : '+ Nueva tarea'}</button>
       </div>
-      <p className="sub">Rojo: menos de 48 h · Ámbar: esta semana · Verde: después.</p>
+      <p className="sub">{personal ? 'Lo que tienes que hacer fuera de clase, por apartado y fecha.' : 'Rojo: menos de 48 h · Ámbar: esta semana · Verde: después.'}</p>
 
       <div className="bloque">
         <div className="seg" role="group" aria-label="Estado">
@@ -54,15 +56,18 @@ export function Tareas() {
           <button aria-pressed={filtro === 'hechas'} onClick={() => setFiltro('hechas')}>Hechas</button>
         </div>
       </div>
-      <div className="bloque">
-        <SelectorArea valor={area} alCambiar={setArea} />
-      </div>
 
       {visibles.length === 0 && (
         <div className="seccion">
           <Vacio
-            titulo={hayDatos ? (filtro === 'pend' ? 'Nada pendiente' : 'Aún no hay hechas') : 'Nada pendiente'}
-            texto={hayDatos ? 'Cuando haya tareas en esta lista, aparecerán aquí.' : 'Agrega una tarea con el botón de arriba, o importa tu respaldo de la v1 en Más → Ajustes.'}
+            titulo={filtro === 'pend' ? 'Nada pendiente' : 'Aún no hay hechas'}
+            texto={
+              delModo.length
+                ? 'Cuando haya algo en esta lista, aparecerá aquí.'
+                : personal
+                  ? 'Agrega un pendiente personal con el botón de arriba.'
+                  : 'Agrega una tarea con el botón de arriba, o importa tu respaldo de la v1 en Más → Ajustes.'
+            }
           />
         </div>
       )}
