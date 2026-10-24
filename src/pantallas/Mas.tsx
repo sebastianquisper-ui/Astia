@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { useAjustes, type Modo } from '../ajustes/AjustesProvider'
 import { Icono, type NombreIcono } from '../ui/Icono'
 import { Vacio } from '../ui/Vacio'
@@ -6,6 +7,9 @@ import { Enfoque } from './Enfoque'
 import { Horario } from './Horario'
 import { Mascotas } from './Mascotas'
 import { Rutinas } from './Rutinas'
+
+// La pantalla de Alpi en 3D trae Three.js: se descarga solo al abrirla.
+const EstudioAlpi = lazy(() => import('../mascotas/alpi/EstudioAlpi'))
 
 interface Entrada {
   id: string
@@ -36,6 +40,12 @@ export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => v
   if (sub === 'horario') return <Horario alVolver={() => alAbrir('')} />
   if (sub === 'enfoque') return <Enfoque alVolver={() => alAbrir('')} />
   if (sub === 'mascota') return <Mascotas alVolver={() => alAbrir('')} />
+  if (sub === 'alpi')
+    return (
+      <Suspense fallback={<section className="pantalla"><p className="sub">Cargando a Alpi…</p></section>}>
+        <EstudioAlpi alVolver={() => alAbrir('mascota')} />
+      </Suspense>
+    )
   if (sub === 'rutinas') return <Rutinas alVolver={() => alAbrir('')} />
 
   const entrada = ENTRADAS.find((e) => e.id === sub)

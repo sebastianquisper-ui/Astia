@@ -25,8 +25,13 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   bufandas, corona...). Al tocarlas se inclinan con perspectiva, las capas se separan en profundidad y saltan con
   chispas; su ánimo (seria, alerta, contenta, durmiendo) cambia la cara y el movimiento. Evolucionan con el XP que
   ganas (se calcula de lo que haces; no se guarda) y piden equilibrio entre estudios y vida personal desde la etapa 3.
-  **Alpi es 3D de verdad** (`src/mascotas/tres/`, Three.js sin archivos de modelo, se descarga solo al usarla, con la
-  versión vectorial de respaldo si el teléfono no tiene WebGL). Las otras 7 usan profundidad simulada con capas. Los dibujos originales de la hoja siguen en
+  **Alpi es 3D de verdad** (`src/mascotas/alpi/`): 4 niveles (Alpaca bebé, Exploradora, Guardiana de los valles,
+  Alpaca legendaria), 8 expresiones (feliz, emocionada, curiosa, dormida, concentrada, sorprendida, triste, guiño) y
+  7 animaciones (reposo, caminar, saltar, celebrar, estudiando, descansando, saludar). Está hecha con formas de
+  Three.js, sin imágenes ni archivos de modelo: `datos.ts` define niveles, expresiones y animaciones; `Modelo.tsx` el
+  cuerpo, la cara y los accesorios por nivel; `EstudioAlpi.tsx` es la pantalla para probarla (Más → Mi mascota →
+  Alpi → Probar a Alpi en 3D). Se descarga solo al usarla y tiene la versión vectorial de respaldo sin WebGL.
+  Las otras 7 usan profundidad simulada con capas. Los dibujos originales de la hoja siguen en
   `herramientas/mascotas/` y `src/mascotas/sprites/` por si se quiere volver a ellos.
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 

@@ -16,9 +16,9 @@ describe('catálogo de mascotas', () => {
     for (const m of MASCOTAS) expect(m.nombre && m.apodo && m.descripcion && m.etiquetas[0] && m.etiquetas[1]).toBeTruthy()
     expect(new Set(MASCOTAS.map((m) => m.id)).size).toBe(8)
   })
-  it('cinco tienen 4 etapas y tres tienen 3', () => {
-    expect(MASCOTAS.filter((m) => m.etapas.length === 4).map((m) => m.id)).toEqual(['axolin', 'taro', 'nube', 'mochi', 'drako'])
-    expect(MASCOTAS.filter((m) => m.etapas.length === 3).map((m) => m.id)).toEqual(['stella', 'hooty', 'alpi'])
+  it('seis tienen 4 etapas y dos tienen 3', () => {
+    expect(MASCOTAS.filter((m) => m.etapas.length === 4).map((m) => m.id)).toEqual(['axolin', 'taro', 'nube', 'mochi', 'drako', 'alpi'])
+    expect(MASCOTAS.filter((m) => m.etapas.length === 3).map((m) => m.id)).toEqual(['stella', 'hooty'])
   })
   it('cada etapa se dibuja por piezas, en cada ánimo, con cara y sin ids repetidos', () => {
     for (const m of MASCOTAS)

@@ -820,5 +820,42 @@ button.habito-texto { background: none; padding: 0; border: 0; }
 .mascota-mini .rig { position: absolute; inset: 6%; width: 88%; height: 88%; filter: none; }
 .mascota-mini.bloqueada .rig { filter: grayscale(1) brightness(0.55) blur(2px); }
 @media (prefers-reduced-motion: reduce) { .rig *, .rig-resp { animation: none !important; } }
-.mascota-marco.vec canvas.tres, .mascota-marco.vec .tres { display: block; width: 100% !important; height: 100% !important; pointer-events: none; }
-.mascota-marco.vec > div { width: 100%; height: 100%; }
+.mascota.en3d .mascota-marco { animation: none !important; }
+.alpi3d { position: relative; width: 100%; height: 100%; }
+.alpi3d.girable { cursor: grab; touch-action: pan-y; }
+.alpi3d canvas, .alpi3d > div { display: block; width: 100% !important; height: 100% !important; }
+.mascota .alpi3d canvas { pointer-events: none; }
+.alpi-efecto { position: absolute; top: 4%; right: 10%; display: flex; gap: 2px; pointer-events: none; font-family: var(--display); font-weight: 800; font-size: 1.5rem; color: #7b5ccf; }
+.alpi-efecto > span { display: inline-block; animation: alpi-sube 2.2s ease-in-out infinite; opacity: 0; }
+.alpi-efecto.zzz > span:nth-child(2) { font-size: 1.15em; }
+.alpi-efecto.zzz > span:nth-child(3) { font-size: 1.35em; }
+.alpi-efecto.pregunta, .alpi-efecto.exclama { font-size: 2.2rem; }
+.alpi-efecto.exclama { color: #e0557a; }
+.alpi-efecto.corazones { color: #f06292; }
+.alpi-efecto.chispas { color: #e9b949; left: 8%; right: 8%; justify-content: space-between; text-shadow: 0 0 10px rgb(255 210 90 / 0.8); }
+@keyframes alpi-sube { 0% { opacity: 0; transform: translateY(14px) scale(0.7); } 25% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-18px) scale(1.1); } }
+@media (prefers-reduced-motion: reduce) { .alpi-efecto > span { animation: none; opacity: 1; } }
+
+/* ---------- Alpi en 3D (pantalla de prueba) ---------- */
+.escenario-alpi { position: relative; margin-top: 16px; border-radius: 28px; height: min(400px, 92vw); padding: 14px; box-shadow: var(--sombra), inset 0 0 0 2px rgb(255 255 255 / 0.6); overflow: hidden; transition: background 0.4s; }
+.escenario-alpi .alpi3d { position: absolute; inset: 40px 0 34px; width: auto; height: auto; }
+.escenario-titulo { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; color: var(--acento-alpi); font-family: var(--display); line-height: 1.15; }
+.escenario-titulo b { font-size: 1.25rem; }
+.escenario-titulo span { font-weight: 700; color: #6b4a5a; }
+.escenario-lema { position: absolute; left: 0; right: 0; bottom: 10px; margin: 0; text-align: center; color: #6b4a5a; font-weight: 600; font-size: 0.9rem; }
+.titulo-seccion { font-family: var(--display); font-size: 1.125rem; margin: 0 0 10px; }
+.niveles-alpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.niveles-alpi button, .opciones-alpi button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 4px; border-radius: 16px; background: var(--surface); color: var(--text); border: 2px solid transparent; text-align: center; font-size: 0.75rem; line-height: 1.2; box-shadow: var(--sombra); }
+.niveles-alpi button b { font-size: 0.85rem; color: var(--acento-alpi); }
+.niveles-alpi button span, .opciones-alpi button span { color: var(--muted); }
+.niveles-alpi button[aria-pressed='true'] { border-color: var(--acento-alpi); background: var(--fondo-alpi); }
+.niveles-alpi button[aria-pressed='true'] span { color: #5a3e4c; }
+.opciones-alpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.opciones-alpi b { font-size: 0.8rem; }
+.opciones-alpi.compactas button { padding: 11px 4px; }
+.opciones-alpi button[aria-pressed='true'] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--surface)); }
+.nota-alpi { margin: 10px 2px 0; color: var(--muted); font-size: 0.85rem; }
+.paleta-alpi { display: flex; gap: 12px; flex-wrap: wrap; }
+.paleta-alpi span { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--muted); }
+.paleta-alpi i { width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.6), var(--sombra); }
+.probar-alpi { margin-top: 4px; }

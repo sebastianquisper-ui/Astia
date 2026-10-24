@@ -23,7 +23,7 @@ export function CelebracionEvolucion() {
   return (
     <Hoja titulo="¡Evolucionó!" abierta={celebrar} alCerrar={marcarVista}>
       <div className="celebracion">
-        <MascotaVista mascota={mascota.id} etapa={estado.indice + 1} animo="contenta" tam={190} />
+        <MascotaVista mascota={mascota.id} etapa={estado.indice + 1} animo="contenta" tam={190} fiesta />
         <h3 className="titulo">{mascota.nombre} ahora es {estado.nombreEtapa}</h3>
         <p className="sub">Nivel {estado.indice + 1} de {estado.etapas}. Tu constancia lo hizo posible: tareas cumplidas, hábitos y cuidarte cuentan.</p>
         <div className="acciones" style={{ width: '100%' }}>

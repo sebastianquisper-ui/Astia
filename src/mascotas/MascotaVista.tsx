@@ -1,21 +1,11 @@
-import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import type { Animo } from '../lib/avatar'
 import type { MascotaId } from '../lib/mascotas'
 import { fondoDe } from './sprites'
 import { Rig } from './rig/Rig'
 
-// Alpi es en 3D de verdad: ese código se descarga solo cuando se usa.
-const AlpiTres = lazy(() => import('./tres/AlpiTres'))
-
-function hayWebGL(): boolean {
-  try {
-    const c = document.createElement('canvas')
-    return !!(c.getContext('webgl2') || c.getContext('webgl'))
-  } catch {
-    return false
-  }
-}
-let webgl: boolean | undefined
+import { Alpi3D, hayWebGL } from './alpi/Alpi3D'
+import { desdeAnimo, nivelAlpi } from './alpi/datos'
 
 interface Chispa {
   id: number
@@ -35,6 +25,8 @@ interface Props {
   tam?: number
   /** Si se pasa, se muestra "Nv N" abajo. */
   nivel?: number
+  /** Para celebrar (la Alpi 3D baila). */
+  fiesta?: boolean
 }
 
 /**
@@ -42,7 +34,7 @@ interface Props {
  * mueven solas; al tocarla se inclina con perspectiva, las capas se separan y salta con chispas.
  * El ánimo cambia cómo se mueve: duerme, se alerta o celebra.
  */
-export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, tam = 112, nivel }: Props) {
+export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, tam = 112, nivel, fiesta = false }: Props) {
   const raiz = useRef<HTMLSpanElement>(null)
   const [inclina, setInclina] = useState<{ x: number; y: number } | null>(null)
   const [saltando, setSaltando] = useState(false)
@@ -61,7 +53,7 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
   const tocar = (e: PointerEvent) => {
     inclinar(e)
     setSaltando(true)
-    temporizadores.current.push(window.setTimeout(() => setSaltando(false), 560))
+    temporizadores.current.push(window.setTimeout(() => setSaltando(false), mascota === 'alpi' ? 900 : 560))
     const nuevas = Array.from({ length: 6 }, (_, i): Chispa => {
       const ang = (Math.PI * 2 * i) / 6 + Math.random() * 0.6
       return { id: ++contador.current, dx: Math.cos(ang) * (tam * 0.62), dy: Math.sin(ang) * (tam * 0.62) - tam * 0.1, simbolo: SIMBOLOS[(i + contador.current) % SIMBOLOS.length] }
@@ -70,8 +62,8 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
     temporizadores.current.push(window.setTimeout(() => setChispas((c) => c.filter((x) => !nuevas.some((n) => n.id === x.id))), 800))
   }
 
-  const en3d = mascota === 'alpi' && (webgl ??= hayWebGL())
-  const clases = ['avatar', 'mascota', animo, habla ? 'habla' : '', saltando ? 'saltando' : '', inclina ? 'activa' : ''].filter(Boolean).join(' ')
+  const en3d = mascota === 'alpi' && hayWebGL()
+  const clases = ['avatar', 'mascota', animo, en3d ? 'en3d' : '', habla ? 'habla' : '', saltando ? 'saltando' : '', inclina ? 'activa' : ''].filter(Boolean).join(' ')
   const transformacion = inclina && !en3d ? `rotateY(${inclina.x * 20}deg) rotateX(${-inclina.y * 20}deg) scale(1.04)` : undefined
 
   return (
@@ -89,9 +81,7 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
       <span className="mascota-sombra" aria-hidden="true" />
       <span className="mascota-marco vec" style={{ transform: transformacion }}>
         {en3d ? (
-          <Suspense fallback={<Rig mascota={mascota} etapa={etapa} animo={animo} habla={habla} />}>
-            <AlpiTres etapa={etapa} animo={animo} habla={habla} saltando={saltando} inclina={inclina} />
-          </Suspense>
+          <Alpi3D nivel={nivelAlpi(etapa)} {...desdeAnimo(animo, { tocada: saltando, fiesta })} habla={habla} inclina={inclina} />
         ) : (
           <Rig key={mascota + etapa} mascota={mascota} etapa={etapa} animo={animo} habla={habla} />
         )}

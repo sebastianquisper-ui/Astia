@@ -241,7 +241,8 @@ export function alpi(c: Contexto): Capas {
     ),
     atras: (
       <>
-        {e >= 2 && <Mochila x={100} y={118} ancho={54} alto={42} color="#d96a5b" />}
+        {e === 4 && <path d="M 62 118 Q 100 100 138 118 L 156 182 Q 100 194 44 182 Z" fill="#b48be0" stroke="#e9b949" strokeWidth="3" />}
+        <Mochila x={100} y={118} ancho={54} alto={42} color={e === 4 ? '#8a5a3c' : e === 1 ? '#6aa8b8' : '#5f9e94'} />
         <circle className="r-cola" style={{ transformOrigin: '146px 150px' }} cx="150" cy="148" r="13" fill="#fff" stroke="#e7cba0" strokeWidth="2" />
         {oreja(-1)}
         {oreja(1)}
@@ -270,8 +271,8 @@ export function alpi(c: Contexto): Capas {
     ),
     frente: (
       <>
-        {e >= 2 && <Bufanda x={100} y={142} ancho={30} color={e >= 3 ? '#e9b43a' : '#d96a5b'} />}
-        {e === 3 && (
+        <Bufanda x={100} y={142} ancho={30} color={e === 3 ? '#7cc79a' : e === 2 ? '#f08a7a' : '#e8553f'} />
+        {e >= 3 && (
           <>
             <CoronaFlores x={100} y={54} ancho={28} />
             <Chispa x={44} y={64} s={6} />

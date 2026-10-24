@@ -720,6 +720,31 @@ test('Alpi es 3D de verdad (lienzo WebGL) y reacciona al toque', async ({ page }
   await expect(page.locator('.chispa').first()).toBeVisible()
 })
 
+test('Alpi en 3D: se prueban sus 4 niveles, 8 expresiones y 7 animaciones', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
+  await page.getByRole('link', { name: 'Probar a Alpi en 3D' }).click()
+  await expect(page.getByRole('heading', { name: 'Alpi en 3D' })).toBeVisible()
+  await expect(page.locator('.escenario-alpi canvas')).toBeVisible({ timeout: 10000 })
+  const alpi = page.locator('.escenario-alpi .alpi3d')
+  await expect(page.getByRole('group', { name: 'Nivel' }).getByRole('button')).toHaveCount(4)
+  await expect(page.getByRole('group', { name: 'Expresión' }).getByRole('button')).toHaveCount(8)
+  await expect(page.getByRole('group', { name: 'Animación' }).getByRole('button')).toHaveCount(7)
+  await page.getByRole('button', { name: /Nivel 4/ }).click()
+  await expect(alpi).toHaveAttribute('data-nivel', '4')
+  await expect(page.locator('.escenario-titulo')).toContainText('Alpaca legendaria')
+  await page.getByRole('group', { name: 'Expresión' }).getByRole('button', { name: /Triste/ }).click()
+  await expect(alpi).toHaveAttribute('data-expresion', 'triste')
+  await page.getByRole('group', { name: 'Animación' }).getByRole('button', { name: 'Descansando' }).click()
+  await expect(alpi).toHaveAttribute('data-animacion', 'descansando')
+  await expect(alpi).toHaveAttribute('data-expresion', 'dormida') // descansar la duerme
+  await expect(page.locator('.alpi-efecto.zzz')).toBeVisible()
+  await page.getByRole('group', { name: 'Animación' }).getByRole('button', { name: 'Estudiando' }).click()
+  await expect(alpi).toHaveAttribute('data-expresion', 'concentrada')
+  await page.getByRole('button', { name: /Mi mascota/ }).click()
+  await expect(page.getByRole('heading', { name: 'Mi mascota' })).toBeVisible()
+})
+
 test('con tareas vencidas la mascota se alerta; su ánimo cambia cómo se mueve', async ({ page }) => {
   await page.goto('/#/mas/mascota')
   await page.getByRole('button', { name: /Nube, El fantasmita productivo/ }).click()
@@ -742,9 +767,9 @@ test('el detalle muestra la evolución: lo alcanzado y lo bloqueado con su XP', 
   await expect(hoja.getByLabel('Nivel 4, Maestro del Caos, bloqueado')).toContainText('700 XP')
 })
 
-test('Stella, Hooty y Alpi tienen 3 etapas; las demás 4', async ({ page }) => {
+test('Stella y Hooty tienen 3 etapas; las demás 4 (Alpi también)', async ({ page }) => {
   await page.goto('/#/mas/mascota')
-  for (const [nombre, apodo, etapas] of [['Stella', 'La estrella brillante', 3], ['Hooty', 'El búho sabio y despistado', 3], ['Alpi', 'La alpaca aventurera', 3], ['Drako', 'El soñador valiente', 4], ['Axolín', 'El curioso caótico', 4]] as const) {
+  for (const [nombre, apodo, etapas] of [['Stella', 'La estrella brillante', 3], ['Hooty', 'El búho sabio y despistado', 3], ['Alpi', 'La alpaca aventurera', 4], ['Drako', 'El soñador valiente', 4], ['Axolín', 'El curioso caótico', 4]] as const) {
     await page.getByRole('button', { name: new RegExp(`${nombre}, ${apodo}`) }).click()
     await expect(page.getByRole('dialog', { name: nombre }).locator('.evolucion li')).toHaveCount(etapas)
     await page.keyboard.press('Escape')

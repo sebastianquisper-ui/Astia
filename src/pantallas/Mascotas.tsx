@@ -148,6 +148,11 @@ function DetalleMascota({ mascota, esActual, onElegir }: { mascota: Mascota; esA
       </ol>
 
       <div className="acciones" style={{ width: '100%' }}>
+        {mascota.id === 'alpi' && (
+          <a className="btn suave probar-alpi" href="#/mas/alpi">
+            Probar a Alpi en 3D
+          </a>
+        )}
         <button className="btn" disabled={esActual} onClick={onElegir}>{esActual ? 'Es tu compañero' : `Elegir a ${mascota.nombre}`}</button>
       </div>
     </div>
