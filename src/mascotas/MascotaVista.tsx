@@ -1,8 +1,21 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent } from 'react'
 import type { Animo } from '../lib/avatar'
 import type { MascotaId } from '../lib/mascotas'
 import { fondoDe } from './sprites'
 import { Rig } from './rig/Rig'
+
+// Alpi es en 3D de verdad: ese código se descarga solo cuando se usa.
+const AlpiTres = lazy(() => import('./tres/AlpiTres'))
+
+function hayWebGL(): boolean {
+  try {
+    const c = document.createElement('canvas')
+    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
+let webgl: boolean | undefined
 
 interface Chispa {
   id: number
@@ -57,8 +70,9 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
     temporizadores.current.push(window.setTimeout(() => setChispas((c) => c.filter((x) => !nuevas.some((n) => n.id === x.id))), 800))
   }
 
+  const en3d = mascota === 'alpi' && (webgl ??= hayWebGL())
   const clases = ['avatar', 'mascota', animo, habla ? 'habla' : '', saltando ? 'saltando' : '', inclina ? 'activa' : ''].filter(Boolean).join(' ')
-  const transformacion = inclina ? `rotateY(${inclina.x * 20}deg) rotateX(${-inclina.y * 20}deg) scale(1.04)` : undefined
+  const transformacion = inclina && !en3d ? `rotateY(${inclina.x * 20}deg) rotateX(${-inclina.y * 20}deg) scale(1.04)` : undefined
 
   return (
     <span
@@ -74,7 +88,13 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
     >
       <span className="mascota-sombra" aria-hidden="true" />
       <span className="mascota-marco vec" style={{ transform: transformacion }}>
-        <Rig key={mascota + etapa} mascota={mascota} etapa={etapa} animo={animo} habla={habla} />
+        {en3d ? (
+          <Suspense fallback={<Rig mascota={mascota} etapa={etapa} animo={animo} habla={habla} />}>
+            <AlpiTres etapa={etapa} animo={animo} habla={habla} saltando={saltando} inclina={inclina} />
+          </Suspense>
+        ) : (
+          <Rig key={mascota + etapa} mascota={mascota} etapa={etapa} animo={animo} habla={habla} />
+        )}
       </span>
       {animo === 'durmiendo' && (
         <span className="zzz" aria-hidden="true">

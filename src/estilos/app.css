@@ -820,3 +820,5 @@ button.habito-texto { background: none; padding: 0; border: 0; }
 .mascota-mini .rig { position: absolute; inset: 6%; width: 88%; height: 88%; filter: none; }
 .mascota-mini.bloqueada .rig { filter: grayscale(1) brightness(0.55) blur(2px); }
 @media (prefers-reduced-motion: reduce) { .rig *, .rig-resp { animation: none !important; } }
+.mascota-marco.vec canvas.tres, .mascota-marco.vec .tres { display: block; width: 100% !important; height: 100% !important; pointer-events: none; }
+.mascota-marco.vec > div { width: 100%; height: 100%; }

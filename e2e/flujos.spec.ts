@@ -709,6 +709,17 @@ test('la mascota está dibujada por piezas: las capas se separan al inclinarla y
   await expect(page.locator('.mascota .boca-habla')).toBeVisible()
 })
 
+test('Alpi es 3D de verdad (lienzo WebGL) y reacciona al toque', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
+  await page.getByRole('button', { name: 'Elegir a Alpi' }).click()
+  await page.goto('/#/hoy')
+  await expect(page.locator('.mascota canvas')).toBeVisible({ timeout: 10000 })
+  await page.getByRole('button', { name: 'Hablar con Astia' }).click()
+  await expect(page.locator('.mascota')).toHaveClass(/saltando/)
+  await expect(page.locator('.chispa').first()).toBeVisible()
+})
+
 test('con tareas vencidas la mascota se alerta; su ánimo cambia cómo se mueve', async ({ page }) => {
   await page.goto('/#/mas/mascota')
   await page.getByRole('button', { name: /Nube, El fantasmita productivo/ }).click()
