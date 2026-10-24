@@ -4,6 +4,7 @@ import { Vacio } from '../ui/Vacio'
 import { Ajustes } from './Ajustes'
 import { Enfoque } from './Enfoque'
 import { Horario } from './Horario'
+import { Mascotas } from './Mascotas'
 import { Rutinas } from './Rutinas'
 
 interface Entrada {
@@ -20,6 +21,7 @@ interface Entrada {
 const ENTRADAS: Entrada[] = [
   { id: 'horario', titulo: 'Horario de clases', detalle: 'Tus clases de lunes a domingo', icono: 'reloj', modos: ['academico'] },
   { id: 'rutinas', titulo: 'Rutinas', detalle: 'Tu mañana, tu noche y tus entrenamientos', icono: 'rutinas', modos: ['personal'] },
+  { id: 'mascota', titulo: 'Mi mascota', detalle: 'Elige a tu compañero y míralo evolucionar', icono: 'mascota', modos: ['academico', 'personal'] },
   { id: 'calendario', titulo: 'Calendario', detalle: 'Fechas importantes del mes', icono: 'calendario', modos: ['academico', 'personal'] },
   { id: 'ciclo', titulo: 'Ciclo completo', detalle: 'Las 16 semanas y su carga', icono: 'ciclo', modos: ['academico'] },
   { id: 'progreso', titulo: 'Progreso y rachas', detalle: 'Cuántos días seguidos cumples', icono: 'progreso', modos: ['academico', 'personal'] },
@@ -33,6 +35,7 @@ export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => v
   if (sub === 'ajustes') return <Ajustes alVolver={() => alAbrir('')} />
   if (sub === 'horario') return <Horario alVolver={() => alAbrir('')} />
   if (sub === 'enfoque') return <Enfoque alVolver={() => alAbrir('')} />
+  if (sub === 'mascota') return <Mascotas alVolver={() => alAbrir('')} />
   if (sub === 'rutinas') return <Rutinas alVolver={() => alAbrir('')} />
 
   const entrada = ENTRADAS.find((e) => e.id === sub)

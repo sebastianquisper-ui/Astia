@@ -611,3 +611,159 @@ test('un Pomodoro completo registra los 25 minutos de enfoque y se ve en Hoy', a
   await page.goto('/#/hoy')
   await expect(page.locator('.chips')).toContainText('25 min de enfoque hoy')
 })
+
+// ---------- mascotas ----------
+
+const dosDigitos = (n: number) => String(n).padStart(2, '0')
+/** n fechas seguidas "AAAA-MM-DD" desde el 1 de enero de 2026. */
+const fechasSeguidas = (n: number) => Array.from({ length: n }, (_, i) => {
+  const d = new Date(Date.UTC(2026, 0, 1 + i))
+  return `${d.getUTCFullYear()}-${dosDigitos(d.getUTCMonth() + 1)}-${dosDigitos(d.getUTCDate())}`
+})
+
+/** Deja guardada una vida de logros: así se prueba la evolución sin repetir cientos de toques. */
+function conLogros(tareasAcademicas: number, diasDeHabito: number) {
+  const tareas = Array.from({ length: tareasAcademicas }, (_, i) => ({
+    id: 'tx' + i, titulo: 'Hecha ' + i, area: 'universidad', cursoId: null, tipo: 'tarea', fecha: '2026-10-01', prioridad: 'media',
+    pideEvidencia: false, pasos: [], estado: 'hecha', hechaEn: '2026-10-01T10:00:00.000Z', actualizadoEn: 1,
+  }))
+  const habitos = [{ id: 'hx', nombre: 'Leer', categoria: 'Mente', color: '#B18CFF', frecuencia: { tipo: 'diaria' }, registro: fechasSeguidas(diasDeHabito), actualizadoEn: 1 }]
+  return { perfil: { inicioCiclo: '', semanasCiclo: 16, enfoqueMin: 25, descansoMin: 5, actualizadoEn: 0 }, tareas, habitos }
+}
+
+test('Más → Mi mascota está en los dos modos y muestra a Astia y las 8 mascotas', async ({ page }) => {
+  await page.goto('/#/mas')
+  await page.getByRole('button', { name: /Mi mascota/ }).click()
+  await expect(page.getByRole('heading', { name: 'Mi mascota' })).toBeVisible()
+  await expect(page.locator('.mascota-card')).toHaveCount(9)
+  for (const n of ['Axolín', 'Taro', 'Nube', 'Mochi', 'Drako', 'Stella', 'Hooty', 'Alpi']) await expect(page.locator('.mascota-card', { hasText: n })).toBeVisible()
+  await MODO(page).getByRole('button', { name: 'Mi Órbita' }).click()
+  await page.goto('/#/mas')
+  await expect(page.getByRole('button', { name: /Mi mascota/ })).toBeVisible()
+})
+
+test('elegir una mascota: aparece en Hoy, se recuerda y deja de ofrecer las mascotas', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByText('Conoce a las mascotas que evolucionan contigo')).toBeVisible()
+  await expect(page.locator('.mascota')).toHaveCount(0) // la estrella de siempre
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Mochi, El estratega travieso/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Mochi' })
+  await expect(hoja).toContainText('Un gatito regordete que ama las listas')
+  await expect(hoja).toContainText('Planificación')
+  await hoja.getByRole('button', { name: 'Elegir a Mochi' }).click()
+  await expect(page.getByRole('status')).toContainText('Mochi es ahora tu compañero')
+  await page.goto('/#/hoy')
+  await expect(page.locator('.mascota')).toHaveAttribute('data-sprite', 'mochi-2') // con el XP de ejemplo está en su 2.ª etapa
+  await expect(page.getByText('Conoce a las mascotas que evolucionan contigo')).toHaveCount(0)
+  await page.reload()
+  await expect(page.locator('.mascota')).toHaveAttribute('data-sprite', 'mochi-2')
+})
+
+test('se puede volver a la estrella de siempre', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Drako, El soñador valiente/ }).click()
+  await page.getByRole('button', { name: 'Elegir a Drako' }).click()
+  await page.getByRole('button', { name: 'Astia, la estrella de siempre' }).click()
+  await page.getByRole('dialog', { name: 'Astia' }).getByRole('button', { name: 'Elegir a Astia' }).click()
+  await page.goto('/#/hoy')
+  await expect(page.locator('.mascota')).toHaveCount(0)
+  await expect(page.locator('.avatar svg')).toBeVisible()
+})
+
+test('tocar a la mascota la hace saltar y lanza chispas', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Stella, La estrella brillante/ }).click()
+  await page.getByRole('button', { name: 'Elegir a Stella' }).click()
+  await page.goto('/#/hoy')
+  const mascota = page.locator('.mascota')
+  await page.getByRole('button', { name: 'Hablar con Astia' }).click()
+  await expect(mascota).toHaveClass(/saltando/)
+  await expect(page.locator('.chispa').first()).toBeVisible()
+  await expect(page.locator('.chispa')).toHaveCount(0, { timeout: 4000 }) // se apagan solas
+})
+
+test('la mascota se inclina hacia donde tocas (perspectiva 3D) y vuelve a su sitio', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Hooty, El búho sabio y despistado/ }).click()
+  await page.getByRole('button', { name: 'Elegir a Hooty' }).click()
+  await page.goto('/#/hoy')
+  const caja = (await page.locator('.mascota').boundingBox())!
+  await page.mouse.move(caja.x + caja.width * 0.9, caja.y + caja.height * 0.2)
+  await expect(page.locator('.mascota-marco')).toHaveAttribute('style', /rotateY\(\d/) // se inclinó a la derecha
+  await page.mouse.move(caja.x - 40, caja.y - 40) // sale del marco
+  await expect(page.locator('.mascota-marco')).not.toHaveAttribute('style', /rotateY/)
+})
+
+test('con tareas vencidas la mascota se alerta; su ánimo cambia cómo se mueve', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Nube, El fantasmita productivo/ }).click()
+  await page.getByRole('button', { name: 'Elegir a Nube' }).click()
+  await page.goto('/#/hoy')
+  await expect(page.locator('.mascota')).toHaveClass(/alerta/) // hay una tarea vencida en los datos de ejemplo
+  await expect(page.locator('.mascota-alerta')).toBeVisible()
+  await page.getByRole('button', { name: /Marcar hecha: Informe de laboratorio/ }).click()
+  await expect(page.locator('.mascota')).toHaveClass(/contenta/)
+})
+
+test('el detalle muestra la evolución: lo alcanzado y lo bloqueado con su XP', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Mochi, El estratega travieso/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Mochi' })
+  await expect(hoja.locator('.evolucion li')).toHaveCount(4)
+  await expect(hoja.locator('.evolucion li.alcanzada')).toHaveCount(2) // con 158 XP de ejemplo: Michi bebé y Planificador
+  await expect(hoja).toContainText('Planificador')
+  await expect(hoja.getByLabel('Nivel 3, Productichi, bloqueado')).toContainText('300 XP')
+  await expect(hoja.getByLabel('Nivel 4, Maestro del Caos, bloqueado')).toContainText('700 XP')
+})
+
+test('Stella, Hooty y Alpi tienen 3 etapas; las demás 4', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  for (const [nombre, apodo, etapas] of [['Stella', 'La estrella brillante', 3], ['Hooty', 'El búho sabio y despistado', 3], ['Alpi', 'La alpaca aventurera', 3], ['Drako', 'El soñador valiente', 4], ['Axolín', 'El curioso caótico', 4]] as const) {
+    await page.getByRole('button', { name: new RegExp(`${nombre}, ${apodo}`) }).click()
+    await expect(page.getByRole('dialog', { name: nombre }).locator('.evolucion li')).toHaveCount(etapas)
+    await page.keyboard.press('Escape')
+  }
+})
+
+test('al evolucionar se celebra una sola vez', async ({ page }) => {
+  const datos = conLogros(20, 150) // 200 de estudio + 750 de hábitos = 950 XP, bien repartido
+  await page.addInitScript((d) => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'mochi', mascotaVista: { mochi: 1 }, datosEjemplo: false }))
+    localStorage.setItem('astia.datos.v2', JSON.stringify(d))
+  }, datos)
+  await page.goto('/#/hoy')
+  const celebracion = page.getByRole('dialog', { name: '¡Evolucionó!' })
+  await expect(celebracion).toContainText('Mochi ahora es Maestro del Caos')
+  await expect(celebracion).toContainText('Nivel 4 de 4')
+  await expect(celebracion.locator('.mascota')).toHaveAttribute('data-sprite', 'mochi-4')
+  await celebracion.getByRole('button', { name: '¡Genial!' }).click()
+  await expect(celebracion).toHaveCount(0)
+  await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'mochi-4')
+})
+
+test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
+  const datos = conLogros(0, 150) // 750 XP, todo personal
+  await page.addInitScript((d) => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'mochi', mascotaVista: { mochi: 1 }, datosEjemplo: false }))
+    localStorage.setItem('astia.datos.v2', JSON.stringify(d))
+  }, datos)
+  await page.goto('/#/mas/mascota')
+  await expect(page.getByText('Nivel 2 de 4 · Planificador')).toBeVisible()
+  await expect(page.getByText(/falta equilibrio: suma XP académico/)).toBeVisible()
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100')
+  await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'mochi-2')
+})
+
+test('mostrar el XP por área y el total', async ({ page }) => {
+  const datos = conLogros(10, 20) // 100 de estudio y 100 de hábitos
+  await page.addInitScript((d) => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'taro', mascotaVista: { taro: 1 }, datosEjemplo: false }))
+    localStorage.setItem('astia.datos.v2', JSON.stringify(d))
+  }, datos)
+  await page.goto('/#/mas/mascota')
+  await expect(page.getByText('200', { exact: true }).first()).toBeVisible()
+  await expect(page.locator('.xp-total')).toContainText('200 XP en total')
+  await expect(page.locator('.xp-fila').nth(0).locator('.xp-valor')).toHaveText('100') // Académico
+  await expect(page.locator('.xp-fila').nth(2).locator('.xp-valor')).toHaveText('100') // Hábitos
+})

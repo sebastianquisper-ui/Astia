@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import type { Tarea } from '../dominio/tipos'
 import { useDatos } from '../datos/DatosProvider'
 import type { Fase } from '../lib/metodos'
-import { Avatar } from '../ui/Avatar'
+import { AvatarMascota } from '../mascotas/AvatarMascota'
 import { Icono } from '../ui/Icono'
 import { pitar } from './sonido'
 
@@ -155,7 +155,7 @@ export function SesionEstudio({ titulo, fases, tarea, esPomodoro, esArranque, de
         </>
       ) : (
         <div className="sesion-fin">
-          <Avatar animo="contenta" tam={104} />
+          <AvatarMascota animo="contenta" tam={104} />
           <h2 className="sesion-fase">{esArranque ? 'Ya empezaste' : 'Sesión terminada'}</h2>
           <p className="sesion-desc">
             {esArranque

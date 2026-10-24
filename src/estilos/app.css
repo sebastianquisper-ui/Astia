@@ -699,3 +699,84 @@ button.habito-texto { background: none; padding: 0; border: 0; }
 
 /* el título de la sesión no debe pasar por debajo del botón de cerrar */
 .sesion > p.sub:first-of-type { max-width: calc(100% - 76px); }
+
+/* =====================================================================
+   MASCOTAS: dibujo con perspectiva, movimiento y evolución
+   ===================================================================== */
+
+.mascota { perspective: 560px; touch-action: pan-y; -webkit-user-select: none; user-select: none; cursor: pointer; }
+.mascota-marco {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 32%;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  box-shadow: 0 12px 26px rgb(0 0 0 / 0.35), inset 0 0 0 2.5px rgb(255 255 255 / 0.55);
+}
+.mascota.activa .mascota-marco { transition: transform 0.06s linear; }
+.mascota-img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); pointer-events: none; -webkit-user-drag: none; animation: aparecer-mascota 0.5s ease-out, respirar 3.8s ease-in-out 0.5s infinite; transform-origin: 50% 80%; }
+.mascota-brillo { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at var(--bx, 50%) var(--by, 30%), rgb(255 255 255 / 0.5), transparent 52%); mix-blend-mode: soft-light; }
+.mascota-sombra { position: absolute; left: 12%; right: 12%; bottom: -9%; height: 11%; border-radius: 50%; background: rgb(0 0 0 / 0.38); filter: blur(7px); animation: sombra 4.2s ease-in-out infinite; }
+.mascota-nivel { position: absolute; left: 50%; bottom: -10px; transform: translateX(-50%); padding: 2px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.02em; box-shadow: 0 2px 8px rgb(0 0 0 / 0.3); white-space: nowrap; }
+.mascota-alerta { position: absolute; top: -6px; right: -4px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--red); color: #fff; font-weight: 900; font-size: 1rem; animation: pulso 1.1s ease-in-out infinite; box-shadow: 0 2px 8px rgb(0 0 0 / 0.3); }
+
+@keyframes aparecer-mascota { from { opacity: 0; transform: scale(1.35); filter: brightness(1.8) saturate(1.4); } to { opacity: 1; transform: scale(1.1); filter: none; } }
+@keyframes respirar { 0%, 100% { transform: scale(1.1, 1.1); } 50% { transform: scale(1.1, 1.135); } }
+@keyframes sombra { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.82); opacity: 0.7; } }
+@keyframes salto-mascota { 0% { transform: translateY(0) scale(1, 1); } 22% { transform: translateY(2px) scale(1.12, 0.88); } 52% { transform: translateY(-16px) scale(0.94, 1.1) rotate(-3deg); } 78% { transform: translateY(0) scale(1.08, 0.92); } 100% { transform: translateY(0) scale(1, 1); } }
+@keyframes salto-feliz { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(-9px); } 90% { transform: translateY(0); } }
+@keyframes temblor { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px) rotate(-2deg); } 75% { transform: translateX(3px) rotate(2deg); } }
+@keyframes habla-mascota { from { transform: scale(1.1, 1.1); } to { transform: scale(1.07, 1.15); } }
+@keyframes chispa { 0% { opacity: 0; transform: translate(0, 0) scale(0.4); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.25) rotate(40deg); } }
+
+.mascota.saltando .mascota-marco { animation: salto-mascota 0.56s ease-out; }
+.mascota.contenta .mascota-marco { animation: salto-feliz 2.4s ease-in-out infinite; }
+.mascota.alerta .mascota-marco { animation: temblor 0.5s ease-in-out infinite; }
+.mascota.saltando.contenta .mascota-marco, .mascota.saltando.alerta .mascota-marco { animation: salto-mascota 0.56s ease-out; }
+.mascota.durmiendo .mascota-img { filter: saturate(0.75) brightness(0.86); animation: aparecer-mascota 0.5s ease-out, respirar 6.5s ease-in-out 0.5s infinite; }
+.mascota.habla .mascota-img { animation: habla-mascota 0.28s ease-in-out infinite alternate; }
+.chispa { position: absolute; left: 50%; top: 45%; z-index: 3; pointer-events: none; color: #ffd766; font-size: 1.15rem; text-shadow: 0 0 8px rgb(255 210 90 / 0.9); animation: chispa 0.8s ease-out forwards; }
+
+/* la mascota en la galería y en la evolución */
+.mascota-mini { position: relative; display: block; border-radius: 28%; overflow: hidden; flex: none; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.55), 0 4px 12px rgb(0 0 0 / 0.2); }
+.mascota-mini img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); }
+.mascota-mini.bloqueada img { filter: grayscale(1) brightness(0.55) blur(2px); }
+.mascota-mini.astia { display: grid; place-items: center; width: 96px; height: 96px; background: linear-gradient(160deg, #2c3157, #151a35); }
+
+.mascota-actual { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; margin-top: 16px; padding-bottom: 22px; }
+.mascota-actual .mascota { margin: 10px 0 14px; }
+.mascota-actual .meter { width: 100%; max-width: 320px; margin-top: 10px; }
+.etapa-actual { font-weight: 700; color: var(--accent); margin-top: 6px; }
+.xp-total { margin-top: 8px; color: var(--muted); font-size: 0.875rem; }
+.xp-total b { font-family: var(--display); font-size: 1.25rem; color: var(--text); }
+
+.xp-fila { cursor: default; }
+.xp-valor { font-family: var(--display); font-weight: 800; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+
+.galeria { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.mascota-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px 12px; border-radius: 22px; background: var(--surface); text-align: center; box-shadow: var(--sombra); border: 2px solid transparent; color: inherit; }
+:root[data-theme='dark'] .mascota-card { border-color: var(--line); }
+.mascota-card b { font-family: var(--display); font-size: 1.0625rem; margin-top: 6px; }
+.mascota-card > span:not(.mascota-mini) { color: var(--muted); font-size: 0.78rem; line-height: 1.3; }
+.mascota-card:active { transform: scale(0.97); }
+.mascota-card.elegida { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+.insignia { margin-top: 4px; font-style: normal; font-size: 0.7rem; font-weight: 800; padding: 2px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); }
+
+.detalle-mascota { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.detalle-mascota .mascota { margin: 10px 0 14px; }
+.detalle-mascota .apodo { font-weight: 700; }
+.detalle-mascota .descripcion { max-width: 380px; font-size: 0.95rem; }
+.etiquetas { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.etiqueta-chip { padding: 5px 13px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-weight: 700; font-size: 0.8125rem; }
+.evolucion { list-style: none; margin: 12px 0 18px; padding: 0; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; width: 100%; }
+.evolucion li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 76px; font-size: 0.75rem; }
+.evolucion li b { font-size: 0.8125rem; }
+.evolucion li span { color: var(--muted); line-height: 1.2; }
+.evolucion li:not(.alcanzada) b { color: var(--muted); }
+.evolucion .candado { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); color: #fff; filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.6)); }
+
+.celebracion { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding-top: 6px; }
+.celebracion .mascota { margin: 12px 0 14px; }

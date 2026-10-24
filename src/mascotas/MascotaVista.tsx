@@ -1,0 +1,102 @@
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import type { Animo } from '../lib/avatar'
+import type { MascotaId } from '../lib/mascotas'
+import { fondoDe, spriteDe } from './sprites'
+
+interface Chispa {
+  id: number
+  dx: number
+  dy: number
+  simbolo: string
+}
+const SIMBOLOS = ['✦', '♥', '✧', '★']
+const limita = (n: number) => Math.max(-1, Math.min(1, n))
+
+interface Props {
+  mascota: MascotaId
+  /** Etapa a mostrar (la primera es la 1). */
+  etapa: number
+  animo?: Animo
+  habla?: boolean
+  tam?: number
+  /** Si se pasa, se muestra "Nv N" abajo. */
+  nivel?: number
+}
+
+/**
+ * Una mascota con movimiento. No es un modelo 3D: es su dibujo dentro de un marco que se inclina
+ * hacia donde tocas (con perspectiva y brillo), respira, flota y salta con chispas al tocarla.
+ * El ánimo cambia cómo se mueve: duerme, se alerta o celebra.
+ */
+export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, tam = 112, nivel }: Props) {
+  const raiz = useRef<HTMLSpanElement>(null)
+  const [inclina, setInclina] = useState<{ x: number; y: number } | null>(null)
+  const [saltando, setSaltando] = useState(false)
+  const [chispas, setChispas] = useState<Chispa[]>([])
+  const contador = useRef(0)
+  const temporizadores = useRef<number[]>([])
+  useEffect(() => () => temporizadores.current.forEach(window.clearTimeout), [])
+
+  const inclinar = (e: PointerEvent) => {
+    const r = raiz.current?.getBoundingClientRect()
+    if (!r || r.width === 0) return
+    setInclina({ x: limita(((e.clientX - r.left) / r.width - 0.5) * 2), y: limita(((e.clientY - r.top) / r.height - 0.5) * 2) })
+  }
+  const soltar = () => setInclina(null)
+
+  const tocar = (e: PointerEvent) => {
+    inclinar(e)
+    setSaltando(true)
+    temporizadores.current.push(window.setTimeout(() => setSaltando(false), 560))
+    const nuevas = Array.from({ length: 6 }, (_, i): Chispa => {
+      const ang = (Math.PI * 2 * i) / 6 + Math.random() * 0.6
+      return { id: ++contador.current, dx: Math.cos(ang) * (tam * 0.62), dy: Math.sin(ang) * (tam * 0.62) - tam * 0.1, simbolo: SIMBOLOS[(i + contador.current) % SIMBOLOS.length] }
+    })
+    setChispas((c) => [...c, ...nuevas])
+    temporizadores.current.push(window.setTimeout(() => setChispas((c) => c.filter((x) => !nuevas.some((n) => n.id === x.id))), 800))
+  }
+
+  const clases = ['avatar', 'mascota', animo, habla ? 'habla' : '', saltando ? 'saltando' : '', inclina ? 'activa' : ''].filter(Boolean).join(' ')
+  const transformacion = inclina ? `rotateY(${inclina.x * 20}deg) rotateX(${-inclina.y * 20}deg) scale(1.04)` : undefined
+
+  return (
+    <span
+      ref={raiz}
+      className={clases}
+      data-sprite={`${mascota}-${etapa}`}
+      style={{ width: tam, height: tam, ['--bx' as string]: `${50 + (inclina?.x ?? 0) * 35}%`, ['--by' as string]: `${30 + (inclina?.y ?? 0) * 30}%` }}
+      onPointerMove={inclinar}
+      onPointerDown={tocar}
+      onPointerLeave={soltar}
+      onPointerUp={soltar}
+      onPointerCancel={soltar}
+    >
+      <span className="mascota-sombra" aria-hidden="true" />
+      <span className="mascota-marco" style={{ background: fondoDe(mascota, etapa), transform: transformacion }}>
+        <img key={mascota + etapa} className="mascota-img" src={spriteDe(mascota, etapa)} alt="" draggable={false} />
+        <span className="mascota-brillo" aria-hidden="true" />
+      </span>
+      {animo === 'durmiendo' && (
+        <span className="zzz" aria-hidden="true">
+          z<small>z</small>
+        </span>
+      )}
+      {animo === 'alerta' && <span className="mascota-alerta" aria-hidden="true">!</span>}
+      {chispas.map((c) => (
+        <span key={c.id} className="chispa" aria-hidden="true" style={{ ['--dx' as string]: `${c.dx}px`, ['--dy' as string]: `${c.dy}px` }}>
+          {c.simbolo}
+        </span>
+      ))}
+      {nivel !== undefined && <span className="mascota-nivel">Nv {nivel}</span>}
+    </span>
+  )
+}
+
+/** Una imagen quieta de una mascota (para listas y para la evolución). */
+export function MascotaMini({ mascota, etapa, bloqueada = false, tam = 72 }: { mascota: MascotaId; etapa: number; bloqueada?: boolean; tam?: number }) {
+  return (
+    <span className={'mascota-mini' + (bloqueada ? ' bloqueada' : '')} style={{ width: tam, height: tam, background: fondoDe(mascota, etapa) }} aria-hidden="true">
+      <img src={spriteDe(mascota, etapa)} alt="" draggable={false} />
+    </span>
+  )
+}

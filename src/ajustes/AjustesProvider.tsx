@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { MascotaElegida } from '../lib/mascotas'
 import { COLOR_BARRA, ESCALA_LETRA, temaEfectivo, type ModoTema, type TamanoLetra } from '../lib/tema'
 import { guardarLocal, leerLocal } from '../lib/almacen'
 import { useAviso } from '../ui/Aviso'
@@ -10,6 +11,10 @@ export type Modo = 'academico' | 'personal'
 
 export interface Ajustes {
   modo: Modo
+  /** Tu compañera: una de las 8 mascotas, o 'astia' (la estrella de siempre). */
+  mascota: MascotaElegida
+  /** Última etapa que viste de cada mascota (para celebrar cuando evoluciona). 0 = la primera. */
+  mascotaVista: Record<string, number>
   nombre: string
   modoTema: ModoTema
   tamanoLetra: TamanoLetra
@@ -18,7 +23,7 @@ export interface Ajustes {
 }
 
 const CLAVE = 'astia.ajustes'
-const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: true, modo: 'academico' }
+const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: true, modo: 'academico', mascota: 'astia', mascotaVista: {} }
 
 interface Contexto {
   ajustes: Ajustes

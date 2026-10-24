@@ -19,6 +19,10 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   repetición espaciada, Cornell, práctica intercalada, SQ3R, mapa mental, tarjetas, resolver problemas por pasos)
   y "Solo 10 minutos". Astia sugiere uno por tarea (se puede cambiar en el formulario). Se usan desde
   Hoy → Empezar ya, desde Más → Enfoque y descanso, y el enfoque se suma al progreso del día.
+- **Mascotas que evolucionan:** completo. 8 mascotas (Axolín, Taro, Nube, Mochi, Drako, Stella, Hooty, Alpi) con sus
+  etapas, tomadas de la hoja "Mascotas originales" (`herramientas/mascotas/`). Se mueven con perspectiva
+  al tocarlas, evolucionan con el XP que ganas (se calcula de lo que haces; no se guarda) y piden equilibrio
+  entre estudios y vida personal desde la etapa 3. No son modelos 3D reales: son sus dibujos con movimiento.
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 
 ## Comandos

@@ -12,7 +12,8 @@ import { cumplimientoDeHoy } from '../lib/habitos'
 import { planDeHoy } from '../lib/plan'
 import { saludoDe } from '../lib/saludo'
 import { urgenciaDe } from '../lib/urgencia'
-import { Avatar } from '../ui/Avatar'
+import { AvatarMascota } from '../mascotas/AvatarMascota'
+import { AvisoMascotas } from '../mascotas/AvisoMascotas'
 import { Icono } from '../ui/Icono'
 import { useAviso } from '../ui/Aviso'
 import { FilaTarea } from '../ui/FilaTarea'
@@ -99,11 +100,12 @@ export function HoyAcademico() {
 
       <div className="hero">
         <button className="avatar-btn" onClick={tocarAvatar} aria-label="Hablar con Astia">
-          <Avatar animo={animo} habla={habla} />
+          <AvatarMascota animo={animo} habla={habla} />
         </button>
         <div className="burbuja" aria-live="polite">
           <p>{frase}</p>
         </div>
+      <AvisoMascotas />
       </div>
 
       <TarjetaAhora

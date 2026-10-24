@@ -30,6 +30,8 @@ const TRAZOS = {
   subir: '<path d="M12 19V6m0 0-5 5m5-5 5 5"/>',
   bajar: '<path d="M12 5v13m0 0 5-5m-5 5-5-5"/>',
   play: '<path d="M8 5v14l11-7z"/>',
+  mascota: '<circle cx="7" cy="9.5" r="1.8"/><circle cx="12" cy="6.5" r="1.8"/><circle cx="17" cy="9.5" r="1.8"/><path d="M12 11.5c-3 0-5.5 2.6-5.5 5 0 1.4 1.2 2.2 2.6 2.2 1 0 1.8-.5 2.9-.5s1.9.5 2.9.5c1.4 0 2.6-.8 2.6-2.2 0-2.4-2.5-5-5.5-5z"/>',
+  candado: '<rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
   orbita: '<circle cx="12" cy="12" r="2.2"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-30 12 12)"/>',
 } as const
