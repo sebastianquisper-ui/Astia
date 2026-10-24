@@ -5,6 +5,7 @@ import { fondoDe } from './sprites'
 import { Rig } from './rig/Rig'
 
 import { desdeAnimo, nivelAlpi } from './alpi/datos'
+import { fotoAlpi } from './alpi/fotos'
 import { useAlpi3D } from './alpi/useAlpi3D'
 import { useVestidor } from './alpi/useVestidor'
 
@@ -113,8 +114,8 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
 /** Una imagen quieta de una mascota (para listas y para la evolución). */
 export function MascotaMini({ mascota, etapa, bloqueada = false, tam = 72 }: { mascota: MascotaId; etapa: number; bloqueada?: boolean; tam?: number }) {
   return (
-    <span className={'mascota-mini' + (bloqueada ? ' bloqueada' : '')} style={{ width: tam, height: tam, background: fondoDe(mascota, etapa) }} aria-hidden="true">
-      <Rig mascota={mascota} etapa={etapa} animo="contenta" quieta />
+    <span className={'mascota-mini' + (mascota === 'alpi' ? ' foto' : '') + (bloqueada ? ' bloqueada' : '')} style={{ width: tam, height: tam, background: fondoDe(mascota, etapa) }} aria-hidden="true">
+      {mascota === 'alpi' ? <img src={fotoAlpi(etapa)} alt="" /> : <Rig mascota={mascota} etapa={etapa} animo="contenta" quieta />}
     </span>
   )
 }

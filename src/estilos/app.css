@@ -850,7 +850,7 @@ button.habito-texto { background: none; padding: 0; border: 0; }
 .hero-alpi-modelo { position: relative; z-index: 1; height: 340px; margin-left: -14px; }
 .hero-alpi-modelo .avatar, .hero-alpi-modelo > .rig { width: 100%; height: 100%; }
 .alpi-iframe { display: block; width: 100%; height: 100%; border: 0; background: transparent; color-scheme: light; opacity: 0; transition: opacity 0.4s ease; }
-.alpi-iframe.lista { opacity: 1; }
+.alpi-iframe.alpi-visible { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .alpi-iframe { transition: none; } }
 .hero-alpi-lado { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 14px; }
 .burbuja-alpi { text-align: left; color: inherit; font: inherit; width: 100%; }
@@ -929,3 +929,20 @@ button.ciclo-fila { width: 100%; text-align: left; }
 
 /* El planeta de Alpi y las estrellas fugaces se salen del borde a propósito: que no ensanchen la página (las hojas se cortaban) */
 html, body { overflow-x: clip; }
+
+.mascota-mini.foto img { object-fit: contain; transform: none; padding: 6%; }
+
+/* ruleta de emotes y movimientos de Alpi */
+.rueda-fondo { position: fixed; inset: 0; z-index: 70; background: rgb(4 6 18 / 0.72); display: grid; place-items: center; animation: aparece 0.18s ease-out; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.rueda { position: relative; width: 1px; height: 1px; }
+.rueda-op { position: absolute; left: -29px; top: -29px; width: 58px; height: 58px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: var(--sombra); animation: rueda-sale 0.22s ease-out both; }
+.rueda-op[aria-pressed='true'] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 24%, var(--surface)); }
+.rueda-emoji { font-size: 1.3rem; line-height: 1; }
+.rueda-texto { font-size: 0.5rem; font-weight: 700; line-height: 1.05; max-width: 56px; text-align: center; overflow-wrap: anywhere; }
+.rueda-centro { position: absolute; left: -48px; top: -48px; width: 96px; height: 96px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-weight: 800; box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 30%, transparent); }
+.rueda-centro span { font-size: 1.7rem; line-height: 1; }
+.rueda-centro small { font-size: 0.68rem; font-weight: 800; }
+.rueda-cerrar { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); padding: 10px 22px; border-radius: 999px; background: var(--surface2); font-weight: 700; }
+.rueda-pista { color: var(--muted); font-size: 0.75rem; line-height: 1.3; padding: 0 4px; }
+@keyframes rueda-sale { from { opacity: 0; scale: 0.4; } to { opacity: 1; scale: 1; } }
+@media (prefers-reduced-motion: reduce) { .rueda-op { animation: none; } }

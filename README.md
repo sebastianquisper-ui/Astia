@@ -27,7 +27,9 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   gasta menos batería). **Vestidor:** con todo lo de hoy cumplido, se le puede quitar ropa o volver a un nivel anterior.
   **Expresiones:** Alpi te muestra cómo vas: orgullosa si cumpliste todo, feliz mientras avanzas, concentrada si aún no
   empiezas, regañona si algo venció, molesta si llevas 2 días o 2 pendientes de atraso, furiosa si son 4 o más; baila cuando
-  cumples algo y duerme de noche. Con todo cumplido, en el vestidor se puede elegir la expresión a mano y probar sus movimientos.
+  cumples algo y duerme de noche. Con todo cumplido, tocando dos veces a Alpi en Hoy se abre una ruleta de emotes (para fijar su expresión a mano o volver a
+  automática) y, tocando el centro, otra con sus movimientos (saludar, saltar, bailar, reír, explorar). Las miniaturas de
+  Alpi (galería y evolución) son fotos de su modelo 3D de frente (`herramientas/alpi/fotos.mjs`).
 - **Evidencia para cumplir:** ninguna tarea se marca hecha sin evidencia: una foto del trabajo (cámara o galería,
   guardada en el teléfono) o el enlace de la entrega. Reabrir una tarea descarta su evidencia.
 - **Pantallas académicas:** completas. Semana (clases y entregas por día), Cursos con sus semanas del ciclo (tema y

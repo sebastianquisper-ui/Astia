@@ -14,13 +14,15 @@ interface Props {
   /** Qué ropa y accesorios lleva (del vestidor). */
   accesorios?: Record<string, boolean>
   alTocar?: () => void
+  /** Dos toques seguidos (la ruleta). */
+  alDobleToque?: () => void
   className?: string
 }
 
 type Orden = { cmd: string; args: unknown[] }
 
 /** Alpi en 3D dentro de un iframe: le manda órdenes con postMessage cuando está lista. */
-export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 0, embebida = true, sonido = false, accesorios, alTocar, className }: Props) {
+export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 0, embebida = true, sonido = false, accesorios, alTocar, alDobleToque, className }: Props) {
   const marco = useRef<HTMLIFrameElement>(null)
   const lista = useRef(false)
   // Alpi se muestra solo cuando ya está armada y en su nivel: así no se ve nada a medias ni un dibujo de relleno
@@ -30,6 +32,8 @@ export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 
   const doc = useMemo(() => documentoAlpi(embebida), [embebida])
   const alTocarRef = useRef(alTocar)
   alTocarRef.current = alTocar
+  const alDobleRef = useRef(alDobleToque)
+  alDobleRef.current = alDobleToque
 
   const enviar = (cmd: string, ...args: unknown[]) => {
     const w = marco.current?.contentWindow
@@ -52,6 +56,7 @@ export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 
         window.setTimeout(() => setVisible(true), 150)
       }
       if (e.data?.type === 'alpi-toque') alTocarRef.current?.()
+      if (e.data?.type === 'alpi-doble') (alDobleRef.current ?? alTocarRef.current)?.()
     }
     window.addEventListener('message', oir)
     return () => window.removeEventListener('message', oir)
@@ -73,5 +78,5 @@ export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 
     if (accesorios) for (const [k, on] of Object.entries(accesorios)) enviar('setAccessory', k, on)
   }, [claveAccesorios])
 
-  return <iframe ref={marco} className={'alpi-iframe' + (visible ? ' lista' : '') + (className ? ' ' + className : '')} title="Alpi en 3D" srcDoc={doc} sandbox="allow-scripts" />
+  return <iframe ref={marco} className={'alpi-iframe' + (visible ? ' alpi-visible' : '') + (className ? ' ' + className : '')} title="Alpi en 3D" srcDoc={doc} sandbox="allow-scripts" />
 }

@@ -742,7 +742,7 @@ test('Alpi en Hoy: grande sobre su planeta, en 3D, con la expresión según tu d
   const heroe = page.locator('.hero-alpi')
   await expect(heroe.locator('.planeta')).toBeAttached()
   await expect(page.frameLocator('.hero-alpi iframe').locator('canvas#stage')).toBeVisible({ timeout: 15000 })
-  await expect(heroe.locator('iframe.alpi-iframe.lista')).toBeAttached({ timeout: 15000 }) // se muestra solo cuando ya está lista
+  await expect(heroe.locator('iframe.alpi-iframe.alpi-visible')).toBeAttached({ timeout: 15000 }) // se muestra solo cuando ya está lista
   expect(await page.evaluate(() => (window as unknown as { __dibujo: boolean }).__dibujo)).toBe(false)
   // la página no se ensancha más que la pantalla (si no, las hojas emergentes se cortan)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
@@ -1036,28 +1036,50 @@ for (const caso of ATRASOS) {
   })
 }
 
-test('expresión a mano: solo con todo cumplido, y el vestidor la recuerda', async ({ page }) => {
+test('ruleta: con todo cumplido, tocar dos veces a Alpi abre emotes y movimientos', async ({ page }) => {
   const datos = conLogros(20, 150)
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: true, descansoVista: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/hoy')
-  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
-  const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
-  const grupo = hoja.getByRole('group', { name: 'Expresión de Alpi' })
-  await expect(grupo.getByRole('button', { name: 'Automática' })).toHaveAttribute('aria-pressed', 'true')
-  await grupo.getByRole('button', { name: 'Furiosa' }).click()
-  await expect(grupo.getByRole('button', { name: 'Furiosa' })).toHaveAttribute('aria-pressed', 'true')
-  await hoja.getByRole('group', { name: 'Movimientos de Alpi' }).getByRole('button', { name: 'Bailar' }).click()
-  await hoja.getByRole('button', { name: 'Listo' }).click()
+  await expect(page.getByText('Toca dos veces a Alpi')).toBeVisible()
+  const lienzo = page.frameLocator('.hero-alpi iframe').locator('canvas#stage')
+  await expect(lienzo).toBeVisible({ timeout: 15000 })
+  await lienzo.dblclick()
+  const emotes = page.getByRole('dialog', { name: 'Emotes de Alpi' })
+  await expect(emotes).toBeVisible()
+  await expect(emotes.getByRole('button', { name: /Automática/ })).toHaveAttribute('aria-pressed', 'true')
+  await emotes.getByRole('button', { name: /Furiosa/ }).click()
+  await expect(emotes).toHaveCount(0)
   await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'furiosa')
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLook.expresion)).toBe('furiosa')
+  // el centro cambia a la rueda de movimientos
+  await lienzo.dblclick()
+  await page.getByRole('button', { name: 'Ver movimientos' }).click()
+  const movimientos = page.getByRole('dialog', { name: 'Movimientos de Alpi' })
+  await expect(movimientos.getByRole('button')).toHaveCount(6) // 5 movimientos y el centro
+  await movimientos.getByRole('button', { name: /Bailar/ }).click()
+  await expect(movimientos).toHaveCount(0)
+  await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'furiosa') // bailar no cambia la expresión fijada
   // volver a automática
-  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
-  await page.getByRole('dialog', { name: 'Vestidor de Alpi' }).getByRole('button', { name: 'Automática' }).click()
-  await page.getByRole('dialog', { name: 'Vestidor de Alpi' }).getByRole('button', { name: 'Listo' }).click()
+  await lienzo.dblclick()
+  await page.getByRole('dialog', { name: 'Emotes de Alpi' }).getByRole('button', { name: /Automática/ }).click()
   await expect(page.locator('.hero-alpi-modelo')).not.toHaveAttribute('data-expresion', 'furiosa')
+})
+
+test('el vestidor ya no trae listas de expresiones ni de movimientos', async ({ page }) => {
+  const datos = conLogros(20, 150)
+  await page.addInitScript((d) => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false, descansoVista: false }))
+    localStorage.setItem('astia.datos.v2', JSON.stringify(d))
+  }, datos)
+  await page.goto('/#/hoy')
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
+  await expect(hoja.getByRole('group', { name: 'Ropa y accesorios' })).toBeVisible()
+  await expect(hoja.getByRole('group', { name: 'Expresión de Alpi' })).toHaveCount(0)
+  await expect(hoja.getByRole('group', { name: 'Movimientos de Alpi' })).toHaveCount(0)
 })
 
 test('expresión a mano: con algo pendiente no se puede elegir y manda tu avance', async ({ page }) => {
@@ -1070,4 +1092,33 @@ test('expresión a mano: con algo pendiente no se puede elegir y manda tu avance
   const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
   await expect(hoja).toContainText('Primero cumples')
   await expect(hoja.getByRole('group', { name: 'Expresión de Alpi' })).toHaveCount(0)
+  await hoja.getByRole('button', { name: 'Cerrar' }).first().click()
+  // con algo pendiente, tocar dos veces a Alpi no abre la ruleta
+  await expect(page.getByText('Toca dos veces a Alpi')).toHaveCount(0)
+  await page.frameLocator('.hero-alpi iframe').locator('canvas#stage').dblclick()
+  await expect(page.getByRole('dialog', { name: 'Emotes de Alpi' })).toHaveCount(0)
+})
+
+
+test('Mi mascota: las miniaturas de Alpi son sus fotos reales, por nivel', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  const tarjeta = page.locator('.mascota-card', { hasText: 'Alpi' })
+  await expect(tarjeta.locator('.mascota-mini.foto img')).toBeVisible()
+  expect(await tarjeta.locator('.mascota-mini img').evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 100)).toBe(true)
+  expect(await tarjeta.locator('.mascota-mini svg').count()).toBe(0) // ya no es el dibujo
+  await tarjeta.click()
+  const hoja = page.getByRole('dialog', { name: 'Alpi' })
+  await expect(hoja.locator('.evolucion .mascota-mini.foto img')).toHaveCount(4)
+  const bloqueadas = await hoja.locator('.evolucion .mascota-mini.bloqueada').count()
+  expect(bloqueadas).toBeGreaterThan(0) // los niveles que aún no alcanzas salen como silueta
+  expect(bloqueadas).toBeLessThan(4)
+})
+
+test('el 3D de Alpi no queda dentro de una caja con borde y sombra', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', datosEjemplo: true, etapa: 'universidad', alpi3d: true, descansoVista: false, modoTema: 'oscuro' })))
+  await page.goto('/#/hoy')
+  const marco = page.locator('.hero-alpi iframe.alpi-iframe.alpi-visible')
+  await expect(marco).toBeAttached({ timeout: 15000 })
+  const estilo = await marco.evaluate((e) => { const c = getComputedStyle(e); return { borde: c.borderTopWidth, radio: c.borderTopLeftRadius, sombra: c.boxShadow, fondo: c.backgroundColor } })
+  expect(estilo).toEqual({ borde: '0px', radio: '0px', sombra: 'none', fondo: 'rgba(0, 0, 0, 0)' })
 })

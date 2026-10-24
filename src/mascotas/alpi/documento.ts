@@ -9,11 +9,11 @@ const CDN = '<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three
 const EMBEBIDA = `<script>window.ALPI_EMBED=true</script>
 <style>html,body{background:transparent!important}.loading{display:none!important}</style>`
 
-// Un toque sin arrastrar avisa a la app (para que Astia cambie de frase).
+// Un toque sin arrastrar avisa a la app (para que Astia cambie de frase); dos toques seguidos, también.
 const AVISO_TOQUE = `<script>(function(){var c=document.getElementById('stage');if(!c)return;var x=0,y=0,m=0;
 c.addEventListener('pointerdown',function(e){x=e.clientX;y=e.clientY;m=0});
 c.addEventListener('pointermove',function(e){m=Math.max(m,Math.abs(e.clientX-x)+Math.abs(e.clientY-y))});
-c.addEventListener('pointerup',function(){if(m<8)parent.postMessage({type:'alpi-toque'},'*')});})()</script>`
+var u=-1e9;c.addEventListener('pointerup',function(e){if(m>=8)return;if(e.timeStamp-u<400){u=-1e9;parent.postMessage({type:'alpi-doble'},'*')}else{u=e.timeStamp;parent.postMessage({type:'alpi-toque'},'*')}});})()</script>`
 
 export function documentoAlpi(embebida: boolean): string {
   const libreria = '<script>' + three.replace(/<\/script/gi, '<\\/script') + '</script>'

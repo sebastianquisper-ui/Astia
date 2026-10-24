@@ -2,5 +2,6 @@
 export const FONDOS: Record<string, string> = {
   'alpi-1': '#fcdfe5',
   'alpi-2': '#fde1e5',
-  'alpi-3': '#fde5e6',
+  'alpi-3': '#dce7f5',
+  'alpi-4': '#f6e6de',
 }
