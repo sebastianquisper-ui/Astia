@@ -46,10 +46,15 @@ def material(nombre, hexa, rugosidad=0.7, metal=0.0, sheen=0.0):
 
 
 M = {
-    'lana': material('lana', '#fbf3ea', 0.85, sheen=0.9),
-    'cara': material('cara', '#fffaf4', 0.7, sheen=0.4),
-    'pezuna': material('pezuna', '#8a5a3c', 0.6),
+    'lana': material('lana', '#f4e2cf', 0.85, sheen=0.9),
+    'cara': material('cara', '#faeee2', 0.75, sheen=0.5),
+    'pezuna': material('pezuna', '#6b4330', 0.55),
     'tinta': material('tinta', '#24161c', 0.15),
+    'iris': material('iris', '#2b1a14', 0.12),
+    'nariz': material('nariz', '#5a3a2e', 0.35),
+    'botella': material('botella', '#f6f1ea', 0.35),
+    'tapa': material('tapa', '#ef8a98', 0.45),
+    'correa': material('correa', '#8a5a3c', 0.6),
     'brillo': material('brillo_ojo', '#ffffff', 0.1),
     'ceja': material('ceja', '#6b4434', 0.6),
     'mejilla': material('mejilla', '#ff9aa6', 0.8),
@@ -59,7 +64,7 @@ M = {
     'boca': material('boca', '#6e2f3c', 0.5),
     'lengua': material('lengua', '#ff8fa0', 0.6),
     'lagrima': material('lagrima', '#7cc3ff', 0.1),
-    'coral': material('panuelo_coral', '#ef6a4c', 0.75),
+    'coral': material('panuelo_coral', '#e2433a', 0.8),
     'rosado': material('panuelo_rosado', '#f4978e', 0.75),
     'rojo': material('panuelo_rojo', '#d93d34', 0.75),
     'verde_bufanda': material('bufanda_verde', '#7cbf6e', 0.75),
@@ -264,7 +269,17 @@ def golpe(obj, origen, direccion):
     inv = mw.inverted()
     ok, loc, nor, _ = obj.ray_cast(inv @ Vector(origen), (inv.to_3x3() @ Vector(direccion)).normalized())
     if not ok:
-        raise RuntimeError(f'El rayo no tocó {obj.name}')
+        # pasó de largo (borde de la lana): se usa el punto más cercano a la línea del rayo
+        centro = mw @ Vector(obj.bound_box[0]).lerp(Vector(obj.bound_box[6]), 0.5)
+        d = Vector(direccion).normalized()
+        return cercano(obj, Vector(origen) + d * (centro - Vector(origen)).dot(d))
+    return mw @ loc, (mw.to_3x3() @ nor).normalized()
+
+
+def cercano(obj, punto):
+    """El punto de la superficie más cercano (y su normal)."""
+    mw = obj.matrix_world
+    ok, loc, nor, _ = obj.closest_point_on_mesh(mw.inverted() @ Vector(punto))
     return mw @ loc, (mw.to_3x3() @ nor).normalized()
 
 
@@ -319,53 +334,53 @@ def hoja(nombre, base, rot, padre, s=1.0, mat='hoja'):
 raiz = vacio('Raiz', (0, 0, 0))
 cuerpo = vacio('Cuerpo', (0, 0, 0.4), raiz)
 cabeza = vacio('Cabeza', (0, -0.05, 1.3), raiz)
-pata = {l: vacio(f'Pata{l}', (x, -0.02, 0.5), raiz) for l, x in (('L', -0.27), ('R', 0.27))}
-brazo = {l: vacio(f'Brazo{l}', (x, -0.08, 1.1), raiz) for l, x in (('L', -0.5), ('R', 0.5))}
-oreja = {l: vacio(f'Oreja{l}', (x, -0.05, 2.3), cabeza) for l, x in (('L', -0.78), ('R', 0.78))}
+pata = {l: vacio(f'Pata{l}', (x, -0.02, 0.5), raiz) for l, x in (('L', -0.23), ('R', 0.23))}
+brazo = {l: vacio(f'Brazo{l}', (x, -0.08, 1.1), raiz) for l, x in (('L', -0.42), ('R', 0.42))}
+oreja = {l: vacio(f'Oreja{l}', (x, -0.05, 2.22), cabeza) for l, x in (('L', -0.7), ('R', 0.7))}
 
 # ---------- cuerpo de nube ----------
 CENTRO_CUERPO = Vector((0, 0.04, 0.88))
-bolas = [((0, 0.04, 0.75), 0.7), ((0, 0.04, 1.05), 0.7)]
-for p in fibonacci(20, CENTRO_CUERPO, (0.56, 0.48, 0.48)):
+bolas = [((0, 0.04, 0.72), 0.66), ((0, 0.04, 1.0), 0.66)]
+for p in fibonacci(34, CENTRO_CUERPO, (0.44, 0.4, 0.43)):
     if p.z < 0.45:
         continue
-    bolas.append((tuple(p), random.uniform(0.34, 0.42)))
+    bolas.append((tuple(p), random.uniform(0.2, 0.25)))
 lana_cuerpo = nube('CuerpoLana', bolas, cuerpo)
 esfera('colita', (0, 0.55, 0.78), (0.17, 0.16, 0.16), M['lana'], cuerpo)
 
 # patas cortas con pezuñas café
-for l, x in (('L', -0.27), ('R', 0.27)):
+for l, x in (('L', -0.23), ('R', 0.23)):
     unir(f'pata{l}', [
-        esfera(f'pata{l}_lana', (x, -0.02, 0.3), (0.2, 0.21, 0.22), M['lana'], pata[l]),
-        esfera(f'pata{l}_pezuna', (x, -0.06, 0.1), (0.17, 0.19, 0.1), M['pezuna'], pata[l]),
+        esfera(f'pata{l}_lana', (x, -0.02, 0.3), (0.18, 0.19, 0.22), M['lana'], pata[l]),
+        esfera(f'pata{l}_pezuna', (x, -0.05, 0.09), (0.16, 0.18, 0.09), M['pezuna'], pata[l]),
     ])
 # bracitos de lana con la pezuña asomando
-for l, x in (('L', -0.6), ('R', 0.6)):
+for l, x in (('L', -0.5), ('R', 0.5)):
     s = -1 if l == 'L' else 1
     unir(f'brazo{l}', [
-        esfera(f'brazo{l}_lana', (x, -0.1, 0.95), (0.15, 0.15, 0.24), M['lana'], brazo[l], rot=(0, -0.5 * s, 0)),
-        esfera(f'brazo{l}_mano', (x * 1.16, -0.14, 0.76), (0.09, 0.09, 0.07), M['pezuna'], brazo[l]),
+        esfera(f'brazo{l}_lana', (x * 1.03, -0.2, 0.97), (0.17, 0.17, 0.26), M['lana'], brazo[l], rot=(0.35, -0.45 * s, 0)),
+        esfera(f'brazo{l}_mano', (x * 1.15, -0.32, 0.8), (0.1, 0.1, 0.09), M['pezuna'], brazo[l]),
     ])
 
 # ---------- cabeza: nube grande, cara lisa y flequillo ----------
 CENTRO_CABEZA = Vector((0, 0.02, 1.98))
 bolas = []
-for dx in (-0.4, 0, 0.4):
-    for dz in (-0.25, 0.15):
-        bolas.append(((dx, CENTRO_CABEZA.y + 0.05, CENTRO_CABEZA.z + dz), 0.62))
-for p in fibonacci(40, CENTRO_CABEZA, (0.88, 0.72, 0.74)):
+for dx in (-0.36, 0, 0.36):
+    for dz in (-0.2, 0.1):
+        bolas.append(((dx, CENTRO_CABEZA.y + 0.05, CENTRO_CABEZA.z + dz), 0.58))
+for p in fibonacci(36, CENTRO_CABEZA, (0.78, 0.62, 0.6)):
     d = p - CENTRO_CABEZA
-    if d.y < -0.2 and p.z < 2.2 and abs(p.x) < 0.6:
+    if d.y < -0.15 and p.z < 2.22 and abs(p.x) < 0.62:
         continue  # la cara queda libre
-    bolas.append((tuple(p), random.uniform(0.36, 0.46)))
-for c in ((0, 0.45, 2.3), (0, 0.55, 1.95), (0, 0.3, 2.55)):
-    bolas.append((c, 0.55))  # relleno atrás (sin huecos)
-for x, z, r in ((-0.38, 2.3, 0.3), (-0.12, 2.36, 0.32), (0.16, 2.35, 0.31), (0.42, 2.28, 0.29)):
-    bolas.append(((x, -0.5, z), r))  # flequillo
+    bolas.append((tuple(p), random.uniform(0.31, 0.37)))
+for c in ((0, 0.4, 2.25), (0, 0.45, 1.95), (0, 0.25, 2.48)):
+    bolas.append((c, 0.5))  # relleno atrás (sin huecos)
+for x, z, r in ((-0.36, 2.24, 0.27), (-0.12, 2.3, 0.29), (0.14, 2.3, 0.28), (0.38, 2.23, 0.26)):
+    bolas.append(((x, -0.44, z), r))  # flequillo
 lana_cabeza = nube('CabezaLana', bolas, cabeza)
 
-CARA_C = Vector((0, -0.36, 1.78))
-CARA_R = (0.6, 0.34, 0.48)
+CARA_C = Vector((0, -0.3, 1.78))
+CARA_R = (0.64, 0.38, 0.52)
 esfera('cara', CARA_C, CARA_R, M['cara'], cabeza, 48, 32)
 
 
@@ -377,35 +392,27 @@ def sup(x, z, extra=0.0):
 
 unir('CaraFija', [
     esfera('hocico', sup(0, 1.67, -0.05), (0.17, 0.08, 0.11), M['cara'], cabeza),
-    esfera('nariz', sup(0, 1.725, 0.012), (0.055, 0.03, 0.04), M['tinta'], cabeza, 20, 12),
-    esfera('mejillaL', sup(-0.43, 1.7, -0.012), (0.11, 0.03, 0.07), M['mejilla'], cabeza),
-    esfera('mejillaR', sup(0.43, 1.7, -0.012), (0.11, 0.03, 0.07), M['mejilla'], cabeza),
-])
-
-# mechón rosado arriba, hacia adelante (apoyado sobre la lana)
-TOPE, _ = golpe(lana_cabeza, (0, -3, 2.62), (0, 1, 0))
-unir('Mechon', [
-    mechon('mechon1', TOPE + Vector((-0.02, 0.06, 0.04)), (0.22, 0.14, 0.32), M['mechon'], cabeza, (1.0, -0.2, -0.15)),
-    mechon('mechon2', TOPE + Vector((0.18, 0.1, 0.0)), (0.18, 0.13, 0.27), M['mechon_claro'], cabeza, (0.9, -0.45, -0.5)),
-    mechon('mechon3', TOPE + Vector((-0.2, 0.12, -0.02)), (0.16, 0.12, 0.23), M['mechon'], cabeza, (0.8, 0.3, 0.4)),
+    esfera('nariz', sup(0, 1.72, 0.015), (0.075, 0.04, 0.052), M['nariz'], cabeza, 20, 12),
+    esfera('mejillaL', sup(-0.42, 1.69, -0.012), (0.14, 0.035, 0.1), M['mejilla'], cabeza),
+    esfera('mejillaR', sup(0.42, 1.69, -0.012), (0.14, 0.035, 0.1), M['mejilla'], cabeza),
 ])
 
 # orejas hacia los lados
-for l, x in (('L', -0.86), ('R', 0.86)):
+for l, x in (('L', -0.76), ('R', 0.76)):
     s = -1 if l == 'L' else 1
     unir(f'oreja{l}', [
-        esfera(f'oreja{l}_lana', (x, -0.05, 2.42), (0.14, 0.1, 0.27), M['lana'], oreja[l], rot=(0, 1.0 * s, 0)),
-        esfera(f'oreja{l}_dentro', (x, -0.14, 2.42), (0.07, 0.03, 0.17), M['oreja'], oreja[l], rot=(0, 1.0 * s, 0)),
+        esfera(f'oreja{l}_lana', (x * 1.02, -0.08, 2.4), (0.2, 0.12, 0.32), M['lana'], oreja[l], rot=(0, 1.05 * s, 0)),
+        esfera(f'oreja{l}_dentro', (x * 1.02, -0.19, 2.41), (0.11, 0.035, 0.21), M['oreja'], oreja[l], rot=(0, 1.05 * s, 0)),
     ])
 
 # ---------- expresiones ----------
-OX, OZ = 0.27, 1.86
+OX, OZ = 0.26, 1.8
 
 
 def ojo_abierto(nombre, x, padre):
     g = vacio(nombre, sup(x, OZ), padre)
-    esfera(f'{nombre}_iris', sup(x, OZ, -0.01), (0.075, 0.04, 0.095), M['tinta'], g)
-    esfera(f'{nombre}_brillo', sup(x - 0.025, OZ + 0.035, 0.03), (0.026, 0.012, 0.03), M['brillo'], g, 16, 10)
+    esfera(f'{nombre}_iris', sup(x, OZ, -0.02), (0.115, 0.055, 0.135), M['iris'], g)
+    esfera(f'{nombre}_brillo', sup(x + 0.035, OZ + 0.05, 0.035), (0.038, 0.015, 0.042), M['brillo'], g, 16, 10)
     esfera(f'{nombre}_brillo2', sup(x + 0.025, OZ - 0.04, 0.03), (0.011, 0.008, 0.013), M['brillo'], g, 12, 8)
     return g
 
@@ -419,14 +426,14 @@ ojos = vacio('OjosAbiertos', (0, -0.7, OZ), cabeza)
 ojo_abierto('OjoL', -OX, ojos)
 ojo_abierto('OjoR', OX, ojos)
 felices = vacio('OjosFelices', (0, -0.7, OZ), cabeza)
-arco('ojo_feliz_L', -OX, OZ - 0.02, 0.07, 0.07, felices)
-arco('ojo_feliz_R', OX, OZ - 0.02, 0.07, 0.07, felices)
+arco('ojo_feliz_L', -OX, OZ - 0.02, 0.09, 0.08, felices)
+arco('ojo_feliz_R', OX, OZ - 0.02, 0.09, 0.08, felices)
 cerrados = vacio('OjosCerrados', (0, -0.7, OZ), cabeza)
-arco('ojo_cerrado_L', -OX, OZ + 0.01, 0.07, -0.05, cerrados)
-arco('ojo_cerrado_R', OX, OZ + 0.01, 0.07, -0.05, cerrados)
+arco('ojo_cerrado_L', -OX, OZ + 0.01, 0.09, -0.06, cerrados)
+arco('ojo_cerrado_R', OX, OZ + 0.01, 0.09, -0.06, cerrados)
 guino = vacio('OjosGuino', (0, -0.7, OZ), cabeza)
 ojo_abierto('OjoGuinoL', -OX, guino)
-arco('ojo_guino_R', OX, OZ - 0.02, 0.07, 0.07, guino)
+arco('ojo_guino_R', OX, OZ - 0.02, 0.09, 0.08, guino)
 
 
 def cejas(nombre, inclinacion_l, inclinacion_r, alto_l=2.03, alto_r=2.03):
@@ -442,7 +449,7 @@ cejas('CejasCuriosa', 0.0, 0.0, 2.03, 2.08)
 cejas('CejasEnfoque', 0.035, -0.035, 2.0, 2.0)
 
 # boca: ":3" (la de la referencia), triste, abierta y "o"
-curva('BocaSonrisa', [sup(-0.09, 1.66, 0.02), sup(-0.045, 1.62, 0.025), sup(0, 1.66, 0.025), sup(0.045, 1.62, 0.025), sup(0.09, 1.66, 0.02)], 0.012, M['tinta'], cabeza)
+curva('BocaSonrisa', [sup(-0.14, 1.665, 0.02), sup(-0.075, 1.6, 0.025), sup(0, 1.645, 0.03), sup(0.075, 1.6, 0.025), sup(0.14, 1.665, 0.02)], 0.019, M['nariz'], cabeza)
 curva('BocaTriste', [sup(-0.07, 1.61, 0.02), sup(0, 1.65, 0.025), sup(0.07, 1.61, 0.02)], 0.012, M['tinta'], cabeza)
 abierta = vacio('BocaAbierta', sup(0, 1.63), cabeza)
 esfera('boca_fondo', sup(0, 1.625, -0.012), (0.085, 0.04, 0.07), M['boca'], abierta)
@@ -485,10 +492,33 @@ def triangulo(nombre, centro, radio, mat, padre, ancho=1.25, inclinacion=0.3):
 
 
 def panuelo(nombre, mat, padre, tamano=1.0):
-    # una banda bajo la barbilla y el triángulo cayendo sobre el pecho
+    """Pañuelo de tela: un triángulo que se apoya sobre la lana del pecho (cada punto se proyecta
+    sobre el cuerpo), con grosor y bordes suaves."""
     g = vacio(nombre, PECHO, padre)
-    curva(f'{nombre}_banda', BANDA, 0.075 * tamano, mat, g)
-    triangulo(f'{nombre}_punta', PECHO + Vector((0, -0.05, -0.08)), 0.34 * tamano, mat, g, 1.45)
+    filas, cols = 7, 14
+    ancho, arriba, punta = 0.8 * tamano, 1.36, 1.36 - 0.52 * tamano
+    verts, caras = [], []
+    for r in range(filas + 1):
+        t = r / filas
+        for c in range(cols + 1):
+            u = (c / cols - 0.5) * 2
+            x = u * ancho * (1 - t)
+            z = (arriba - 0.12 * u * u) * (1 - t) + punta * t
+            p, nor = cercano(lana_cuerpo, (x, -0.7, z))
+            verts.append(tuple(p + nor * 0.035))
+    for r in range(filas):
+        for c in range(cols):
+            a = r * (cols + 1) + c
+            caras.append((a, a + 1, a + cols + 2, a + cols + 1))
+    me = bpy.data.meshes.new(f'{nombre}_tela')
+    me.from_pydata(verts, [], caras)
+    o = bpy.data.objects.new(f'{nombre}_tela', me)
+    coleccion.objects.link(o)
+    o.modifiers.new('grosor', 'SOLIDIFY').thickness = 0.03
+    o.modifiers.new('suave', 'SUBSURF').levels = 1
+    suave(o, mat)
+    bpy.context.view_layer.update()
+    poner_padre(o, g)
     return g
 
 
@@ -520,8 +550,14 @@ def mochila(nombre, cuerpo_mat, bolsillo_mat, manta_mat, padre, grande=1.0):
     return g
 
 
-m1 = mochila('Niv_1_mochila', M['mochila'], M['mochila_claro'], M['manta_rosa'], cuerpo)
-esfera('m1_corazon', (-0.42, 0.75, 0.88), (0.06, 0.02, 0.05), M['mochila_rosa'], m1, 14, 9)
+m1 = vacio('Niv_1_cantimplora', (-0.42, 0.36, 1.0), cuerpo)
+caja('cantimplora', (-0.46, 0.36, 0.98), (0.34, 0.3, 0.56), M['botella'], m1, 0.14)
+cilindro('cantimplora_tapa', (-0.46, 0.36, 1.25), (-0.46, 0.36, 1.38), 0.1, M['tapa'], m1, 24)
+toro('cantimplora_asa', (-0.46, 0.46, 1.4), 0.08, 0.022, M['tapa'], m1, rot=(math.pi / 2, 0, math.pi / 2))
+for z in (0.82, 1.14):
+    toro('cantimplora_correa', (-0.46, 0.36, z), 0.2, 0.02, M['correa'], m1, rot=(0, 0, 0))
+cilindro('cantimplora_tira', (-0.4, 0.3, 1.2), (0.3, -0.1, 1.3), 0.025, M['correa'], m1, 8)
+flor('cantimplora_flor', (-0.64, 0.28, 0.98), m1, 1.1, 'petalo_blanco', (-1, -0.3, 0))
 m23 = mochila('Niv_23_mochila', M['mochila'], M['mochila_claro'], M['manta_cafe'], cuerpo, 1.1)
 m4 = mochila('Niv_4_mochila', M['cuero'], M['cuero_claro'], M['manta_cafe'], cuerpo, 1.15)
 for x in (-0.42, -0.18):
@@ -578,8 +614,9 @@ bpy.data.objects['broche_estrella'].name = 'Niv_4_broche'
 
 # Bastón de caminante (nivel 1), en la mano izquierda de Alpi
 bs = vacio('Niv_1_baston', (0.7, -0.2, 0.75), brazo['R'])
-cilindro('baston_palo', (0.74, -0.2, 0.08), (0.7, -0.2, 1.25), 0.03, M['baston'], bs, 12)
-esfera('baston_nudo', (0.7, -0.2, 1.28), (0.045, 0.045, 0.05), M['baston'], bs, 12, 8)
+cilindro('ramita', (0.56, -0.36, 0.42), (0.74, -0.38, 1.32), 0.032, M['baston'], bs, 10)
+cilindro('ramita_brote', (0.68, -0.37, 1.08), (0.8, -0.38, 1.2), 0.02, M['baston'], bs, 8)
+hoja('ramita_hoja', (0.86, -0.38, 1.26), (0.2, 1.1, 0), bs, 1.3, 'hoja_claro')
 
 # ---------- objetos de las animaciones ----------
 libro = vacio('Libro', (0, -0.72, 0.95), raiz)
