@@ -9,14 +9,16 @@ export interface MascotaActual {
   estado: EstadoMascota | null
   xp: XP
   total: number
+  /** Semanas de tu ciclo: de eso depende cuánto cuesta cada nivel. */
+  semanas: number
 }
 
 /** La mascota que elegiste, en qué etapa está y tu XP (todo calculado de lo que haces en la app). */
 export function useMascota(): MascotaActual {
   const { ajustes } = useAjustes()
-  const { tareas, habitos, rutinas, progreso } = useDatos()
+  const { tareas, habitos, rutinas, progreso, perfil } = useDatos()
   const xp = useMemo(() => calcularXP({ tareas, habitos, rutinas, progreso }), [tareas, habitos, rutinas, progreso])
   // Si habías elegido una mascota que ya no existe, te acompaña Alpi.
   const mascota = ajustes.mascota === 'astia' ? null : (mascotaPorId(ajustes.mascota) ?? mascotaPorId('alpi') ?? null)
-  return { mascota, estado: mascota ? estadoDe(mascota, xp) : null, xp, total: totalXP(xp) }
+  return { mascota, estado: mascota ? estadoDe(mascota, xp, perfil.semanasCiclo) : null, xp, total: totalXP(xp), semanas: perfil.semanasCiclo }
 }

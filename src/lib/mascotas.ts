@@ -40,11 +40,14 @@ export interface XP {
   cuidado: number
 }
 
+/** Puntos por cada cosa cumplida. Con estos valores, un buen día suma unos 27 y una buena semana unos 160. */
+export const PUNTOS = { tarea: 5, examen: 10, personal: 4, habito: 2, rutina: 6, minutosPorPunto: 10 } as const
+
 export const AREAS_XP: { id: keyof XP; nombre: string; detalle: string }[] = [
-  { id: 'academico', nombre: 'Académico', detalle: 'Tareas (+10), exámenes (+20) y 1 por cada 5 min de enfoque' },
-  { id: 'personal', nombre: 'Metas personales', detalle: 'Pendientes personales cumplidos (+8)' },
-  { id: 'habitos', nombre: 'Hábitos', detalle: 'Cada hábito cumplido (+5) y cada rutina (+12)' },
-  { id: 'cuidado', nombre: 'Cuidar de ti', detalle: 'Lo de Salud y Deporte: hábitos (+5), rutinas (+12), pendientes (+8)' },
+  { id: 'academico', nombre: 'Académico', detalle: `Tareas (+${PUNTOS.tarea}), exámenes (+${PUNTOS.examen}) y 1 por cada ${PUNTOS.minutosPorPunto} min de enfoque` },
+  { id: 'personal', nombre: 'Metas personales', detalle: `Pendientes personales cumplidos (+${PUNTOS.personal})` },
+  { id: 'habitos', nombre: 'Hábitos', detalle: `Cada hábito cumplido (+${PUNTOS.habito}) y cada rutina (+${PUNTOS.rutina})` },
+  { id: 'cuidado', nombre: 'Cuidar de ti', detalle: `Lo de Salud y Deporte: hábitos (+${PUNTOS.habito}), rutinas (+${PUNTOS.rutina}), pendientes (+${PUNTOS.personal})` },
 ]
 
 export const totalXP = (xp: XP): number => xp.academico + xp.personal + xp.habitos + xp.cuidado
@@ -56,21 +59,30 @@ export function calcularXP(d: { tareas: Tarea[]; habitos: Habito[]; rutinas: Rut
   const xp: XP = { academico: 0, personal: 0, habitos: 0, cuidado: 0 }
   for (const t of d.tareas) {
     if (t.estado !== 'hecha') continue
-    if (t.area === 'universidad') xp.academico += t.tipo === 'examen' ? 20 : 10
-    else if (esCuidado(t.categoria)) xp.cuidado += 8
-    else xp.personal += 8
+    if (t.area === 'universidad') xp.academico += t.tipo === 'examen' ? PUNTOS.examen : PUNTOS.tarea
+    else if (esCuidado(t.categoria)) xp.cuidado += PUNTOS.personal
+    else xp.personal += PUNTOS.personal
   }
-  for (const h of d.habitos) xp[esCuidado(h.categoria) ? 'cuidado' : 'habitos'] += 5 * h.registro.length
-  for (const r of d.rutinas) xp[esCuidado(r.categoria) ? 'cuidado' : 'habitos'] += 12 * r.registro.length
-  for (const p of d.progreso) xp.academico += Math.floor(p.enfoque / 5)
+  for (const h of d.habitos) xp[esCuidado(h.categoria) ? 'cuidado' : 'habitos'] += PUNTOS.habito * h.registro.length
+  for (const r of d.rutinas) xp[esCuidado(r.categoria) ? 'cuidado' : 'habitos'] += PUNTOS.rutina * r.registro.length
+  for (const p of d.progreso) xp.academico += Math.floor(p.enfoque / PUNTOS.minutosPorPunto)
   return xp
 }
 
 // ---------- etapas ----------
 
-/** XP total que se necesita para llegar a cada etapa (la primera es 0). */
-export function umbralesDe(etapas: number): number[] {
-  return etapas >= 4 ? [0, 100, 300, 700] : etapas === 3 ? [0, 150, 500] : etapas === 2 ? [0, 200] : [0]
+/** Lo que suma una buena semana (cumplir casi todo cada día). De ahí sale cuánto cuesta cada nivel. */
+export const XP_BUENA_SEMANA = 160
+
+/**
+ * XP total que se necesita para llegar a cada etapa (la primera es 0). Depende de cuánto dura tu ciclo: con buen ritmo
+ * llegas al nivel máximo a la mitad del ciclo, y con la mitad de ritmo, al final. Los niveles intermedios están en
+ * el 10% y el 40% de ese camino, para que haya un premio pronto pero el final se haga esperar.
+ */
+export function umbralesDe(etapas: number, semanas = 16): number[] {
+  const tope = XP_BUENA_SEMANA * (semanas / 2)
+  const r = (x: number) => Math.max(10, Math.round(x / 10) * 10)
+  return etapas >= 4 ? [0, r(tope * 0.1), r(tope * 0.4), r(tope)] : etapas === 3 ? [0, r(tope * 0.2), r(tope)] : etapas === 2 ? [0, r(tope * 0.5)] : [0]
 }
 
 /** Mínimo de XP que debe venir de cada lado (estudios / vida personal) para evolucionar a la etapa 3 o más. */
@@ -106,10 +118,10 @@ export interface EstadoMascota {
 }
 
 /** En qué etapa está una mascota con este XP. La etapa 3 en adelante pide equilibrio entre estudios y vida personal. */
-export function estadoDe(mascota: Pick<Mascota, 'etapas'>, xp: XP): EstadoMascota {
+export function estadoDe(mascota: Pick<Mascota, 'etapas'>, xp: XP, semanas = 16): EstadoMascota {
   const total = totalXP(xp)
   const n = mascota.etapas.length
-  const umbrales = umbralesDe(n)
+  const umbrales = umbralesDe(n, semanas)
   let porXP = 0
   umbrales.forEach((u, i) => {
     if (total >= u) porXP = i

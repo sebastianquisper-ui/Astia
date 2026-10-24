@@ -19,6 +19,10 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   repetición espaciada, Cornell, práctica intercalada, SQ3R, mapa mental, tarjetas, resolver problemas por pasos)
   y "Solo 10 minutos". Astia sugiere uno por tarea (se puede cambiar en el formulario). Se usan desde
   Hoy → Empezar ya, desde Más → Enfoque y descanso, y el enfoque se suma al progreso del día.
+- **Ritmo de experiencia:** cada cosa cumplida suma poco (tarea +5, examen +10, hábito +2, rutina +6, pendiente personal +4,
+  1 por cada 10 min de enfoque). Una buena semana suma unos 160 XP y el costo de los niveles depende de cuánto dura tu
+  ciclo: con buen ritmo llegas al nivel máximo a la mitad del ciclo (con 16 semanas: nivel 2 a los 130 XP, nivel 3 a los
+  510 y nivel 4 a los 1280); con la mitad de ritmo, al final.
 - **Alpi, tu compañera:** la única mascota (la otra opción es la estrella de siempre). Evoluciona en 4 niveles con
   el XP que ganas (se calcula de lo que haces; no se guarda) y pide equilibrio entre estudios y vida personal desde
   la etapa 3. Su modelo 3D es `src/mascotas/alpi/modelo/alpi-3d.html` (tal cual): la app lo carga en un iframe con la

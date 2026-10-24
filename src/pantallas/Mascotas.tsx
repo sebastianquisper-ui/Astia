@@ -17,12 +17,12 @@ export function Mascotas({ alVolver }: { alVolver: () => void }) {
   const avisar = useAviso()
   const actual = useMascota()
   const [detalle, setDetalle] = useState<MascotaElegida | null>(null)
-  const { xp, total, estado, mascota } = actual
+  const { xp, total, estado, mascota, semanas } = actual
   const elegida = detalle && detalle !== 'astia' ? MASCOTAS.find((m) => m.id === detalle) : undefined
 
   const elegir = (m: Mascota | 'astia') => {
     if (m === 'astia') cambiar({ mascota: 'astia' })
-    else cambiar({ mascota: m.id, mascotaVista: { ...ajustes.mascotaVista, [m.id]: estadoDe(m, xp).indice } })
+    else cambiar({ mascota: m.id, mascotaVista: { ...ajustes.mascotaVista, [m.id]: estadoDe(m, xp, semanas).indice } })
     setDetalle(null)
     avisar(m === 'astia' ? 'Astia, la estrella de siempre, es tu compañera.' : `${m.nombre} es ahora tu compañero.`)
   }
@@ -78,7 +78,7 @@ export function Mascotas({ alVolver }: { alVolver: () => void }) {
             </div>
           ))}
         </div>
-        <p className="nota">Para pasar de la etapa 2 en adelante necesitas equilibrio: al menos 15% de tu XP de estudios y 15% de vida personal.</p>
+        <p className="nota">Con buen ritmo llegas al nivel máximo a la mitad de tu ciclo. Para pasar de la etapa 2 en adelante necesitas equilibrio: al menos 15% de tu XP de estudios y 15% de vida personal.</p>
       </div>
 
       <div className="seccion">
@@ -90,7 +90,7 @@ export function Mascotas({ alVolver }: { alVolver: () => void }) {
             <span>La estrella de siempre</span>
           </button>
           {MASCOTAS.map((m) => {
-            const e = estadoDe(m, xp)
+            const e = estadoDe(m, xp, semanas)
             return (
               <button key={m.id} className={'mascota-card' + (ajustes.mascota === m.id ? ' elegida' : '')} onClick={() => setDetalle(m.id)} aria-label={`${m.nombre}, ${m.apodo}`}>
                 <MascotaMini mascota={m.id} etapa={e.indice + 1} tam={96} />
@@ -120,9 +120,9 @@ export function Mascotas({ alVolver }: { alVolver: () => void }) {
 }
 
 function DetalleMascota({ mascota, esActual, onElegir }: { mascota: Mascota; esActual: boolean; onElegir: () => void }) {
-  const { xp } = useMascota()
-  const estado = estadoDe(mascota, xp)
-  const umbrales = umbralesDe(mascota.etapas.length)
+  const { xp, semanas } = useMascota()
+  const estado = estadoDe(mascota, xp, semanas)
+  const umbrales = umbralesDe(mascota.etapas.length, semanas)
   return (
     <div className="detalle-mascota">
       <MascotaVista mascota={mascota.id} etapa={estado.indice + 1} animo="seria" tam={190} />

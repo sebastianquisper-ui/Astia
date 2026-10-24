@@ -720,7 +720,7 @@ test('elegir a Alpi y volver a la estrella de siempre', async ({ page }) => {
   await elegirAlpi(page)
   await expect(page.getByRole('status')).toContainText('Alpi es ahora tu compañero')
   await page.goto('/#/hoy')
-  await expect(page.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-2')
+  await expect(page.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-1')
   await page.goto('/#/mas/mascota')
   await page.getByRole('button', { name: 'Astia, la estrella de siempre' }).click()
   await page.getByRole('dialog', { name: 'Astia' }).getByRole('button', { name: 'Elegir a Astia' }).click()
@@ -784,7 +784,7 @@ test('vestidor: con tareas pendientes hoy está cerrado', async ({ page }) => {
 })
 
 test('vestidor: con todo cumplido se puede quitar ropa y volver al nivel 1', async ({ page }) => {
-  const datos = conLogros(20, 150) // 950 XP: Alpi en nivel 4, sin nada pendiente
+  const datos = conLogros(100, 400) // 1300 XP: Alpi en nivel 4, sin nada pendiente
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
@@ -813,14 +813,14 @@ test('el detalle de Alpi muestra la evolución: lo alcanzado y lo bloqueado con 
   await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
   const hoja = page.getByRole('dialog', { name: 'Alpi' })
   await expect(hoja.locator('.evolucion li')).toHaveCount(4)
-  await expect(hoja.locator('.evolucion li.alcanzada')).toHaveCount(2) // con 158 XP de ejemplo
-  await expect(hoja).toContainText('Exploradora')
-  await expect(hoja.getByLabel('Nivel 3, Guardiana de los valles, bloqueado')).toContainText('300 XP')
-  await expect(hoja.getByLabel('Nivel 4, Alpaca legendaria, bloqueado')).toContainText('700 XP')
+  await expect(hoja.locator('.evolucion li.alcanzada')).toHaveCount(1) // con ~80 XP de ejemplo todavía es el nivel 1
+  await expect(hoja.getByLabel('Nivel 2, Exploradora, bloqueado')).toContainText('130 XP')
+  await expect(hoja.getByLabel('Nivel 3, Guardiana de los valles, bloqueado')).toContainText('510 XP')
+  await expect(hoja.getByLabel('Nivel 4, Alpaca legendaria, bloqueado')).toContainText('1280 XP')
 })
 
 test('al evolucionar se celebra una sola vez', async ({ page }) => {
-  const datos = conLogros(20, 150) // 200 de estudio + 750 de hábitos = 950 XP, bien repartido
+  const datos = conLogros(100, 400) // 500 de estudio + 800 de hábitos = 1300 XP, bien repartido
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
@@ -838,7 +838,7 @@ test('al evolucionar se celebra una sola vez', async ({ page }) => {
 })
 
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
-  const datos = conLogros(0, 150) // 750 XP, todo personal
+  const datos = conLogros(0, 700) // 1400 XP, todo personal
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
@@ -851,7 +851,7 @@ test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', asy
 })
 
 test('mostrar el XP por área y el total', async ({ page }) => {
-  const datos = conLogros(10, 20) // 100 de estudio y 100 de hábitos
+  const datos = conLogros(20, 50) // 100 de estudio y 100 de hábitos
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
@@ -1037,7 +1037,8 @@ for (const caso of ATRASOS) {
 }
 
 test('ruleta: con todo cumplido, tocar dos veces a Alpi abre emotes y movimientos', async ({ page }) => {
-  const datos = conLogros(20, 150)
+  test.setTimeout(90_000) // el 3D sin tarjeta gráfica es lento en estas pruebas
+  const datos = conLogros(100, 400)
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: true, descansoVista: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
@@ -1069,7 +1070,7 @@ test('ruleta: con todo cumplido, tocar dos veces a Alpi abre emotes y movimiento
 })
 
 test('el vestidor ya no trae listas de expresiones ni de movimientos', async ({ page }) => {
-  const datos = conLogros(20, 150)
+  const datos = conLogros(100, 400)
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false, descansoVista: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
