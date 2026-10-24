@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { documentoAlpi } from './documento'
 import type { AccionAlpi, ExpresionAlpi, NivelAlpi } from './datos'
 
@@ -23,6 +23,8 @@ type Orden = { cmd: string; args: unknown[] }
 export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 0, embebida = true, sonido = false, accesorios, alTocar, className }: Props) {
   const marco = useRef<HTMLIFrameElement>(null)
   const lista = useRef(false)
+  // Alpi se muestra solo cuando ya está armada y en su nivel: así no se ve nada a medias ni un dibujo de relleno
+  const [visible, setVisible] = useState(false)
   const pendientes = useRef<Orden[]>([])
   const nivelVisto = useRef<NivelAlpi | null>(null)
   const doc = useMemo(() => documentoAlpi(embebida), [embebida])
@@ -46,6 +48,8 @@ export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 
         const cola = pendientes.current
         pendientes.current = []
         cola.forEach((o) => enviar(o.cmd, ...o.args))
+        // un instante para que el modelo aplique el nivel y la ropa antes de mostrarse
+        window.setTimeout(() => setVisible(true), 150)
       }
       if (e.data?.type === 'alpi-toque') alTocarRef.current?.()
     }
@@ -69,5 +73,5 @@ export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 
     if (accesorios) for (const [k, on] of Object.entries(accesorios)) enviar('setAccessory', k, on)
   }, [claveAccesorios])
 
-  return <iframe ref={marco} className={'alpi-iframe ' + (className ?? '')} title="Alpi en 3D" srcDoc={doc} sandbox="allow-scripts" />
+  return <iframe ref={marco} className={'alpi-iframe' + (visible ? ' lista' : '') + (className ? ' ' + className : '')} title="Alpi en 3D" srcDoc={doc} sandbox="allow-scripts" />
 }

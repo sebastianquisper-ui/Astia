@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useAjustes, type Modo } from '../ajustes/AjustesProvider'
+import { usePeriodo } from '../ajustes/usePeriodo'
 import { Icono, type NombreIcono } from '../ui/Icono'
 import { Vacio } from '../ui/Vacio'
 import { Ajustes } from './Ajustes'
@@ -30,7 +31,7 @@ const ENTRADAS: Entrada[] = [
   { id: 'rutinas', titulo: 'Rutinas', detalle: 'Tu mañana, tu noche y tus entrenamientos', icono: 'rutinas', modos: ['personal'] },
   { id: 'mascota', titulo: 'Mi mascota', detalle: 'Elige a tu compañero y míralo evolucionar', icono: 'mascota', modos: ['academico', 'personal'] },
   { id: 'calendario', titulo: 'Calendario', detalle: 'Fechas importantes del mes', icono: 'calendario', modos: ['academico', 'personal'] },
-  { id: 'ciclo', titulo: 'Ciclo completo', detalle: 'Las 16 semanas y su carga', icono: 'ciclo', modos: ['academico'] },
+  { id: 'ciclo', titulo: 'Ciclo completo', detalle: 'Todas las semanas y su carga', icono: 'ciclo', modos: ['academico'] },
   { id: 'progreso', titulo: 'Progreso y rachas', detalle: 'Cuántos días seguidos cumples', icono: 'progreso', modos: ['academico', 'personal'] },
   { id: 'enfoque', titulo: 'Enfoque y descanso', detalle: 'Pomodoro, Feynman, Cornell y más técnicas', icono: 'enfoque', modos: ['academico'] },
   { id: 'ajustes', titulo: 'Ajustes', detalle: 'Tema, tamaño de letra, respaldo', icono: 'ajustes', modos: ['academico', 'personal'] },
@@ -39,6 +40,7 @@ const ENTRADAS: Entrada[] = [
 
 export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => void }) {
   const { ajustes } = useAjustes()
+  const { nombre: periodo } = usePeriodo()
   if (sub === 'ajustes') return <Ajustes alVolver={() => alAbrir('')} />
   if (sub === 'horario') return <Horario alVolver={() => alAbrir('')} />
   if (sub === 'enfoque') return <Enfoque alVolver={() => alAbrir('')} />
@@ -81,7 +83,7 @@ export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => v
                 <Icono nombre={e.icono} tam={24} />
               </span>
               <span className="texto">
-                <b>{e.titulo}</b>
+                <b>{e.id === 'ciclo' ? `${periodo} completo` : e.titulo}</b>
                 <span>{e.detalle}</span>
               </span>
               <Icono nombre="derecha" tam={18} />

@@ -1,3 +1,4 @@
+import type { Etapa } from '../lib/etapa'
 import type { Clase, Curso, Datos, Habito, Mejora, PlanDia, ProgresoDia, Prioridad, SemanaTema, Tarea, TipoTarea } from '../dominio/tipos'
 import { datosVacios, normalizarDatos } from './almacenamiento'
 import type { TamanoLetra, ModoTema } from '../lib/tema'
@@ -13,6 +14,7 @@ export interface AjustesImportados {
   nombre?: string
   modoTema?: ModoTema
   tamanoLetra?: TamanoLetra
+  etapa?: Etapa
 }
 
 export interface ResumenImportacion {
@@ -81,7 +83,7 @@ function importarV1(r: Obj, ahora: number): Importacion {
 
   datos.perfil = {
     inicioCiclo: FECHA.test(txt(config.startDate)) ? txt(config.startDate) : '',
-    semanasCiclo: Math.min(24, Math.max(4, num(config.totalWeeks, 16))),
+    semanasCiclo: Math.min(52, Math.max(4, num(config.totalWeeks, 16))),
     enfoqueMin: Math.min(90, Math.max(5, num(config.focusMin, 25))),
     descansoMin: Math.min(30, Math.max(1, num(config.breakMin, 5))),
     actualizadoEn: ahora,

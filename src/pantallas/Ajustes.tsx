@@ -3,7 +3,9 @@ import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
 import { borrarTodoYReiniciar } from '../datos/reiniciar'
 import { importarRespaldo, type Importacion } from '../datos/respaldo'
+import { ETAPAS, MAX_SEMANAS, MIN_SEMANAS } from '../lib/etapa'
 import { semanaDelCiclo } from '../lib/fechas'
+import { usePeriodo } from '../ajustes/usePeriodo'
 import { Hoja } from '../ui/Hoja'
 import type { ModoTema, TamanoLetra } from '../lib/tema'
 import { Icono } from '../ui/Icono'
@@ -25,6 +27,7 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
   const avisar = useAviso()
   const { perfil, guardarPerfil, importar, exportar, enEjemplo } = useDatos()
   const [nombre, setNombre] = useState(ajustes.nombre)
+  const { etapa, minuscula } = usePeriodo()
   const [semanas, setSemanas] = useState(String(perfil.semanasCiclo))
   const [borrando, setBorrando] = useState(false)
   const [pendiente, setPendiente] = useState<Extract<Importacion, { ok: true }> | null>(null)
@@ -34,11 +37,11 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
   const semanaActual = semanaDelCiclo(perfil.inicioCiclo, new Date())
 
   const guardarSemanas = () => {
-    const n = Math.min(24, Math.max(4, parseInt(semanas, 10) || 16))
+    const n = Math.min(MAX_SEMANAS, Math.max(MIN_SEMANAS, parseInt(semanas, 10) || etapa.semanas))
     setSemanas(String(n))
     if (n !== perfil.semanasCiclo) {
       guardarPerfil({ semanasCiclo: n })
-      avisar('Semanas del ciclo guardadas.')
+      avisar('Semanas guardadas.')
     }
   }
 
@@ -173,21 +176,35 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
       </div>
 
       <div className="campo">
-        <label htmlFor="aj-inicio">Inicio del ciclo</label>
+        <span className="etiqueta" id="et-etapa">Mi etapa de estudios</span>
+        <div className="seg" role="group" aria-labelledby="et-etapa">
+          {ETAPAS.map((e) => (
+            <button key={e.id} aria-pressed={etapa.id === e.id} onClick={() => cambiar({ etapa: e.id, periodo: undefined })}>{e.nombre}</button>
+          ))}
+        </div>
+        <p className="nota">{etapa.ayuda}</p>
+      </div>
+      <div className="campo">
+        <label htmlFor="aj-periodo">Cómo llamas a tu periodo</label>
+        <input id="aj-periodo" type="text" value={ajustes.periodo ?? ''} placeholder={etapa.periodo} maxLength={20} onChange={(e) => cambiar({ periodo: e.target.value })} />
+      </div>
+
+      <div className="campo">
+        <label htmlFor="aj-inicio">Inicio del {minuscula}</label>
         <input id="aj-inicio" type="date" value={perfil.inicioCiclo} onChange={(e) => guardarPerfil({ inicioCiclo: e.target.value })} />
         <p className="nota">
           {semanaActual === null
-            ? 'Con la fecha de inicio, Astia sabe en qué semana del ciclo estás.'
+            ? `Con la fecha de inicio, Astia sabe en qué semana del ${minuscula} estás.`
             : semanaActual < 1
-              ? 'Tu ciclo aún no empieza.'
+              ? `Tu ${minuscula} aún no empieza.`
               : semanaActual > perfil.semanasCiclo
-                ? 'Tu ciclo ya terminó.'
+                ? `Tu ${minuscula} ya terminó.`
                 : `Hoy estás en la semana ${semanaActual} de ${perfil.semanasCiclo}.`}
         </p>
       </div>
       <div className="campo">
-        <label htmlFor="aj-semanas">Semanas del ciclo</label>
-        <input id="aj-semanas" type="number" inputMode="numeric" min={4} max={24} value={semanas} onChange={(e) => setSemanas(e.target.value)} onBlur={guardarSemanas} />
+        <label htmlFor="aj-semanas">Semanas del {minuscula}</label>
+        <input id="aj-semanas" type="number" inputMode="numeric" min={MIN_SEMANAS} max={MAX_SEMANAS} value={semanas} onChange={(e) => setSemanas(e.target.value)} onBlur={guardarSemanas} />
       </div>
 
       <div className="campo">

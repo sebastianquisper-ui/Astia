@@ -29,10 +29,11 @@ export interface CargaSemana {
   total: number
   pendientes: number
   examenes: number
+  tipo?: 'examenes' | 'libre'
 }
 
 /** Cuántas tareas (y exámenes) vencen en cada semana del ciclo. Vacío si no hay fecha de inicio. */
-export function cargaDelCiclo(tareas: Tarea[], inicioCiclo: string, semanas: number): CargaSemana[] {
+export function cargaDelCiclo(tareas: Tarea[], inicioCiclo: string, semanas: number, especiales: Record<string, 'examenes' | 'libre'> = {}): CargaSemana[] {
   if (!inicioCiclo) return []
   const lunes0 = lunesDe(parseYmd(inicioCiclo))
   return Array.from({ length: semanas }, (_, i) => {
@@ -46,6 +47,7 @@ export function cargaDelCiclo(tareas: Tarea[], inicioCiclo: string, semanas: num
       total: dentro.length,
       pendientes: dentro.filter((t) => t.estado === 'pendiente').length,
       examenes: dentro.filter((t) => t.tipo === 'examen').length,
+      tipo: especiales[String(i + 1)],
     }
   })
 }

@@ -87,7 +87,7 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
       <span className="mascota-sombra" aria-hidden="true" />
       <span className="mascota-marco vec" style={{ transform: transformacion }}>
         {en3d ? (
-          <Suspense fallback={<Rig mascota={mascota} etapa={etapa} animo={animo} habla={habla} />}>
+          <Suspense fallback={null}>
             <AlpiIframe nivel={nivelAlpi(etapa)} {...desdeAnimo(animo, { fiesta })} accesorios={accesorios} />
           </Suspense>
         ) : (

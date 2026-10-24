@@ -32,6 +32,9 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
 - **Cuidado de la vista (20-20-20):** cada 20 minutos con Astia abierta propone mirar algo lejano durante 20 segundos
   (se apaga en Ajustes). No manda notificaciones: eso llega con la nube. El título de una tarea se puede dictar por voz
   si el navegador lo permite; si no, queda el micrófono del teclado del iPhone.
+- **Tu etapa de estudios:** la primera vez Astia pregunta si estás en colegio, preuniversitario o universidad y arma el
+  periodo a tu medida (nombre, de 4 a 52 semanas, fecha de inicio). Todo se cambia en Ajustes, y en "Ciclo completo" se
+  marcan las semanas de exámenes o sin clases (feriados, vacaciones) como lo dicte tu institución.
 - **Empezar de cero:** Astia abre sin datos de ejemplo. Ajustes → "Borrar todos mis datos" la deja como recién instalada.
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 

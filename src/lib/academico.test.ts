@@ -26,6 +26,10 @@ describe('cargaDelCiclo', () => {
     expect(c[1].examenes).toBe(1)
     expect(c[1].pendientes).toBe(1)
   })
+  it('trae el tipo de cada semana (exámenes, sin clases)', () => {
+    const c = cargaDelCiclo([], '2026-10-05', 3, { '2': 'examenes', '3': 'libre' })
+    expect(c.map((s) => s.tipo)).toEqual([undefined, 'examenes', 'libre'])
+  })
   it('sin inicio no hay ciclo', () => expect(cargaDelCiclo([], '', 16)).toEqual([]))
 })
 

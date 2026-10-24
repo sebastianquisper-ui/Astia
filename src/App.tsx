@@ -12,6 +12,7 @@ import { Cielo } from './ui/Cielo'
 import { useAjustes, type Modo } from './ajustes/AjustesProvider'
 import { Mas } from './pantallas/Mas'
 import { DescansoVista } from './ui/DescansoVista'
+import { Bienvenida } from './ui/Bienvenida'
 
 export default function App() {
   const { ajustes, cambiar } = useAjustes()
@@ -44,6 +45,7 @@ export default function App() {
     <>
       <Cielo />
       <DescansoVista />
+      <Bienvenida />
       <div className="app">
         <header className="cabecera">
           <div className="marca">

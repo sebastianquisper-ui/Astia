@@ -62,7 +62,7 @@ export function DetalleCurso({ curso, alVolver, alEditar }: { curso: Curso; alVo
                 <span className="ico semana-num">{n}</span>
                 <span className="texto">
                   <b>{r?.tema || 'Sin tema'}</b>
-                  <span>{[n === actual ? 'Esta semana' : '', fechas(n), r?.notas ? 'con notas' : ''].filter(Boolean).join(' · ') || 'Toca para agregar el tema'}</span>
+                  <span>{[n === actual ? 'Esta semana' : '', perfil.semanasEspeciales?.[String(n)] === 'examenes' ? 'Exámenes' : perfil.semanasEspeciales?.[String(n)] === 'libre' ? 'Sin clases' : '', fechas(n), r?.notas ? 'con notas' : ''].filter(Boolean).join(' · ') || 'Toca para agregar el tema'}</span>
                 </span>
                 <Icono nombre="derecha" tam={18} />
               </button>

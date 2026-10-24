@@ -132,7 +132,7 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       guardarPerfil: (cambios) => editar((d) => ({ ...d, perfil: { ...d.perfil, ...cambios, actualizadoEn: ahora() } })),
       importar: (r) => {
         setReales(r.datos)
-        cambiar({ ...r.ajustes, datosEjemplo: false }) // al traer tus datos, se ocultan los de ejemplo
+        cambiar({ ...r.ajustes, etapa: r.ajustes.etapa ?? 'universidad', datosEjemplo: false }) // al traer tus datos, se ocultan los de ejemplo
       },
       exportar: () => crearRespaldo(reales),
     }

@@ -212,6 +212,13 @@ function normalizarRutina(r: Dic): Rutina {
   }
 }
 
+function normalizarEspeciales(x: unknown): Record<string, 'examenes' | 'libre'> | undefined {
+  if (!esObjeto(x)) return undefined
+  const r: Record<string, 'examenes' | 'libre'> = {}
+  for (const [k, v] of Object.entries(x)) if (/^\d{1,2}$/.test(k) && (v === 'examenes' || v === 'libre')) r[k] = v
+  return Object.keys(r).length ? r : undefined
+}
+
 /** Convierte cualquier cosa leída del teléfono o de un respaldo en `Datos` válidos. */
 export function normalizarDatos(bruto: unknown): Datos {
   const base = datosVacios()
@@ -221,7 +228,8 @@ export function normalizarDatos(bruto: unknown): Datos {
   return {
     perfil: {
       inicioCiclo: typeof p.inicioCiclo === 'string' ? p.inicioCiclo : base.perfil.inicioCiclo,
-      semanasCiclo: Math.min(24, Math.max(4, num(p.semanasCiclo, 16))),
+      semanasCiclo: Math.min(52, Math.max(4, num(p.semanasCiclo, 16))),
+      semanasEspeciales: normalizarEspeciales(p.semanasEspeciales),
       enfoqueMin: Math.min(90, Math.max(5, num(p.enfoqueMin, 25))),
       descansoMin: Math.min(30, Math.max(1, num(p.descansoMin, 5))),
       actualizadoEn: num(p.actualizadoEn, 0),

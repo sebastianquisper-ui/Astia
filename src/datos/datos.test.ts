@@ -125,7 +125,8 @@ describe('lectura segura de datos dañados', () => {
     expect(d.tareas[0].pasos).toEqual([])
   })
   it('limita los valores del perfil a rangos razonables', () => {
-    expect(normalizarDatos({ perfil: { semanasCiclo: 999, enfoqueMin: 1, descansoMin: 500 } }).perfil).toMatchObject({ semanasCiclo: 24, enfoqueMin: 5, descansoMin: 30 })
+    expect(normalizarDatos({ perfil: { semanasEspeciales: { 3: 'examenes', 4: 'libre', 5: 'otra', x: 'libre' } } }).perfil.semanasEspeciales).toEqual({ '3': 'examenes', '4': 'libre' })
+    expect(normalizarDatos({ perfil: { semanasCiclo: 999, enfoqueMin: 1, descansoMin: 500 } }).perfil).toMatchObject({ semanasCiclo: 52, enfoqueMin: 5, descansoMin: 30 })
   })
 })
 

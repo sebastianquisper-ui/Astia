@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
     sessionStorage.setItem('e2e-iniciado', '1')
     try {
       const a = JSON.parse(localStorage.getItem('astia.ajustes') || '{}')
-      localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, datosEjemplo: true, descansoVista: false, ...a }))
+      localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, datosEjemplo: true, descansoVista: false, etapa: 'universidad', ...a }))
     } catch {
       /* sin almacenamiento */
     }
@@ -731,10 +731,21 @@ test('elegir a Alpi y volver a la estrella de siempre', async ({ page }) => {
 
 test('Alpi en Hoy: grande sobre su planeta, en 3D, con la expresión según tu día', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('astia.ajustes', JSON.stringify({ ...JSON.parse(localStorage.getItem('astia.ajustes') || '{}'), alpi3d: true, mascota: 'alpi' })))
+  // Mientras carga no debe verse la Alpi dibujada: se vigila que nunca aparezca
+  await page.addInitScript(() => {
+    ;(window as unknown as { __dibujo: boolean }).__dibujo = false
+    new MutationObserver(() => {
+      if (document.querySelector('.hero-alpi-modelo .rig')) (window as unknown as { __dibujo: boolean }).__dibujo = true
+    }).observe(document, { childList: true, subtree: true })
+  })
   await page.goto('/#/hoy')
   const heroe = page.locator('.hero-alpi')
   await expect(heroe.locator('.planeta')).toBeAttached()
   await expect(page.frameLocator('.hero-alpi iframe').locator('canvas#stage')).toBeVisible({ timeout: 15000 })
+  await expect(heroe.locator('iframe.alpi-iframe.lista')).toBeAttached({ timeout: 15000 }) // se muestra solo cuando ya está lista
+  expect(await page.evaluate(() => (window as unknown as { __dibujo: boolean }).__dibujo)).toBe(false)
+  // la página no se ensancha más que la pantalla (si no, las hojas emergentes se cortan)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   // hay una tarea vencida en los datos de ejemplo: Alpi regaña
   await expect(heroe.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'reganona')
   const antes = await page.locator('.burbuja').innerText()
@@ -775,7 +786,7 @@ test('vestidor: con tareas pendientes hoy está cerrado', async ({ page }) => {
 test('vestidor: con todo cumplido se puede quitar ropa y volver al nivel 1', async ({ page }) => {
   const datos = conLogros(20, 150) // 950 XP: Alpi en nivel 4, sin nada pendiente
   await page.addInitScript((d) => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, alpi3d: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/hoy')
@@ -811,7 +822,7 @@ test('el detalle de Alpi muestra la evolución: lo alcanzado y lo bloqueado con 
 test('al evolucionar se celebra una sola vez', async ({ page }) => {
   const datos = conLogros(20, 150) // 200 de estudio + 750 de hábitos = 950 XP, bien repartido
   await page.addInitScript((d) => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, alpi3d: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/hoy')
@@ -829,7 +840,7 @@ test('al evolucionar se celebra una sola vez', async ({ page }) => {
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
   const datos = conLogros(0, 150) // 750 XP, todo personal
   await page.addInitScript((d) => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, alpi3d: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/mas/mascota')
@@ -842,7 +853,7 @@ test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', asy
 test('mostrar el XP por área y el total', async ({ page }) => {
   const datos = conLogros(10, 20) // 100 de estudio y 100 de hábitos
   await page.addInitScript((d) => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, alpi3d: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/mas/mascota')
@@ -855,11 +866,55 @@ test('mostrar el XP por área y el total', async ({ page }) => {
 
 // ---------- fase 3: pantallas académicas, descanso de la vista, empezar de cero ----------
 
-test('una app recién instalada abre vacía, sin datos de ejemplo', async ({ page }) => {
+test('una app recién instalada abre vacía, sin datos de ejemplo, y pregunta en qué etapa estás', async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem('astia.ajustes')) // como si nunca se hubiera usado
   await page.goto('/#/hoy')
-  await expect(page.getByText('Sin tareas todavía')).toBeVisible()
+  await expect(page.getByRole('dialog', { name: 'Bienvenido a Astia' })).toBeVisible()
   await expect(page.locator('.cabecera .estado')).toContainText('Solo en este teléfono')
+})
+
+test('Bienvenida: elegir Colegio arma un periodo de 10 semanas, que se pueden cambiar', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('bv')) return
+    sessionStorage.setItem('bv', '1')
+    localStorage.removeItem('astia.ajustes')
+  })
+  await page.goto('/#/cursos')
+  const hoja = page.getByRole('dialog', { name: 'Bienvenido a Astia' })
+  await hoja.getByRole('button', { name: 'Colegio' }).click()
+  await expect(hoja.getByLabel(/Cuántas semanas dura tu bimestre/)).toHaveValue('10')
+  await hoja.getByLabel(/Cuándo empieza/).fill('2026-10-05')
+  await hoja.getByRole('button', { name: 'Empezar' }).click()
+  await expect(hoja).toHaveCount(0)
+  await page.getByRole('button', { name: '+ Nuevo curso' }).click()
+  await page.getByLabel('Nombre del curso').fill('Comunicación')
+  await page.getByRole('button', { name: 'Guardar' }).click()
+  await page.getByRole('button', { name: /Comunicación/ }).click()
+  await expect(page.getByRole('button', { name: /^Semana \d+/ })).toHaveCount(10)
+  await page.goto('/#/mas/ciclo')
+  await expect(page.getByRole('heading', { name: 'Bimestre completo' })).toBeVisible()
+  await expect(page.locator('.ciclo-fila')).toHaveCount(10)
+})
+
+test('Ajustes: cambiar de etapa y el nombre del periodo, y marcar semanas de exámenes', async ({ page }) => {
+  await importarRespaldoV1(page)
+  await page.goto('/#/mas/ajustes')
+  await page.getByRole('group', { name: 'Mi etapa de estudios' }).getByRole('button', { name: 'Preuniversitario' }).click()
+  await page.getByLabel('Cómo llamas a tu periodo').fill('Trimestre')
+  await page.getByLabel('Semanas del trimestre').fill('20')
+  await page.getByLabel('Semanas del trimestre').blur()
+  await page.goto('/#/mas/ciclo')
+  await expect(page.getByRole('heading', { name: 'Trimestre completo' })).toBeVisible()
+  await expect(page.locator('.ciclo-fila')).toHaveCount(20)
+  await page.getByRole('button', { name: /^Semana 5:/ }).click()
+  await page.getByRole('group', { name: 'Tipo de semana' }).getByRole('button', { name: /Exámenes/ }).click()
+  await expect(page.getByRole('button', { name: /^Semana 5, exámenes:/ })).toBeVisible()
+  await page.getByRole('button', { name: /^Semana 6:/ }).click()
+  await page.getByRole('group', { name: 'Tipo de semana' }).getByRole('button', { name: /Sin clases/ }).click()
+  await expect(page.getByRole('button', { name: /^Semana 6, sin clases:/ })).toBeVisible()
+  await page.reload()
+  await page.goto('/#/mas/ciclo')
+  await expect(page.getByRole('button', { name: /^Semana 5, exámenes:/ })).toBeVisible()
 })
 
 test('Borrar todos mis datos deja Astia como recién instalada', async ({ page }) => {
@@ -930,7 +985,7 @@ test('Progreso: cuenta los días seguidos y las tareas de la semana', async ({ p
     if (sessionStorage.getItem('prog-iniciado')) return
     sessionStorage.setItem('prog-iniciado', '1')
     const dia = (f: string, hechas: number) => ({ id: f, fecha: f, actualizadoEn: 1, hechas, enfoque: 25, descanso: 5, pomodoros: 1 })
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, datosEjemplo: false, descansoVista: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, datosEjemplo: false, etapa: 'universidad', descansoVista: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify({ perfil: { inicioCiclo: '', semanasCiclo: 16, enfoqueMin: 25, descansoMin: 5, actualizadoEn: 0 }, progreso: [dia('2026-10-13', 1), dia('2026-10-14', 2), dia('2026-10-15', 1)] }))
   })
   await page.goto('/#/mas/progreso')

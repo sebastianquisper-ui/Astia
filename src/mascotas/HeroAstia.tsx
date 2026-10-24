@@ -6,10 +6,12 @@ import { AvatarMascota } from './AvatarMascota'
 import { AvisoMascotas } from './AvisoMascotas'
 import { BotonVestidor } from './alpi/Vestidor'
 import { useVestidor } from './alpi/useVestidor'
-import { Rig } from './rig/Rig'
 import { useMascota } from './useMascota'
 
-const AlpiIframe = lazy(() => import('./alpi/AlpiIframe'))
+const cargarAlpi = () => import('./alpi/AlpiIframe')
+const AlpiIframe = lazy(cargarAlpi)
+// Se empieza a descargar apenas abre la app, para que Alpi aparezca ya en 3D
+void cargarAlpi()
 
 interface Props {
   animo: Animo
@@ -30,7 +32,7 @@ export function HeroAstia({ animo, habla, frase, alTocar }: Props) {
       <div className="hero-alpi" data-animo={animo}>
         <div className="planeta" aria-hidden="true" />
         <div className="hero-alpi-modelo" data-nivel={nivel} data-expresion={expresion}>
-          <Suspense fallback={<Rig mascota="alpi" etapa={nivel} animo={animo} habla={habla} />}>
+          <Suspense fallback={null}>
             <AlpiIframe nivel={nivel} expresion={expresion} accion={accion} accesorios={vestidor.accesorios} alTocar={alTocar} />
           </Suspense>
         </div>

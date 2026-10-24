@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { Etapa } from '../lib/etapa'
 import type { MascotaElegida } from '../lib/mascotas'
 import { COLOR_BARRA, ESCALA_LETRA, temaEfectivo, type ModoTema, type TamanoLetra } from '../lib/tema'
 import { guardarLocal, leerLocal } from '../lib/almacen'
@@ -21,6 +22,10 @@ export interface Ajustes {
   alpi3d?: boolean
   /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */
   descansoVista?: boolean
+  /** Colegio, preuniversitario o universidad. Sin elegir todavía = se le pregunta al abrir. */
+  etapa?: Etapa
+  /** Cómo llamas a tu periodo (Ciclo, Bimestre, Trimestre...). Vacío = el de tu etapa. */
+  periodo?: string
   nombre: string
   modoTema: ModoTema
   tamanoLetra: TamanoLetra

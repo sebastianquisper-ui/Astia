@@ -135,6 +135,8 @@ export interface PlanDia extends Registro {
 export interface Perfil {
   inicioCiclo: string
   semanasCiclo: number
+  /** Semanas distintas del ciclo (clave = número de semana): de exámenes o sin clases. */
+  semanasEspeciales?: Record<string, 'examenes' | 'libre'>
   enfoqueMin: number
   descansoMin: number
   actualizadoEn: number
