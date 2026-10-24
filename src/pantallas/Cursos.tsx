@@ -5,13 +5,53 @@ import { Hoja } from '../ui/Hoja'
 import { Icono } from '../ui/Icono'
 import { useAviso } from '../ui/Aviso'
 import { Vacio } from '../ui/Vacio'
+import { DetalleCurso } from './DetalleCurso'
 
 export function Cursos() {
   const { cursos, clases, tareas, guardarCurso, borrarCurso } = useDatos()
   const avisar = useAviso()
   const [editando, setEditando] = useState<{ id?: string } | null>(null)
+  const [abierto, setAbierto] = useState<string | null>(null)
   const inicial = editando?.id ? cursos.find((c) => c.id === editando.id) : undefined
   const cerrar = () => setEditando(null)
+  const detalle = abierto ? cursos.find((c) => c.id === abierto) : undefined
+
+  const hoja = (
+    <Hoja titulo={inicial ? 'Editar curso' : 'Nuevo curso'} abierta={editando !== null} alCerrar={cerrar}>
+      {editando && (
+        <FormCurso
+          key={editando.id ?? 'nuevo'}
+          inicial={inicial}
+          colorSugerido={COLORES_CURSO[cursos.length % COLORES_CURSO.length]}
+          alGuardar={(c) => {
+            guardarCurso(c)
+            cerrar()
+            avisar(inicial ? 'Curso actualizado.' : `Curso agregado: ${c.nombre}.`)
+          }}
+          alBorrar={
+            inicial
+              ? () => {
+                  borrarCurso(inicial.id)
+                  cerrar()
+                  setAbierto(null)
+                  avisar('Curso borrado.')
+                }
+              : undefined
+          }
+          alCerrar={cerrar}
+        />
+      )}
+    </Hoja>
+  )
+
+  if (detalle) {
+    return (
+      <>
+        <DetalleCurso curso={detalle} alVolver={() => setAbierto(null)} alEditar={() => setEditando({ id: detalle.id })} />
+        {hoja}
+      </>
+    )
+  }
 
   return (
     <section className="pantalla">
@@ -19,7 +59,7 @@ export function Cursos() {
         <h1 className="titulo">Cursos</h1>
         <button className="btn pequeno" onClick={() => setEditando({})}>+ Nuevo curso</button>
       </div>
-      <p className="sub">Toca un curso para editarlo. Sus 16 semanas llegan en la siguiente fase.</p>
+      <p className="sub">Toca un curso para ver sus semanas, el tema de cada una y editarlo.</p>
 
       <div className="seccion" style={{ marginTop: 14 }}>
         {cursos.length === 0 ? (
@@ -30,7 +70,7 @@ export function Cursos() {
               const nClases = clases.filter((x) => x.cursoId === c.id).length
               const nPend = tareas.filter((t) => t.cursoId === c.id && t.estado === 'pendiente').length
               return (
-                <button key={c.id} className="fila" onClick={() => setEditando({ id: c.id })}>
+                <button key={c.id} className="fila" onClick={() => setAbierto(c.id)}>
                   <i className="punto grande" style={{ background: c.color }} />
                   <span className="texto">
                     <b>{c.nombre}</b>
@@ -45,31 +85,7 @@ export function Cursos() {
           </div>
         )}
       </div>
-
-      <Hoja titulo={inicial ? 'Editar curso' : 'Nuevo curso'} abierta={editando !== null} alCerrar={cerrar}>
-        {editando && (
-          <FormCurso
-            key={editando.id ?? 'nuevo'}
-            inicial={inicial}
-            colorSugerido={COLORES_CURSO[cursos.length % COLORES_CURSO.length]}
-            alGuardar={(c) => {
-              guardarCurso(c)
-              cerrar()
-              avisar(inicial ? 'Curso actualizado.' : `Curso agregado: ${c.nombre}.`)
-            }}
-            alBorrar={
-              inicial
-                ? () => {
-                    borrarCurso(inicial.id)
-                    cerrar()
-                    avisar('Curso borrado.')
-                  }
-                : undefined
-            }
-            alCerrar={cerrar}
-          />
-        )}
-      </Hoja>
+      {hoja}
     </section>
   )
 }

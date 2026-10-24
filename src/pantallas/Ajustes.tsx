@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
+import { borrarTodoYReiniciar } from '../datos/reiniciar'
 import { importarRespaldo, type Importacion } from '../datos/respaldo'
 import { semanaDelCiclo } from '../lib/fechas'
 import { Hoja } from '../ui/Hoja'
@@ -25,6 +26,7 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
   const { perfil, guardarPerfil, importar, exportar, enEjemplo } = useDatos()
   const [nombre, setNombre] = useState(ajustes.nombre)
   const [semanas, setSemanas] = useState(String(perfil.semanasCiclo))
+  const [borrando, setBorrando] = useState(false)
   const [pendiente, setPendiente] = useState<Extract<Importacion, { ok: true }> | null>(null)
   const archivo = useRef<HTMLInputElement>(null)
   // En la vista previa web no se pueden descargar archivos: solo se ofrece "Copiar"
@@ -153,6 +155,15 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
       </div>
 
       <div className="campo">
+        <span className="etiqueta" id="et-vista">Descanso de la vista (20-20-20)</span>
+        <div className="seg" role="group" aria-labelledby="et-vista">
+          <button aria-pressed={ajustes.descansoVista !== false} onClick={() => cambiar({ descansoVista: true })}>Sí</button>
+          <button aria-pressed={ajustes.descansoVista === false} onClick={() => cambiar({ descansoVista: false })}>No</button>
+        </div>
+        <p className="nota">Cada 20 minutos con Astia abierta te recuerda mirar algo a 6 metros durante 20 segundos. Cuida tus ojos al estudiar.</p>
+      </div>
+
+      <div className="campo">
         <span className="etiqueta" id="et-demo">Datos de ejemplo</span>
         <div className="seg" role="group" aria-labelledby="et-demo">
           <button aria-pressed={ajustes.datosEjemplo} onClick={() => cambiar({ datosEjemplo: true })}>Mostrar</button>
@@ -189,6 +200,20 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
         <input ref={archivo} id="archivo-respaldo" type="file" accept=".json,application/json" hidden onChange={elegirArchivo} aria-label="Archivo de respaldo" />
         <p className="nota">Importa el respaldo de Astia v1 (Ajustes → Descargar respaldo) o uno de esta versión. {esVista ? 'En esta vista previa no se pueden descargar archivos: usa "Copiar".' : 'Si tu navegador no descarga archivos, usa "Copiar".'}</p>
       </div>
+
+      <div className="campo">
+        <span className="etiqueta">Empezar de cero</span>
+        <button className="btn suave" onClick={() => setBorrando(true)}>Borrar todos mis datos</button>
+        <p className="nota">Borra cursos, clases, tareas, hábitos, rutinas, fotos de evidencia y ajustes de este teléfono. Astia queda como recién instalada.</p>
+      </div>
+
+      <Hoja titulo="¿Borrar todo?" abierta={borrando} alCerrar={() => setBorrando(false)}>
+        <p>Se borra todo lo que hay en Astia en este teléfono y no se puede deshacer. Si quieres conservarlo, descarga o copia un respaldo antes.</p>
+        <div className="acciones">
+          <button className="btn suave" onClick={() => setBorrando(false)}>Cancelar</button>
+          <button className="btn" onClick={() => void borrarTodoYReiniciar()}>Sí, borrar todo</button>
+        </div>
+      </Hoja>
 
       <Hoja titulo="Importar respaldo" abierta={pendiente !== null} alCerrar={() => setPendiente(null)}>
         {pendiente && (

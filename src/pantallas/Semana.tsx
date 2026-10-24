@@ -1,5 +1,5 @@
 import { useAjustes } from '../ajustes/AjustesProvider'
-import { SemanaAcademica } from './Simples'
+import { SemanaAcademica } from './SemanaAcademica'
 import { SemanaPersonal } from './SemanaPersonal'
 
 export function Semana() {

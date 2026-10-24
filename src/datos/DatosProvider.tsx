@@ -52,6 +52,8 @@ export interface Contexto {
   borrarTarea: (id: string) => void
   guardarCurso: (c: Curso) => void
   borrarCurso: (id: string) => void
+  guardarSemana: (s: SemanaTema) => void
+  borrarSemana: (id: string) => void
   guardarClase: (c: Clase) => void
   borrarClase: (id: string) => void
   /** Marca o desmarca un hábito. Sin fecha, es hoy. */
@@ -116,6 +118,8 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       borrarTarea: (id) => editar((d) => ({ ...d, tareas: borrarRegistro(d.tareas, id, ahora()) })),
       guardarCurso: (c) => editar((d) => ({ ...d, cursos: guardarRegistro(d.cursos, c, ahora()) })),
       borrarCurso: (id) => editar((d) => quitarCurso(d, id, ahora())),
+      guardarSemana: (s) => editar((d) => ({ ...d, semanas: guardarRegistro(d.semanas, s, ahora()) })),
+      borrarSemana: (id) => editar((d) => ({ ...d, semanas: borrarRegistro(d.semanas, id, ahora()) })),
       guardarClase: (c) => editar((d) => ({ ...d, clases: guardarRegistro(d.clases, c, ahora()) })),
       borrarClase: (id) => editar((d) => ({ ...d, clases: borrarRegistro(d.clases, id, ahora()) })),
       alternarHabito: (id, fecha) => editar((d) => alternarHabito(d, id, fecha ?? ymd(new Date()), ahora())),

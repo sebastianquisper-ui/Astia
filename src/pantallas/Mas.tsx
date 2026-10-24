@@ -3,9 +3,12 @@ import { useAjustes, type Modo } from '../ajustes/AjustesProvider'
 import { Icono, type NombreIcono } from '../ui/Icono'
 import { Vacio } from '../ui/Vacio'
 import { Ajustes } from './Ajustes'
+import { Calendario } from './Calendario'
+import { Ciclo } from './Ciclo'
 import { Enfoque } from './Enfoque'
 import { Horario } from './Horario'
 import { Mascotas } from './Mascotas'
+import { Progreso } from './Progreso'
 import { Rutinas } from './Rutinas'
 
 // La pantalla de Alpi en 3D trae Three.js: se descarga solo al abrirla.
@@ -46,6 +49,9 @@ export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => v
         <EstudioAlpi alVolver={() => alAbrir('mascota')} />
       </Suspense>
     )
+  if (sub === 'calendario') return <Calendario alVolver={() => alAbrir('')} />
+  if (sub === 'ciclo') return <Ciclo alVolver={() => alAbrir('')} alAjustes={() => alAbrir('ajustes')} />
+  if (sub === 'progreso') return <Progreso alVolver={() => alAbrir('')} />
   if (sub === 'rutinas') return <Rutinas alVolver={() => alAbrir('')} />
 
   const entrada = ENTRADAS.find((e) => e.id === sub)

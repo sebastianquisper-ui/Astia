@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
     sessionStorage.setItem('e2e-iniciado', '1')
     try {
       const a = JSON.parse(localStorage.getItem('astia.ajustes') || '{}')
-      localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, ...a }))
+      localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, datosEjemplo: true, descansoVista: false, ...a }))
     } catch {
       /* sin almacenamiento */
     }
@@ -221,6 +221,7 @@ test('borrar un curso conserva sus tareas (sin curso) y borra sus clases', async
   await importarRespaldoV1(page)
   await page.goto('/#/cursos')
   await page.getByRole('button', { name: /Cálculo II/ }).click()
+  await page.getByRole('button', { name: 'Editar curso' }).click()
   await page.getByRole('button', { name: 'Borrar curso' }).click()
   await page.getByRole('button', { name: 'Toca otra vez para borrar' }).click()
   await expect(page.getByRole('button', { name: /Cálculo II/ })).toHaveCount(0)
@@ -849,4 +850,114 @@ test('mostrar el XP por área y el total', async ({ page }) => {
   await expect(page.locator('.xp-total')).toContainText('200 XP en total')
   await expect(page.locator('.xp-fila').nth(0).locator('.xp-valor')).toHaveText('100') // Académico
   await expect(page.locator('.xp-fila').nth(2).locator('.xp-valor')).toHaveText('100') // Hábitos
+})
+
+
+// ---------- fase 3: pantallas académicas, descanso de la vista, empezar de cero ----------
+
+test('una app recién instalada abre vacía, sin datos de ejemplo', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('astia.ajustes')) // como si nunca se hubiera usado
+  await page.goto('/#/hoy')
+  await expect(page.getByText('Sin tareas todavía')).toBeVisible()
+  await expect(page.locator('.cabecera .estado')).toContainText('Solo en este teléfono')
+})
+
+test('Borrar todos mis datos deja Astia como recién instalada', async ({ page }) => {
+  await importarRespaldoV1(page)
+  await page.goto('/#/cursos')
+  await expect(page.getByText('Física')).toBeVisible()
+  await page.goto('/#/mas/ajustes')
+  await page.getByRole('button', { name: 'Borrar todos mis datos' }).click()
+  await page.getByRole('button', { name: 'Sí, borrar todo' }).click()
+  await expect(page.getByText('Sin tareas todavía')).toBeVisible()
+  await page.goto('/#/cursos')
+  await expect(page.getByText('Sin cursos')).toBeVisible()
+  expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k === 'astia.datos.v2'))).toEqual([])
+})
+
+test('Semana: clases y entregas de cada día, y se puede cambiar de semana', async ({ page }) => {
+  await page.goto('/#/semana')
+  await expect(page.getByRole('heading', { name: /Jueves 15/ })).toContainText('hoy')
+  await expect(page.getByText('Resolver práctica de Cálculo II')).toBeVisible()
+  await expect(page.getByText('Examen parcial de Física')).toBeVisible() // mañana
+  await expect(page.getByText('Pagar el recibo de luz')).toHaveCount(0) // es personal
+  await page.getByRole('button', { name: 'Semana siguiente' }).click()
+  await expect(page.getByText('Resolver práctica de Cálculo II')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Semana anterior' }).click()
+  await expect(page.getByText('Resolver práctica de Cálculo II')).toBeVisible()
+})
+
+test('Cursos: cada curso tiene sus semanas y se guarda el tema de una', async ({ page }) => {
+  await importarRespaldoV1(page)
+  await page.goto('/#/cursos')
+  await page.getByRole('button', { name: /Física/ }).click()
+  await expect(page.getByRole('button', { name: /^Semana \d+/ })).toHaveCount(16)
+  await expect(page.locator('.fila.actual')).toContainText('Esta semana')
+  await page.getByRole('button', { name: /^Semana 3/ }).click()
+  await page.getByLabel('Tema de la semana').fill('Cinemática')
+  await page.getByLabel('Notas').fill('Repasar MRU')
+  await page.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('status')).toContainText('Semana 3 guardada')
+  await expect(page.getByRole('button', { name: /^Semana 3: Cinemática/ })).toBeVisible()
+  await page.reload()
+  await page.goto('/#/cursos')
+  await page.getByRole('button', { name: /Física/ }).click()
+  await expect(page.getByRole('button', { name: /^Semana 3: Cinemática/ })).toBeVisible()
+})
+
+test('Calendario: marca los días con entregas y muestra las del día elegido', async ({ page }) => {
+  await page.goto('/#/mas/calendario')
+  await expect(page.getByRole('heading', { name: 'octubre 2026', level: 2 }).or(page.getByText('octubre 2026'))).toBeVisible()
+  await expect(page.getByRole('button', { name: '16 de octubre, 1 entrega, hay examen' })).toBeVisible()
+  await page.getByRole('button', { name: '16 de octubre, 1 entrega, hay examen' }).click()
+  await expect(page.getByText('Examen parcial de Física')).toBeVisible()
+  await page.getByRole('button', { name: 'Mes siguiente' }).click()
+  await expect(page.getByText('noviembre 2026')).toBeVisible()
+})
+
+test('Ciclo: muestra las 16 semanas y la carga, o pide la fecha de inicio', async ({ page }) => {
+  await page.goto('/#/mas/ciclo')
+  await expect(page.getByText('Falta la fecha de inicio')).toBeVisible()
+  await importarRespaldoV1(page)
+  await page.goto('/#/mas/ciclo')
+  await expect(page.getByText('Hoy estás en la semana 8 de 16.')).toBeVisible()
+  await expect(page.locator('.ciclo-fila')).toHaveCount(16)
+  await expect(page.locator('.ciclo-fila.actual')).toContainText('esta semana')
+})
+
+test('Progreso: cuenta los días seguidos y las tareas de la semana', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('prog-iniciado')) return
+    sessionStorage.setItem('prog-iniciado', '1')
+    const dia = (f: string, hechas: number) => ({ id: f, fecha: f, actualizadoEn: 1, hechas, enfoque: 25, descanso: 5, pomodoros: 1 })
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, datosEjemplo: false, descansoVista: false }))
+    localStorage.setItem('astia.datos.v2', JSON.stringify({ perfil: { inicioCiclo: '', semanasCiclo: 16, enfoqueMin: 25, descansoMin: 5, actualizadoEn: 0 }, progreso: [dia('2026-10-13', 1), dia('2026-10-14', 2), dia('2026-10-15', 1)] }))
+  })
+  await page.goto('/#/mas/progreso')
+  await expect(page.locator('.estadisticas').first()).toContainText('3')
+  await expect(page.locator('.estadisticas').first()).toContainText('días seguidos')
+  await expect(page.getByText('tareas hechas')).toBeVisible()
+  await expect(page.getByRole('img', { name: /3 de 28/ })).toBeVisible()
+})
+
+test('descanso 20-20-20: a los 20 minutos con la app abierta propone mirar lejos 20 segundos', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, datosEjemplo: true, descansoVista: true })))
+  await page.goto('/#/hoy')
+  await page.clock.runFor(19 * 60_000)
+  await expect(page.getByRole('dialog', { name: 'Descansa la vista' })).toHaveCount(0)
+  await page.clock.runFor(61_000)
+  const hoja = page.getByRole('dialog', { name: 'Descansa la vista' })
+  await expect(hoja).toBeVisible()
+  await expect(hoja.getByRole('button', { name: 'Mirando lejos…' })).toBeDisabled()
+  await page.clock.runFor(21_000)
+  await expect(hoja.getByRole('button', { name: 'Ya miré lejos' })).toBeEnabled()
+  await hoja.getByRole('button', { name: 'Ya miré lejos' }).click()
+  await expect(hoja).toHaveCount(0)
+})
+
+test('Ajustes: el descanso de la vista se puede apagar', async ({ page }) => {
+  await page.goto('/#/mas/ajustes')
+  const grupo = page.getByRole('group', { name: 'Descanso de la vista (20-20-20)' })
+  await grupo.getByRole('button', { name: 'No' }).click()
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes')!).descansoVista)).toBe(false)
 })

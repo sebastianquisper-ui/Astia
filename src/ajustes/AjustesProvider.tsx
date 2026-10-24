@@ -19,6 +19,8 @@ export interface Ajustes {
   alpiLook?: { nivel?: number; accesorios?: Record<string, boolean> }
   /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
   alpi3d?: boolean
+  /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */
+  descansoVista?: boolean
   nombre: string
   modoTema: ModoTema
   tamanoLetra: TamanoLetra
@@ -27,7 +29,7 @@ export interface Ajustes {
 }
 
 const CLAVE = 'astia.ajustes'
-const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: true, modo: 'academico', mascota: 'alpi', mascotaVista: {} }
+const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: false, modo: 'academico', mascota: 'alpi', mascotaVista: {} }
 
 interface Contexto {
   ajustes: Ajustes

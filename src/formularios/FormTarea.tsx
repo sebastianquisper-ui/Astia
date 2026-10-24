@@ -4,6 +4,7 @@ import type { Area, Curso, Prioridad, Tarea, TipoTarea } from '../dominio/tipos'
 import { crearId } from '../datos/almacenamiento'
 import { APARTADOS, apartadoDe } from '../lib/apartados'
 import { ymd } from '../lib/fechas'
+import { hayDictado, useDictado } from '../lib/dictado'
 import { METODOS, metodoPorId, sugerirMetodo, type MetodoId } from '../lib/metodos'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
@@ -37,6 +38,9 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
   const [cursoId, setCursoId] = useState(inicial?.cursoId ?? plantilla?.cursoId ?? cursos[0]?.id ?? '')
   const [categoria, setCategoria] = useState(apartadoDe(inicial?.categoria ?? plantilla?.categoria ?? 'Salud').nombre)
   const [tipo, setTipo] = useState<TipoTarea>(inicial?.tipo ?? plantilla?.tipo ?? 'tarea')
+  const { escuchando, dictar } = useDictado()
+  const conDictado = hayDictado()
+  const dictarTitulo = () => dictar((t) => setTitulo((previo) => (previo ? previo + ' ' : '') + t), () => avisar('No se pudo usar el micrófono. Usa el del teclado del iPhone.', 'error'))
   const [fecha, setFecha] = useState(inicial?.fecha ?? plantilla?.fecha ?? ymd(new Date()))
   const [hora, setHora] = useState(inicial?.hora ?? plantilla?.hora ?? '')
   const [prioridad, setPrioridad] = useState<Prioridad>(inicial?.prioridad ?? 'media')
@@ -68,7 +72,14 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
     >
       <div className="campo">
         <label htmlFor="ft-titulo">{personal ? 'Qué tienes pendiente' : 'Qué hay que hacer'}</label>
-        <input id="ft-titulo" type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder={personal ? 'Ejemplo: Sacar cita en el dentista' : 'Ejemplo: Guía 5 de Cálculo II'} autoFocus />
+        <div className="campo-dictado">
+          <input id="ft-titulo" type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder={personal ? 'Ejemplo: Sacar cita en el dentista' : 'Ejemplo: Guía 5 de Cálculo II'} autoFocus />
+          {conDictado && (
+            <button type="button" className={'icono-btn mic' + (escuchando ? ' escuchando' : '')} aria-pressed={escuchando} aria-label={escuchando ? 'Detener dictado' : 'Dictar por voz'} onClick={dictarTitulo}>
+              <Icono nombre="mic" tam={20} />
+            </button>
+          )}
+        </div>
       </div>
 
       {personal ? (

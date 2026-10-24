@@ -893,3 +893,25 @@ button.habito-texto { background: none; padding: 0; border: 0; }
 .enlace-mascotas.ancho { width: 100%; margin-top: 12px; }
 .evidencia .campo { display: flex; flex-direction: column; gap: 6px; }
 .evidencia .campo input { width: 100%; }
+
+/* Semana, cursos, calendario, ciclo y progreso */
+.dia-titulo.hoy { color: var(--accent); }
+.dia-titulo small { font-family: var(--text, inherit); font-weight: 600; font-size: 0.8125rem; }
+.fila.actual { box-shadow: inset 0 0 0 2px var(--accent); }
+.semana-num { font-family: var(--display); font-weight: 800; font-variant-numeric: tabular-nums; }
+.mes-celda.cal { position: relative; }
+.mes-celda.cal.elegido { background: color-mix(in srgb, var(--accent) 22%, var(--surface2)); }
+.mes-celda.cal .cal-punto { position: absolute; left: 50%; bottom: 5px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--accent); }
+.mes-celda.cal.examen .cal-punto { background: var(--red); }
+.mes-celda.cal.hecha .cal-punto { background: var(--muted); }
+.mes-celda.calor { display: grid; place-items: center; }
+.mes-celda.calor.hecho { background: var(--accent); color: var(--accent-ink); }
+.carga { display: block; height: 6px; border-radius: 3px; background: var(--surface2); margin-top: 6px; overflow: hidden; }
+.carga i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+.carga i.examen { background: var(--red); }
+.ciclo-fila { cursor: default; }
+
+.campo-dictado { display: flex; gap: 8px; align-items: center; }
+.campo-dictado input { flex: 1; min-width: 0; }
+.icono-btn.mic.escuchando { background: var(--red); color: #fff; }
+.descanso-cuenta { font-family: var(--display); font-weight: 800; font-size: 3rem; text-align: center; margin: 12px 0; font-variant-numeric: tabular-nums; }

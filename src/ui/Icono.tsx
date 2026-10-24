@@ -8,6 +8,7 @@ const TRAZOS = {
   izquierda: '<path d="m14 6-6 6 6 6"/>',
   derecha: '<path d="m10 6 6 6-6 6"/>',
   reloj: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
   calendario: '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2"/>',
   ciclo: '<path d="M4 6h16M4 12h10M4 18h13"/>',
   progreso: '<path d="M5 20V10M12 20V4M19 20v-7"/>',

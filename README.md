@@ -27,6 +27,12 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   gasta menos batería). **Vestidor:** con todo lo de hoy cumplido, se le puede quitar ropa o volver a un nivel anterior.
 - **Evidencia para cumplir:** ninguna tarea se marca hecha sin evidencia: una foto del trabajo (cámara o galería,
   guardada en el teléfono) o el enlace de la entrega. Reabrir una tarea descarta su evidencia.
+- **Pantallas académicas:** completas. Semana (clases y entregas por día), Cursos con sus semanas del ciclo (tema y
+  notas de cada una), Calendario del mes, Ciclo completo (carga de cada semana) y Progreso y rachas.
+- **Cuidado de la vista (20-20-20):** cada 20 minutos con Astia abierta propone mirar algo lejano durante 20 segundos
+  (se apaga en Ajustes). No manda notificaciones: eso llega con la nube. El título de una tarea se puede dictar por voz
+  si el navegador lo permite; si no, queda el micrófono del teclado del iPhone.
+- **Empezar de cero:** Astia abre sin datos de ejemplo. Ajustes → "Borrar todos mis datos" la deja como recién instalada.
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 
 ## Comandos
