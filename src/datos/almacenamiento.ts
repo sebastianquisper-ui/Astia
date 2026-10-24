@@ -1,4 +1,4 @@
-import type { Clase, Curso, Datos, Frecuencia, Habito, Mejora, Momento, PasoRutina, PlanDia, ProgresoDia, Registro, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
+import type { Clase, Curso, Datos, Frecuencia, Habito, Mejora, Momento, PasoRutina, PlanDia, ProgresoDia, Registro, Rutina, SemanaTema, Tarea, Evidencia } from '../dominio/tipos'
 import { ymd } from '../lib/fechas'
 
 // Funciones puras para manejar los datos. Todas devuelven objetos NUEVOS (nunca modifican
@@ -88,7 +88,11 @@ export function sumarHechas(progreso: ProgresoDia[], fecha: string, delta: numbe
 }
 
 /** Marca o reabre una tarea y ajusta el progreso del día, todo de una vez. */
-export function alternarTarea(datos: Datos, id: string, ahora: Date): Datos {
+/**
+ * Marca una tarea hecha (con su evidencia) o la reabre (y su evidencia se descarta).
+ * Antiprocrastinación: sin evidencia, una tarea pendiente NO se marca hecha.
+ */
+export function alternarTarea(datos: Datos, id: string, ahora: Date, evidencia?: Evidencia): Datos {
   const t = datos.tareas.find((x) => x.id === id && x.borradoEn === undefined)
   if (!t) return datos
   const ms = ahora.getTime()
@@ -96,9 +100,11 @@ export function alternarTarea(datos: Datos, id: string, ahora: Date): Datos {
     const dia = t.hechaEn ? ymd(new Date(t.hechaEn)) : ymd(ahora)
     const abierta: Tarea = { ...t, estado: 'pendiente' }
     delete abierta.hechaEn
+    delete abierta.evidencia
     return { ...datos, tareas: guardarRegistro(datos.tareas, abierta, ms), progreso: sumarHechas(datos.progreso, dia, -1, ms) }
   }
-  const hecha: Tarea = { ...t, estado: 'hecha', hechaEn: ahora.toISOString() }
+  if (!evidencia || (!evidencia.foto && !evidencia.enlace?.trim())) return datos
+  const hecha: Tarea = { ...t, estado: 'hecha', hechaEn: ahora.toISOString(), evidencia }
   return { ...datos, tareas: guardarRegistro(datos.tareas, hecha, ms), progreso: sumarHechas(datos.progreso, ymd(ahora), 1, ms) }
 }
 

@@ -1,12 +1,12 @@
 import type { Habito, ProgresoDia, Rutina, Tarea } from '../dominio/tipos'
 import { apartadoDe } from './apartados'
 
-// Mascotas: compañeras que evolucionan con tus logros.
+// Mascota: Alpi, la compañera que evoluciona con tus logros (la otra opción es la estrella de siempre).
 // La experiencia (XP) NO se guarda: se calcula siempre a partir de lo que ya hiciste en la app
 // (tareas hechas, hábitos cumplidos, rutinas, minutos de enfoque). Así no se puede "farmear"
 // marcando y desmarcando, y no hay nada que sincronizar.
 
-export type MascotaId = 'axolin' | 'taro' | 'nube' | 'mochi' | 'drako' | 'stella' | 'hooty' | 'alpi'
+export type MascotaId = 'alpi'
 /** 'astia' es la estrella de siempre (sin evolución). */
 export type MascotaElegida = MascotaId | 'astia'
 
@@ -21,13 +21,6 @@ export interface Mascota {
 }
 
 export const MASCOTAS: Mascota[] = [
-  { id: 'axolin', nombre: 'Axolín', apodo: 'El curioso caótico', descripcion: 'Un ajolote que siempre tiene mil ideas, se distrae fácil, pero nunca se rinde. Representa la curiosidad y el aprendizaje.', etiquetas: ['Académico', 'Exploración'], etapas: ['Renacuajo', 'Estudiante', 'Explorador', 'Sabio Estelar'] },
-  { id: 'taro', nombre: 'Taro', apodo: 'La papita con sueños', descripcion: 'Una criatura vegetal que crece contigo. Torpe, optimista y contagiosa. Representa tus hábitos y tu crecimiento personal.', etiquetas: ['Hábitos', 'Vida personal'], etapas: ['Brotecito', 'Plantita curiosa', 'Jardinero', 'Árbol guardián'] },
-  { id: 'nube', nombre: 'Nube', apodo: 'El fantasmita productivo', descripcion: 'Un fantasma adorable que pasa de procrastinar a ser un gran aliado. Representa el equilibrio, el descanso y la gestión del tiempo.', etiquetas: ['Organización', 'Bienestar'], etapas: ['Somnoliento', 'Organizado', 'Aventurero', 'Espectro Legendario'] },
-  { id: 'mochi', nombre: 'Mochi', apodo: 'El estratega travieso', descripcion: 'Un gatito regordete que ama las listas, las cajas y los planes... aunque a veces se enreda en ellos. Representa la organización y la constancia.', etiquetas: ['Planificación', 'Productividad'], etapas: ['Michi bebé', 'Planificador', 'Productichi', 'Maestro del Caos'] },
-  { id: 'drako', nombre: 'Drako', apodo: 'El soñador valiente', descripcion: 'Un pequeño dragón que empieza con chispas tímidas y se convierte en un gran guardián. Representa la superación y la disciplina.', etiquetas: ['Disciplina', 'Grandes metas'], etapas: ['Huevo', 'Dragón bebé', 'Aventurero', 'Guardián de sueños'] },
-  { id: 'stella', nombre: 'Stella', apodo: 'La estrella brillante', descripcion: 'Una estrellita que ilumina tu camino, incluso en los días más nublados. Representa la motivación, la confianza y tus sueños.', etiquetas: ['Motivación', 'Autoconfianza'], etapas: ['Estrellita', 'Estrella curiosa', 'Exploradora cósmica'] },
-  { id: 'hooty', nombre: 'Hooty', apodo: 'El búho sabio y despistado', descripcion: 'Un búho que parece serio, pero es un gran torpe. Siempre te observa, te anima y te recuerda lo importante. Representa la concentración, la calma y el conocimiento.', etiquetas: ['Concentración', 'Aprendizaje'], etapas: ['Polluelo', 'Explorador del saber', 'Maestro Nocturno'] },
   { id: 'alpi', nombre: 'Alpi', apodo: 'La alpaca aventurera', descripcion: 'Una alpaca suave y divertida que te acompaña paso a paso. Representa la perseverancia, la calma y el equilibrio entre tus metas y tu bienestar.', etiquetas: ['Perseverancia', 'Bienestar'], etapas: ['Alpaca bebé', 'Exploradora', 'Guardiana de los valles', 'Alpaca legendaria'] },
 ]
 

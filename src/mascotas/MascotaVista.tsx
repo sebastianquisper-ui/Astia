@@ -5,7 +5,8 @@ import { fondoDe } from './sprites'
 import { Rig } from './rig/Rig'
 
 import { desdeAnimo, nivelAlpi } from './alpi/datos'
-import { hayWebGL } from './alpi/webgl'
+import { useAlpi3D } from './alpi/useAlpi3D'
+import { useVestidor } from './alpi/useVestidor'
 
 // Alpi en 3D (su propia página con la librería 3D adentro): se descarga solo cuando aparece.
 const AlpiIframe = lazy(() => import('./alpi/AlpiIframe'))
@@ -39,6 +40,7 @@ interface Props {
  */
 export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, tam = 112, nivel, fiesta = false }: Props) {
   const raiz = useRef<HTMLSpanElement>(null)
+  const { accesorios } = useVestidor()
   const [inclina, setInclina] = useState<{ x: number; y: number } | null>(null)
   const [saltando, setSaltando] = useState(false)
   const [chispas, setChispas] = useState<Chispa[]>([])
@@ -65,7 +67,8 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
     temporizadores.current.push(window.setTimeout(() => setChispas((c) => c.filter((x) => !nuevas.some((n) => n.id === x.id))), 800))
   }
 
-  const en3d = mascota === 'alpi' && hayWebGL()
+  const usa3d = useAlpi3D()
+  const en3d = mascota === 'alpi' && usa3d
   const clases = ['avatar', 'mascota', animo, en3d ? 'en3d' : '', habla ? 'habla' : '', saltando ? 'saltando' : '', inclina ? 'activa' : ''].filter(Boolean).join(' ')
   const transformacion = inclina && !en3d ? `rotateY(${inclina.x * 20}deg) rotateX(${-inclina.y * 20}deg) scale(1.04)` : undefined
 
@@ -85,7 +88,7 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
       <span className="mascota-marco vec" style={{ transform: transformacion }}>
         {en3d ? (
           <Suspense fallback={<Rig mascota={mascota} etapa={etapa} animo={animo} habla={habla} />}>
-            <AlpiIframe nivel={nivelAlpi(etapa)} {...desdeAnimo(animo, { fiesta })} />
+            <AlpiIframe nivel={nivelAlpi(etapa)} {...desdeAnimo(animo, { fiesta })} accesorios={accesorios} />
           </Suspense>
         ) : (
           <Rig key={mascota + etapa} mascota={mascota} etapa={etapa} animo={animo} habla={habla} />

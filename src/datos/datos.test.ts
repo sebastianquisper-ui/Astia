@@ -90,14 +90,23 @@ describe('marcar tareas hechas', () => {
   const ahora = new Date(2026, 9, 15, 10, 0)
   it('marca hecha y suma al progreso del día; al reabrir lo resta', () => {
     const d = { ...datosVacios(), tareas: [tarea('t1')] }
-    const hecha = alternarTarea(d, 't1', ahora)
+    const evidencia = { foto: true, fecha: ahora.toISOString() }
+    const hecha = alternarTarea(d, 't1', ahora, evidencia)
     expect(hecha.tareas[0].estado).toBe('hecha')
+    expect(hecha.tareas[0].evidencia).toEqual(evidencia)
     expect(hecha.tareas[0].hechaEn).toBeDefined()
     expect(hecha.progreso.find((p) => p.fecha === '2026-10-15')?.hechas).toBe(1)
     const reabierta = alternarTarea(hecha, 't1', ahora)
     expect(reabierta.tareas[0].estado).toBe('pendiente')
     expect(reabierta.tareas[0].hechaEn).toBeUndefined()
+    expect(reabierta.tareas[0].evidencia).toBeUndefined() // al reabrir, la evidencia se descarta
     expect(reabierta.progreso.find((p) => p.fecha === '2026-10-15')?.hechas).toBe(0)
+  })
+  it('sin evidencia no se marca hecha (antiprocrastinación)', () => {
+    const d = { ...datosVacios(), tareas: [tarea('t1')] }
+    expect(alternarTarea(d, 't1', ahora)).toBe(d)
+    expect(alternarTarea(d, 't1', ahora, { foto: false, enlace: '  ', fecha: ahora.toISOString() })).toBe(d)
+    expect(alternarTarea(d, 't1', ahora, { foto: false, enlace: 'https://classroom.google.com/c/1', fecha: ahora.toISOString() }).tareas[0].estado).toBe('hecha')
   })
   it('una tarea inexistente no cambia nada', () => {
     const d = datosVacios()

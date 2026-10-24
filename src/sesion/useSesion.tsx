@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useDatos } from '../datos/DatosProvider'
 import { FASE_ARRANQUE, fasesDe, metodoPorId, sugerirMetodo, type MetodoId } from '../lib/metodos'
-import { useAviso } from '../ui/Aviso'
+import { useCumplirTarea } from '../formularios/Evidencia'
 import { SesionEstudio } from './SesionEstudio'
 import { prepararSonido } from './sonido'
 
@@ -11,8 +11,8 @@ import { prepararSonido } from './sonido'
  * `'arranque'` es "Solo 10 minutos para arrancar".
  */
 export function useSesion() {
-  const { tareas, cursos, perfil, alternar } = useDatos()
-  const avisar = useAviso()
+  const { tareas, cursos, perfil } = useDatos()
+  const cumplir = useCumplirTarea()
   const [sesion, setSesion] = useState<{ metodo: MetodoId | 'arranque'; tareaId?: string; clave: number } | null>(null)
 
   const iniciar = useCallback((metodo: MetodoId | 'arranque', tareaId?: string) => {
@@ -41,10 +41,7 @@ export function useSesion() {
         siguiente={esArranque ? { nombre: metodoPorId(sugerido).nombre, alSeguir: () => iniciar(sugerido, sesion.tareaId) } : undefined}
         alMarcarHecha={
           tarea && tarea.estado === 'pendiente'
-            ? () => {
-                alternar(tarea.id)
-                avisar('Hecha. Una menos.')
-              }
+            ? () => cumplir(tarea)
             : undefined
         }
         alCerrar={cerrar}

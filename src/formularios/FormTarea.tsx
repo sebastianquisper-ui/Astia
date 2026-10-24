@@ -1,3 +1,4 @@
+import { VerEvidencia } from './VerEvidencia'
 import { useState } from 'react'
 import type { Area, Curso, Prioridad, Tarea, TipoTarea } from '../dominio/tipos'
 import { crearId } from '../datos/almacenamiento'
@@ -39,7 +40,6 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
   const [fecha, setFecha] = useState(inicial?.fecha ?? plantilla?.fecha ?? ymd(new Date()))
   const [hora, setHora] = useState(inicial?.hora ?? plantilla?.hora ?? '')
   const [prioridad, setPrioridad] = useState<Prioridad>(inicial?.prioridad ?? 'media')
-  const [evidencia, setEvidencia] = useState(inicial?.pideEvidencia ?? false)
   const [metodo, setMetodo] = useState<string>(inicial?.metodo ?? '') // '' = que Astia lo sugiera
   const [confirmaBorrar, setConfirmaBorrar] = useState(false)
   const apartado = apartadoDe(categoria)
@@ -50,12 +50,12 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
     const limpio = titulo.trim()
     if (!limpio) return avisar(personal ? 'Escribe qué tienes pendiente.' : 'Escribe qué hay que hacer.', 'error')
     if (!fecha) return avisar('Elige la fecha límite.', 'error')
-    const base: Tarea = inicial ?? { id: crearId(), titulo: '', area, cursoId: null, tipo: 'tarea', fecha, prioridad: 'media', pideEvidencia: false, pasos: [], estado: 'pendiente', actualizadoEn: 0 }
+    const base: Tarea = inicial ?? { id: crearId(), titulo: '', area, cursoId: null, tipo: 'tarea', fecha, prioridad: 'media', pideEvidencia: true, pasos: [], estado: 'pendiente', actualizadoEn: 0 }
     alGuardar(
       personal
-        ? // Lo personal siempre es una tarea simple: sin tipo, prioridad ni evidencia
-          { ...base, titulo: limpio, area, cursoId: null, categoria, tipo: 'tarea', fecha, hora: hora || undefined, prioridad: 'media', pideEvidencia: false, metodo: undefined }
-        : { ...base, titulo: limpio, area, cursoId: cursoId || null, categoria: undefined, tipo, fecha, hora: hora || undefined, prioridad, pideEvidencia: evidencia, metodo: metodo || undefined },
+        ? // Lo personal siempre es una tarea simple: sin tipo ni prioridad (la evidencia sí se pide)
+          { ...base, titulo: limpio, area, cursoId: null, categoria, tipo: 'tarea', fecha, hora: hora || undefined, prioridad: 'media', pideEvidencia: true, metodo: undefined }
+        : { ...base, titulo: limpio, area, cursoId: cursoId || null, categoria: undefined, tipo, fecha, hora: hora || undefined, prioridad, pideEvidencia: true, metodo: metodo || undefined },
     )
   }
 
@@ -142,12 +142,11 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
             </select>
             <p className="nota">{metodoPorId((metodo || sugerido) as MetodoId).paraQue}. {metodoPorId((metodo || sugerido) as MetodoId).porque}</p>
           </div>
-          <label className="interruptor">
-            <input type="checkbox" checked={evidencia} onChange={(e) => setEvidencia(e.target.checked)} />
-            <span>Pedir evidencia (una foto de que lo hice)</span>
-          </label>
         </>
       )}
+
+      {inicial?.evidencia && <VerEvidencia tarea={inicial} />}
+      <p className="nota">Para marcarla hecha te pediré evidencia: una foto de tu trabajo o el enlace de la entrega.</p>
 
       <div className="acciones">
         <button type="button" className="btn suave" onClick={alCerrar}>Cancelar</button>

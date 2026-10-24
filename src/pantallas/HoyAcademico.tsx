@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import type { Tarea } from '../dominio/tipos'
 import { metodoPorId, sugerirMetodo } from '../lib/metodos'
 import { useSesion } from '../sesion/useSesion'
 import { Hoja } from '../ui/Hoja'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
+import { useCumplirTarea } from '../formularios/Evidencia'
 import { useEditorTarea } from '../formularios/EditorTarea'
 import { animoDe, fraseDe, frasesToque, type Animo } from '../lib/avatar'
 import { claseAhora } from '../lib/ahora'
@@ -23,7 +25,8 @@ import { Vacio } from '../ui/Vacio'
 /** Hoy en modo Académico: clase actual, urgencias y tus 3 de hoy de la universidad. */
 export function HoyAcademico() {
   const { ajustes, cambiar } = useAjustes()
-  const { tareas, planes, cursos, clases, habitos, progreso, alternar } = useDatos()
+  const { tareas, planes, cursos, clases, habitos, progreso } = useDatos()
+  const cumplir = useCumplirTarea()
   const sesion = useSesion()
   const [menuEmpezar, setMenuEmpezar] = useState(false)
   const { abrir, nodo } = useEditorTarea()
@@ -71,18 +74,14 @@ export function HoyAcademico() {
     temporizadores.current.push(window.setTimeout(() => setReaccion(null), 4500))
   }
 
-  const alternarTarea = (id: string, estabaHecha: boolean) => {
-    alternar(id)
-    if (estabaHecha) {
-      avisar('Tarea reabierta.')
-      return
-    }
+  const alternarTarea = (t: Tarea) => cumplir(t, { alHecha: () => celebrar(t.id), alReabrir: () => avisar('Tarea reabierta.') })
+  const celebrar = (id: string) => {
     const faltan = plan.filter((t) => t.estado === 'pendiente' && t.id !== id).length
     const dijo = faltan === 0 && plan.some((t) => t.id === id) ? 'Plan de hoy cumplido. Eso sí.' : 'Una menos. Sigue con la siguiente.'
     setReaccion({ frase: dijo, animo: 'contenta' })
     hablarPor(1800)
     temporizadores.current.push(window.setTimeout(() => setReaccion(null), 3500))
-    avisar('Hecha. ' + (faltan === 0 ? 'Cumpliste tu lista.' : `Te faltan ${faltan} de hoy.`))
+    avisar('Hecha, con evidencia. ' + (faltan === 0 ? 'Cumpliste tu lista.' : `Te faltan ${faltan} de hoy.`))
   }
 
   const estado = claseAhora(clases, ahora)
@@ -123,7 +122,7 @@ export function HoyAcademico() {
         {plan.length ? (
           <div className="tlista">
             {plan.map((t) => (
-              <FilaTarea key={t.id} tarea={t} curso={cursos.find((c) => c.id === t.cursoId)} ahora={ahora} alAlternar={() => alternarTarea(t.id, t.estado === 'hecha')} alAbrir={() => abrir(t.id)} />
+              <FilaTarea key={t.id} tarea={t} curso={cursos.find((c) => c.id === t.cursoId)} ahora={ahora} alAlternar={() => alternarTarea(t)} alAbrir={() => abrir(t.id)} />
             ))}
           </div>
         ) : (

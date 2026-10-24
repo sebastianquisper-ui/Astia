@@ -15,6 +15,10 @@ export interface Ajustes {
   mascota: MascotaElegida
   /** Última etapa que viste de cada mascota (para celebrar cuando evoluciona). 0 = la primera. */
   mascotaVista: Record<string, number>
+  /** Cómo vestiste a Alpi: nivel a mostrar (hasta el que alcanzaste) y qué accesorios lleva. */
+  alpiLook?: { nivel?: number; accesorios?: Record<string, boolean> }
+  /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
+  alpi3d?: boolean
   nombre: string
   modoTema: ModoTema
   tamanoLetra: TamanoLetra

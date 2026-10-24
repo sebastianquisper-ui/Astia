@@ -9,6 +9,7 @@ import App from './App'
 import { AvisoProvider } from './ui/Aviso'
 import { AjustesProvider } from './ajustes/AjustesProvider'
 import { DatosProvider } from './datos/DatosProvider'
+import { EvidenciaProvider } from './formularios/Evidencia'
 
 // Registra el service worker: es lo que permite instalar la app y abrirla sin internet
 registerSW({ immediate: true })
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')!).render(
     <AvisoProvider>
       <AjustesProvider>
         <DatosProvider>
-          <App />
+          <EvidenciaProvider>
+            <App />
+          </EvidenciaProvider>
         </DatosProvider>
       </AjustesProvider>
     </AvisoProvider>

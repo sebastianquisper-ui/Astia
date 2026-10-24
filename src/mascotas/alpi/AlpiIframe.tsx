@@ -11,6 +11,8 @@ interface Props {
   /** Embebida: solo Alpi, sin controles. Si no, la página completa con todos sus botones. */
   embebida?: boolean
   sonido?: boolean
+  /** Qué ropa y accesorios lleva (del vestidor). */
+  accesorios?: Record<string, boolean>
   alTocar?: () => void
   className?: string
 }
@@ -18,7 +20,7 @@ interface Props {
 type Orden = { cmd: string; args: unknown[] }
 
 /** Alpi en 3D dentro de un iframe: le manda órdenes con postMessage cuando está lista. */
-export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 0, embebida = true, sonido = false, alTocar, className }: Props) {
+export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 0, embebida = true, sonido = false, accesorios, alTocar, className }: Props) {
   const marco = useRef<HTMLIFrameElement>(null)
   const lista = useRef(false)
   const pendientes = useRef<Orden[]>([])
@@ -62,6 +64,10 @@ export default function AlpiIframe({ nivel, expresion = 'normal', accion, vez = 
     if (accion) enviar('play', accion)
   }, [accion, vez])
   useEffect(() => enviar('setSound', sonido), [sonido])
+  const claveAccesorios = JSON.stringify(accesorios ?? null)
+  useEffect(() => {
+    if (accesorios) for (const [k, on] of Object.entries(accesorios)) enviar('setAccessory', k, on)
+  }, [claveAccesorios])
 
   return <iframe ref={marco} className={'alpi-iframe ' + (className ?? '')} title="Alpi en 3D" srcDoc={doc} sandbox="allow-scripts" />
 }

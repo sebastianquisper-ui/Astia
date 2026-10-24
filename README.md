@@ -19,19 +19,14 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   repetición espaciada, Cornell, práctica intercalada, SQ3R, mapa mental, tarjetas, resolver problemas por pasos)
   y "Solo 10 minutos". Astia sugiere uno por tarea (se puede cambiar en el formulario). Se usan desde
   Hoy → Empezar ya, desde Más → Enfoque y descanso, y el enfoque se suma al progreso del día.
-- **Mascotas que evolucionan:** completo. 8 mascotas (Axolín, Taro, Nube, Mochi, Drako, Stella, Hooty, Alpi) con sus
-  etapas. Están dibujadas por piezas en vectores (`src/mascotas/rig/`): cuerpo, cara (ojos que parpadean, cejas,
-  boca que habla), orejas, cola, alas y branquias que se mueven solas, y accesorios por etapa (sombreros, lentes,
-  bufandas, corona...). Al tocarlas se inclinan con perspectiva, las capas se separan en profundidad y saltan con
-  chispas; su ánimo (seria, alerta, contenta, durmiendo) cambia la cara y el movimiento. Evolucionan con el XP que
-  ganas (se calcula de lo que haces; no se guarda) y piden equilibrio entre estudios y vida personal desde la etapa 3.
-  **Alpi es 3D de verdad** y es la compañera por defecto: su modelo es `src/mascotas/alpi/modelo/alpi-3d.html`
-  (tal cual, con sus 4 niveles, 13 expresiones, acciones, accesorios y sonidos). La app lo carga en un iframe con
-  la librería 3D adentro (three.js 0.149, sin internet) y le manda órdenes: nivel según tu XP y expresión según tu
-  día (regaña si hay algo vencido, duerme de noche). En Hoy aparece grande sobre su planeta; en Más → Mi mascota →
-  Alpi → Probar a Alpi en 3D está su página completa con todos los controles.
-  Las otras 7 usan profundidad simulada con capas. Los dibujos originales de la hoja siguen en
-  `herramientas/mascotas/` y `src/mascotas/sprites/` por si se quiere volver a ellos.
+- **Alpi, tu compañera:** la única mascota (la otra opción es la estrella de siempre). Evoluciona en 4 niveles con
+  el XP que ganas (se calcula de lo que haces; no se guarda) y pide equilibrio entre estudios y vida personal desde
+  la etapa 3. Su modelo 3D es `src/mascotas/alpi/modelo/alpi-3d.html` (tal cual): la app lo carga en un iframe con la
+  librería 3D adentro (three.js 0.149, sin internet) y le manda nivel, expresión (regaña si hay algo vencido, duerme de
+  noche) y la ropa elegida. En Hoy aparece grande sobre su planeta. Se puede apagar el 3D en Ajustes ("Dibujada",
+  gasta menos batería). **Vestidor:** con todo lo de hoy cumplido, se le puede quitar ropa o volver a un nivel anterior.
+- **Evidencia para cumplir:** ninguna tarea se marca hecha sin evidencia: una foto del trabajo (cámara o galería,
+  guardada en el teléfono) o el enlace de la entrega. Reabrir una tarea descarta su evidencia.
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 
 ## Comandos

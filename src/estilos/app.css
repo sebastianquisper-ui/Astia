@@ -862,3 +862,34 @@ button.habito-texto { background: none; padding: 0; border: 0; }
 /* la pantalla de Alpi con todos sus controles */
 .estudio-marco { margin-top: 14px; height: min(86vh, 860px); border-radius: 24px; overflow: hidden; box-shadow: var(--sombra); }
 .estudio-marco .alpi-iframe { background: #f4a6c1; }
+
+/* ---------- evidencia para cumplir una tarea ---------- */
+.hoja-fondo:has(.evidencia) { z-index: 80; } /* también por encima de una sesión de estudio */
+.evidencia { display: flex; flex-direction: column; gap: 12px; }
+.evidencia-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.evidencia-botones .btn { text-align: center; cursor: pointer; }
+.evidencia-foto { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.evidencia-foto img, .ver-evidencia img { width: 100%; max-height: 260px; object-fit: cover; border-radius: 16px; }
+.evidencia-error { margin: 0; color: var(--red); font-weight: 600; }
+.ver-evidencia { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; padding: 12px; border-radius: 16px; background: var(--surface2); }
+.ver-evidencia a { color: var(--accent); overflow-wrap: anywhere; }
+.etiqueta.evidencia-tag { background: color-mix(in srgb, var(--green, #3fb27f) 18%, transparent); color: var(--green, #3fb27f); }
+
+/* ---------- vestidor de Alpi ---------- */
+.enlace-mascotas.bloqueado { opacity: 0.85; }
+.vestidor-icono { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
+.vestidor { display: flex; flex-direction: column; gap: 10px; }
+.vestidor .titulo { margin: 6px 0 0; font-size: 1rem; }
+.vestidor-vista { height: 240px; border-radius: 20px; overflow: hidden; background: radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%); }
+.vestidor-vista .rig { width: 100%; height: 100%; }
+.vestidor-niveles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.vestidor-niveles button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); color: var(--text); font-size: 0.75rem; line-height: 1.2; }
+.vestidor-niveles button span { color: var(--muted); }
+.vestidor-niveles button[aria-pressed='true'] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+.vestidor-niveles button:disabled { opacity: 0.45; }
+.vestidor-accesorios { display: flex; flex-wrap: wrap; gap: 8px; }
+.vestidor-accesorios button { padding: 8px 14px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--text); font-weight: 600; }
+.vestidor-accesorios button[aria-pressed='true'] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.enlace-mascotas.ancho { width: 100%; margin-top: 12px; }
+.evidencia .campo { display: flex; flex-direction: column; gap: 6px; }
+.evidencia .campo input { width: 100%; }

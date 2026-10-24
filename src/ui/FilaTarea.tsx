@@ -20,7 +20,7 @@ export function FilaTarea({ tarea, curso, ahora, alAlternar, alAbrir }: { tarea:
         )}
         {tarea.area !== 'personal' && tarea.tipo === 'examen' && <span className="etiqueta ambar">Examen</span>}
         {tarea.area === 'universidad' && !hecha && <span className="metodo-tag">{metodoPorId(sugerirMetodo(tarea, curso?.nombre)).nombre}</span>}
-        <span className={'etiqueta ' + urgencia}>{textoVence(tarea, ahora)}</span>
+        {hecha && tarea.evidencia ? <span className="etiqueta evidencia-tag">{tarea.evidencia.foto ? 'Con foto' : 'Con enlace'}</span> : <span className={'etiqueta ' + urgencia}>{textoVence(tarea, ahora)}</span>}
       </span>
     </>
   )

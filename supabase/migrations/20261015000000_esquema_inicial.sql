@@ -59,6 +59,7 @@ create table public.tareas (
   pasos          jsonb not null default '[]'::jsonb,
   estado         text not null default 'pendiente' check (estado in ('pendiente', 'hecha')),
   hecha_en       timestamptz,
+  evidencia      jsonb,                                             -- foto (solo en el teléfono) y/o enlace
   gcal_event_id  text,                                              -- fase de Google Calendar
   actualizado_en bigint not null,
   borrado_en     bigint,

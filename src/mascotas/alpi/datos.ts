@@ -30,3 +30,22 @@ export function desdeAnimo(animo: Animo, opciones: { fiesta?: boolean } = {}): {
       return { expresion: 'normal' }
   }
 }
+
+/** Ropa y accesorios que se pueden quitar o poner en el vestidor, y en qué niveles existen. */
+export const ACCESORIOS_ALPI: { id: string; nombre: string; niveles: NivelAlpi[] }[] = [
+  { id: 'chullo', nombre: 'Chullo', niveles: [2] },
+  { id: 'bufanda', nombre: 'Bufanda', niveles: [2, 3] },
+  { id: 'morral', nombre: 'Morral', niveles: [2] },
+  { id: 'baston', nombre: 'Bastón', niveles: [2] },
+  { id: 'chaqueta', nombre: 'Chaqueta', niveles: [3] },
+  { id: 'baston3', nombre: 'Bastón', niveles: [3] },
+  { id: 'mochila', nombre: 'Mochila', niveles: [3, 4] },
+  { id: 'corona', nombre: 'Corona', niveles: [4] },
+  { id: 'capa', nombre: 'Capa', niveles: [4] },
+  { id: 'baston4', nombre: 'Bastón elemental', niveles: [4] },
+]
+
+/** Cómo viene Alpi de fábrica (el bastón del nivel 2 empieza guardado). */
+export const ACCESORIOS_INICIALES: Record<string, boolean> = {
+  chullo: true, bufanda: true, morral: true, baston: false, chaqueta: true, baston3: true, mochila: true, corona: true, capa: true, baston4: true,
+}

@@ -53,6 +53,16 @@ export interface Tarea extends Registro {
   estado: 'pendiente' | 'hecha'
   /** Momento en que se marcó hecha (ISO). */
   hechaEn?: string
+  /** La prueba de que se hizo. Sin evidencia, una tarea no se puede marcar hecha. */
+  evidencia?: Evidencia
+}
+
+/** Evidencia de una tarea: una foto (guardada aparte, en el teléfono) y/o el enlace de la entrega. */
+export interface Evidencia {
+  foto: boolean
+  enlace?: string
+  /** Cuándo se entregó (ISO). */
+  fecha: string
 }
 
 /** Tema y notas de una semana del ciclo para un curso. */

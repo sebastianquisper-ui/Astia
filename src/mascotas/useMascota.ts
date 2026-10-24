@@ -16,6 +16,7 @@ export function useMascota(): MascotaActual {
   const { ajustes } = useAjustes()
   const { tareas, habitos, rutinas, progreso } = useDatos()
   const xp = useMemo(() => calcularXP({ tareas, habitos, rutinas, progreso }), [tareas, habitos, rutinas, progreso])
-  const mascota = ajustes.mascota === 'astia' ? null : (mascotaPorId(ajustes.mascota) ?? null)
+  // Si habías elegido una mascota que ya no existe, te acompaña Alpi.
+  const mascota = ajustes.mascota === 'astia' ? null : (mascotaPorId(ajustes.mascota) ?? mascotaPorId('alpi') ?? null)
   return { mascota, estado: mascota ? estadoDe(mascota, xp) : null, xp, total: totalXP(xp) }
 }

@@ -1,11 +1,10 @@
 import { useId } from 'react'
 import type { Animo } from '../../lib/avatar'
 import { MASCOTAS, type MascotaId } from '../../lib/mascotas'
-import { alpi, hooty, drako, stella } from './especiesB'
-import { axolin, mochi, nube, taro } from './especiesA'
+import { alpi } from './alpi'
 import type { Dibujar } from './tipos'
 
-const DIBUJOS: Record<MascotaId, Dibujar> = { axolin, taro, nube, mochi, drako, stella, hooty, alpi }
+const DIBUJOS: Record<MascotaId, Dibujar> = { alpi }
 
 interface Props {
   mascota: MascotaId

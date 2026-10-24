@@ -54,6 +54,7 @@ export function aFilas(d: Datos): Filas {
         pasos: t.pasos,
         estado: t.estado,
         hecha_en: t.hechaEn ?? null,
+        evidencia: t.evidencia ?? null,
         actualizado_en: t.actualizadoEn,
         borrado_en: t.borradoEn ?? null,
       }),
@@ -124,6 +125,7 @@ export function deFilas(f: Partial<Filas>): Datos {
     if (hora !== undefined) t.hora = hora
     if (metodo !== undefined) t.metodo = metodo
     if (r.hecha_en) t.hechaEn = new Date(r.hecha_en as string | Date).toISOString()
+    if (r.evidencia && typeof r.evidencia === 'object') t.evidencia = r.evidencia as Tarea['evidencia']
     return conBorrado(t, r)
   })
   d.semanas = (f.semanas ?? []).map((r) =>

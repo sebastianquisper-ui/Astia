@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
+import { useCumplirTarea } from '../formularios/Evidencia'
 import { useEditorTarea } from '../formularios/EditorTarea'
 import { porUrgencia, urgenciaDe } from '../lib/urgencia'
 import { useAviso } from '../ui/Aviso'
@@ -11,7 +12,8 @@ import { Vacio } from '../ui/Vacio'
 /** Tareas (Académico) o Pendientes (Mi Órbita): cada modo ve solo lo suyo. */
 export function Tareas() {
   const { ajustes } = useAjustes()
-  const { tareas, cursos, alternar } = useDatos()
+  const { tareas, cursos } = useDatos()
+  const cumplir = useCumplirTarea()
   const { abrir, nodo } = useEditorTarea()
   const avisar = useAviso()
   const ahora = useAhora()
@@ -33,10 +35,7 @@ export function Tareas() {
           curso={cursos.find((c) => c.id === t.cursoId)}
           ahora={ahora}
           alAbrir={() => abrir(t.id)}
-          alAlternar={() => {
-            alternar(t.id)
-            avisar(t.estado === 'hecha' ? (personal ? 'Pendiente reabierto.' : 'Tarea reabierta.') : 'Hecha. Una menos.')
-          }}
+          alAlternar={() => cumplir(t, { alReabrir: () => avisar(personal ? 'Pendiente reabierto.' : 'Tarea reabierta.') })}
         />
       ))}
     </div>

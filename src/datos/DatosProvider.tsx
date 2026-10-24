@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { Clase, Curso, Datos, Habito, Mejora, PlanDia, Perfil, ProgresoDia, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
+import type { Clase, Curso, Datos, Evidencia, Habito, Mejora, PlanDia, Perfil, ProgresoDia, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
 import { datosDeEjemplo } from '../demo/datosEjemplo'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { guardarLocal } from '../lib/almacen'
@@ -46,7 +46,8 @@ export interface Contexto {
   hayDatos: boolean
   /** Estás viendo los datos de ejemplo, no los tuyos. */
   enEjemplo: boolean
-  alternar: (id: string) => void
+  /** Reabre una tarea hecha, o la marca hecha con su evidencia (sin evidencia no se marca). */
+  alternar: (id: string, evidencia?: Evidencia) => void
   guardarTarea: (t: Tarea) => void
   borrarTarea: (id: string) => void
   guardarCurso: (c: Curso) => void
@@ -110,7 +111,7 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       progreso: activos(datos.progreso),
       hayDatos: activos(datos.cursos).length > 0 || activos(datos.tareas).length > 0 || activos(datos.habitos).length > 0,
       enEjemplo,
-      alternar: (id) => editar((d) => alternarTarea(d, id, new Date())),
+      alternar: (id, evidencia) => editar((d) => alternarTarea(d, id, new Date(), evidencia)),
       guardarTarea: (t) => editar((d) => ({ ...d, tareas: guardarRegistro(d.tareas, t, ahora()) })),
       borrarTarea: (id) => editar((d) => ({ ...d, tareas: borrarRegistro(d.tareas, id, ahora()) })),
       guardarCurso: (c) => editar((d) => ({ ...d, cursos: guardarRegistro(d.cursos, c, ahora()) })),

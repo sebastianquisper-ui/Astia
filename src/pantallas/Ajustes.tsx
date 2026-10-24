@@ -144,6 +144,15 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
       </div>
 
       <div className="campo">
+        <span className="etiqueta" id="et-3d">Alpi en 3D</span>
+        <div className="seg" role="group" aria-labelledby="et-3d">
+          <button aria-pressed={ajustes.alpi3d !== false} onClick={() => cambiar({ alpi3d: true })}>Sí</button>
+          <button aria-pressed={ajustes.alpi3d === false} onClick={() => cambiar({ alpi3d: false })}>Dibujada</button>
+        </div>
+        <p className="nota">En 3D se mueve, reacciona y se transforma. Dibujada gasta menos batería.</p>
+      </div>
+
+      <div className="campo">
         <span className="etiqueta" id="et-demo">Datos de ejemplo</span>
         <div className="seg" role="group" aria-labelledby="et-demo">
           <button aria-pressed={ajustes.datosEjemplo} onClick={() => cambiar({ datosEjemplo: true })}>Mostrar</button>

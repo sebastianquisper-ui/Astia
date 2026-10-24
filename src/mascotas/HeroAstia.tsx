@@ -1,10 +1,11 @@
 import { lazy, Suspense } from 'react'
 import type { Animo } from '../lib/avatar'
-import { desdeAnimo, nivelAlpi } from './alpi/datos'
-import { hayWebGL } from './alpi/webgl'
+import { desdeAnimo } from './alpi/datos'
+import { useAlpi3D } from './alpi/useAlpi3D'
 import { AvatarMascota } from './AvatarMascota'
 import { AvisoMascotas } from './AvisoMascotas'
-import { MascotaMini } from './MascotaVista'
+import { BotonVestidor } from './alpi/Vestidor'
+import { useVestidor } from './alpi/useVestidor'
 import { Rig } from './rig/Rig'
 import { useMascota } from './useMascota'
 
@@ -20,30 +21,24 @@ interface Props {
 /** La parte de arriba de Hoy: tu compañero y lo que te dice. Con Alpi, en grande sobre su planeta. */
 export function HeroAstia({ animo, habla, frase, alTocar }: Props) {
   const { mascota, estado } = useMascota()
-  if (mascota?.id === 'alpi' && estado && hayWebGL()) {
-    const nivel = nivelAlpi(estado.indice + 1)
+  const vestidor = useVestidor()
+  const en3d = useAlpi3D()
+  if (mascota?.id === 'alpi' && estado && en3d) {
+    const nivel = vestidor.nivel
     const { expresion, accion } = desdeAnimo(animo)
     return (
       <div className="hero-alpi" data-animo={animo}>
         <div className="planeta" aria-hidden="true" />
         <div className="hero-alpi-modelo" data-nivel={nivel} data-expresion={expresion}>
           <Suspense fallback={<Rig mascota="alpi" etapa={nivel} animo={animo} habla={habla} />}>
-            <AlpiIframe nivel={nivel} expresion={expresion} accion={accion} alTocar={alTocar} />
+            <AlpiIframe nivel={nivel} expresion={expresion} accion={accion} accesorios={vestidor.accesorios} alTocar={alTocar} />
           </Suspense>
         </div>
         <div className="hero-alpi-lado">
           <button className="burbuja burbuja-alpi" onClick={alTocar} aria-label="Hablar con Astia">
             <p aria-live="polite">{frase}</p>
           </button>
-          <button className="enlace-mascotas" onClick={() => (window.location.hash = '#/mas/mascota')}>
-            <span className="enlace-mascotas-caras" aria-hidden="true">
-              <MascotaMini mascota="alpi" etapa={1} tam={34} />
-              <MascotaMini mascota="stella" etapa={1} tam={30} />
-              <MascotaMini mascota="nube" etapa={1} tam={30} />
-            </span>
-            <span>Conoce a las mascotas que evolucionan contigo</span>
-            <span className="enlace-mascotas-flecha" aria-hidden="true">›</span>
-          </button>
+          <BotonVestidor />
         </div>
       </div>
     )
@@ -58,7 +53,7 @@ export function HeroAstia({ animo, habla, frase, alTocar }: Props) {
           <p>{frase}</p>
         </div>
       </div>
-      <AvisoMascotas />
+      {mascota?.id === 'alpi' ? <BotonVestidor className="enlace-mascotas ancho" /> : <AvisoMascotas />}
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
+import { useCumplirTarea } from '../formularios/Evidencia'
 import { useEditorTarea } from '../formularios/EditorTarea'
 import { useEjecutorRutina } from '../formularios/EjecutarRutina'
 import { FormHabito } from '../formularios/FormHabito'
@@ -23,7 +24,8 @@ import { Vacio } from '../ui/Vacio'
 /** Hoy en modo Mi Órbita: hábitos del día, rutina del momento y pendientes personales. */
 export function HoyPersonal() {
   const { ajustes, cambiar } = useAjustes()
-  const { tareas, planes, habitos, rutinas, alternarHabito, guardarHabito, alternar } = useDatos()
+  const { tareas, planes, habitos, rutinas, alternarHabito, guardarHabito } = useDatos()
+  const cumplir = useCumplirTarea()
   const { abrir, nodo } = useEditorTarea()
   const ejecutor = useEjecutorRutina()
   const avisar = useAviso()
@@ -130,10 +132,7 @@ export function HoyPersonal() {
                 tarea={t}
                 ahora={ahora}
                 alAbrir={() => abrir(t.id)}
-                alAlternar={() => {
-                  alternar(t.id)
-                  if (t.estado === 'pendiente') reaccionar('Un pendiente menos. Lo personal también cuenta.', 'contenta')
-                }}
+                alAlternar={() => cumplir(t, { alHecha: () => reaccionar('Un pendiente menos. Lo personal también cuenta.', 'contenta') })}
               />
             ))}
           </div>

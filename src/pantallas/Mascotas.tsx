@@ -1,3 +1,4 @@
+import { BotonVestidor } from '../mascotas/alpi/Vestidor'
 import { useState } from 'react'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { AREAS_XP, MASCOTAS, estadoDe, umbralesDe, type Mascota, type MascotaElegida } from '../lib/mascotas'
@@ -32,7 +33,7 @@ export function Mascotas({ alVolver }: { alVolver: () => void }) {
         <Icono nombre="izquierda" /> Más
       </button>
       <h1 className="titulo">Mi mascota</h1>
-      <p className="sub">Tu compañero evoluciona con lo que haces: tareas, hábitos, rutinas y cuidarte. Tócalo para que se mueva.</p>
+      <p className="sub">Alpi evoluciona con lo que haces: tareas, hábitos, rutinas y cuidarte. Tócala para que reaccione.</p>
 
       <div className="tarjeta mascota-actual">
         {mascota && estado ? (
@@ -51,6 +52,7 @@ export function Mascotas({ alVolver }: { alVolver: () => void }) {
                   ? 'Llegó a su última etapa. Sigue cumpliendo para mantenerlo feliz.'
                   : `${total} de ${estado.xpSiguiente} XP para la siguiente etapa.`}
             </p>
+            {mascota.id === 'alpi' && <BotonVestidor className="enlace-mascotas ancho" />}
           </>
         ) : (
           <>

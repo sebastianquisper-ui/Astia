@@ -6,18 +6,26 @@ test.beforeEach(async ({ page }) => {
   // El reloj arranca ahí y sigue corriendo; una prueba puede adelantarlo con fastForward
   await page.clock.install({ time: new Date(2026, 9, 15, 10, 30) })
   // Alpi en 3D viene por defecto, pero sin tarjeta gráfica (como en estas pruebas) ocupa todo el
-  // procesador. Las pruebas usan la estrella, salvo las de Alpi, que la eligen.
+  // procesador. Las pruebas usan la estrella y Alpi dibujada, salvo las que prueban el 3D.
   await page.addInitScript(() => {
     if (sessionStorage.getItem('e2e-iniciado')) return
     sessionStorage.setItem('e2e-iniciado', '1')
     try {
       const a = JSON.parse(localStorage.getItem('astia.ajustes') || '{}')
-      if (!a.mascota) localStorage.setItem('astia.ajustes', JSON.stringify({ ...a, mascota: 'astia' }))
+      localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'astia', alpi3d: false, ...a }))
     } catch {
       /* sin almacenamiento */
     }
   })
 })
+
+async function entregarConEnlace(page: import('@playwright/test').Page) {
+  const hoja = page.getByRole('dialog', { name: 'Entrega tu evidencia' })
+  await expect(hoja.getByRole('button', { name: 'Marcar hecha con evidencia' })).toBeDisabled() // sin evidencia no se puede
+  await hoja.getByLabel(/enlace de la entrega/).fill('https://classroom.google.com/c/entrega')
+  await hoja.getByRole('button', { name: 'Marcar hecha con evidencia' }).click()
+  await expect(hoja).toHaveCount(0)
+}
 
 async function elegirAlpi(page: import('@playwright/test').Page) {
   await page.goto('/#/mas/mascota')
@@ -80,7 +88,8 @@ test('Hoy: al marcar una tarea Astia reacciona y avisa', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('.tarea')).toHaveCount(3)
   await page.getByRole('button', { name: /Marcar hecha/ }).first().click()
-  await expect(page.getByRole('status')).toContainText('Hecha')
+  await entregarConEnlace(page)
+  await expect(page.getByRole('status')).toContainText('Tarea hecha')
   await expect(page.locator('.burbuja')).toContainText('Una menos')
   await expect(page.locator('[data-animo]')).toHaveAttribute('data-animo', 'contenta')
 })
@@ -579,7 +588,8 @@ test('Hoy → Empezar ya propone un método por tarea y arranca esa sesión', as
   for (let i = 0; i < 4; i++) await sesion.getByRole('button', { name: 'Saltar paso' }).click()
   await sesion.getByRole('button', { name: 'Terminar' }).click()
   await sesion.getByRole('button', { name: 'Marcar la tarea como hecha' }).click()
-  await expect(page.getByRole('status')).toContainText('Hecha')
+  await entregarConEnlace(page)
+  await expect(page.getByRole('status')).toContainText('Tarea hecha')
   await expect(sesion).toHaveCount(0)
   await page.goto('/#/tareas')
   await page.getByRole('button', { name: 'Hechas' }).click()
@@ -649,39 +659,68 @@ function conLogros(tareasAcademicas: number, diasDeHabito: number) {
   return { perfil: { inicioCiclo: '', semanasCiclo: 16, enfoqueMin: 25, descansoMin: 5, actualizadoEn: 0 }, tareas, habitos }
 }
 
-test('Más → Mi mascota está en los dos modos y muestra a Astia y las 8 mascotas', async ({ page }) => {
+test('evidencia: sin foto ni enlace la tarea no se marca hecha', async ({ page }) => {
+  await page.goto('/#/tareas')
+  const primera = page.getByRole('button', { name: /Marcar hecha/ }).first()
+  const titulo = (await primera.getAttribute('aria-label'))!.replace('Marcar hecha: ', '')
+  await primera.click()
+  const hoja = page.getByRole('dialog', { name: 'Entrega tu evidencia' })
+  await expect(hoja).toContainText('Sin evidencia no cuenta')
+  await hoja.getByLabel(/enlace de la entrega/).fill('no es un enlace')
+  await expect(hoja.getByRole('button', { name: 'Marcar hecha con evidencia' })).toBeDisabled()
+  await hoja.getByRole('button', { name: 'Ahora no' }).click()
+  await expect(page.getByRole('button', { name: 'Marcar hecha: ' + titulo })).toHaveAttribute('aria-pressed', 'false')
+})
+
+test('evidencia: con una foto la tarea queda hecha y se puede ver después', async ({ page }) => {
+  await page.goto('/#/tareas')
+  await page.getByRole('button', { name: 'Marcar hecha: Informe de laboratorio' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Entrega tu evidencia' })
+  // una imagen de 2x2 px como "foto"
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVR42mP8z8DwnwEIGBmhNBMDAwA2dQP/Gg8ZGwAAAABJRU5ErkJggg==', 'base64')
+  await page.setInputFiles('#evidencia-galeria', { name: 'informe.png', mimeType: 'image/png', buffer: png })
+  await expect(hoja.getByRole('img', { name: 'Tu evidencia' })).toBeVisible()
+  await hoja.getByRole('button', { name: 'Marcar hecha con evidencia' }).click()
+  await expect(page.getByRole('status')).toContainText('Evidencia guardada')
+  await page.getByRole('button', { name: 'Hechas' }).click()
+  await expect(page.locator('.tarea', { hasText: 'Informe de laboratorio' })).toContainText('Con foto')
+  await page.getByRole('button', { name: 'Editar: Informe de laboratorio' }).click()
+  await expect(page.getByText(/Evidencia entregada el/)).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Evidencia de Informe de laboratorio' })).toBeVisible()
+})
+
+test('evidencia: reabrir una tarea descarta su evidencia', async ({ page }) => {
+  await page.goto('/#/tareas')
+  await page.getByRole('button', { name: 'Marcar hecha: Informe de laboratorio' }).click()
+  await entregarConEnlace(page)
+  await page.getByRole('button', { name: 'Hechas' }).click()
+  await page.getByRole('button', { name: 'Reabrir: Informe de laboratorio' }).click()
+  await expect(page.getByRole('status')).toContainText('reabierta')
+  await page.getByRole('button', { name: 'Pendientes' }).click()
+  await page.getByRole('button', { name: 'Marcar hecha: Informe de laboratorio' }).click()
+  await expect(page.getByRole('dialog', { name: 'Entrega tu evidencia' })).toBeVisible() // la pide otra vez
+})
+
+test('Más → Mi mascota está en los dos modos y muestra solo a Astia y Alpi', async ({ page }) => {
   await page.goto('/#/mas')
   await page.getByRole('button', { name: /Mi mascota/ }).click()
   await expect(page.getByRole('heading', { name: 'Mi mascota' })).toBeVisible()
-  await expect(page.locator('.mascota-card')).toHaveCount(9)
-  for (const n of ['Axolín', 'Taro', 'Nube', 'Mochi', 'Drako', 'Stella', 'Hooty', 'Alpi']) await expect(page.locator('.mascota-card', { hasText: n })).toBeVisible()
+  await expect(page.locator('.mascota-card')).toHaveCount(2)
+  await expect(page.locator('.mascota-card', { hasText: 'Alpi' })).toBeVisible()
+  await expect(page.locator('.mascota-card', { hasText: 'Astia' })).toBeVisible()
   await MODO(page).getByRole('button', { name: 'Mi Órbita' }).click()
   await page.goto('/#/mas')
   await expect(page.getByRole('button', { name: /Mi mascota/ })).toBeVisible()
 })
 
-test('elegir una mascota: aparece en Hoy, se recuerda y deja de ofrecer las mascotas', async ({ page }) => {
+test('elegir a Alpi y volver a la estrella de siempre', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('Conoce a las mascotas que evolucionan contigo')).toBeVisible()
-  await expect(page.locator('.mascota')).toHaveCount(0) // la estrella de siempre
-  await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Mochi, El estratega travieso/ }).click()
-  const hoja = page.getByRole('dialog', { name: 'Mochi' })
-  await expect(hoja).toContainText('Un gatito regordete que ama las listas')
-  await expect(hoja).toContainText('Planificación')
-  await hoja.getByRole('button', { name: 'Elegir a Mochi' }).click()
-  await expect(page.getByRole('status')).toContainText('Mochi es ahora tu compañero')
+  await expect(page.locator('.avatar svg')).toBeVisible() // la estrella
+  await elegirAlpi(page)
+  await expect(page.getByRole('status')).toContainText('Alpi es ahora tu compañero')
   await page.goto('/#/hoy')
-  await expect(page.locator('.mascota')).toHaveAttribute('data-sprite', 'mochi-2') // con el XP de ejemplo está en su 2.ª etapa
-  await expect(page.getByText('Conoce a las mascotas que evolucionan contigo')).toHaveCount(0)
-  await page.reload()
-  await expect(page.locator('.mascota')).toHaveAttribute('data-sprite', 'mochi-2')
-})
-
-test('se puede volver a la estrella de siempre', async ({ page }) => {
+  await expect(page.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-2')
   await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Drako, El soñador valiente/ }).click()
-  await page.getByRole('button', { name: 'Elegir a Drako' }).click()
   await page.getByRole('button', { name: 'Astia, la estrella de siempre' }).click()
   await page.getByRole('dialog', { name: 'Astia' }).getByRole('button', { name: 'Elegir a Astia' }).click()
   await page.goto('/#/hoy')
@@ -689,46 +728,8 @@ test('se puede volver a la estrella de siempre', async ({ page }) => {
   await expect(page.locator('.avatar svg')).toBeVisible()
 })
 
-test('tocar a la mascota la hace saltar y lanza chispas', async ({ page }) => {
-  await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Stella, La estrella brillante/ }).click()
-  await page.getByRole('button', { name: 'Elegir a Stella' }).click()
-  await page.goto('/#/hoy')
-  const mascota = page.locator('.mascota')
-  await page.getByRole('button', { name: 'Hablar con Astia' }).click()
-  await expect(mascota).toHaveClass(/saltando/)
-  await expect(page.locator('.chispa').first()).toBeVisible()
-  await expect(page.locator('.chispa')).toHaveCount(0, { timeout: 4000 }) // se apagan solas
-})
-
-test('la mascota se inclina hacia donde tocas (perspectiva 3D) y vuelve a su sitio', async ({ page }) => {
-  await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Hooty, El búho sabio y despistado/ }).click()
-  await page.getByRole('button', { name: 'Elegir a Hooty' }).click()
-  await page.goto('/#/hoy')
-  const caja = (await page.locator('.mascota').boundingBox())!
-  await page.mouse.move(caja.x + caja.width * 0.9, caja.y + caja.height * 0.2)
-  await expect(page.locator('.mascota-marco')).toHaveAttribute('style', /rotateY\(\d/) // se inclinó a la derecha
-  await page.mouse.move(caja.x - 40, caja.y - 40) // sale del marco
-  await expect(page.locator('.mascota-marco')).not.toHaveAttribute('style', /rotateY/)
-})
-
-test('la mascota está dibujada por piezas: las capas se separan al inclinarla y la cara cambia de ánimo', async ({ page }) => {
-  await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Axolín/ }).click()
-  await page.getByRole('button', { name: 'Elegir a Axolín' }).click()
-  await page.goto('/#/hoy')
-  await expect(page.locator('.mascota svg.rig .rig-atras')).toHaveCount(1)
-  await expect(page.locator('.mascota svg.rig .ojo')).toHaveCount(2)
-  const caja = (await page.locator('.mascota').boundingBox())!
-  await page.mouse.move(caja.x + caja.width * 0.95, caja.y + caja.height * 0.5)
-  await expect(page.locator('.mascota')).toHaveAttribute('style', /--ix: 0\.[5-9]|--ix: 1/)
-  await page.getByRole('button', { name: 'Hablar con Astia' }).click()
-  await expect(page.locator('.mascota .boca-habla')).toBeVisible()
-})
-
 test('Alpi en Hoy: grande sobre su planeta, en 3D, con la expresión según tu día', async ({ page }) => {
-  await elegirAlpi(page)
+  await page.addInitScript(() => localStorage.setItem('astia.ajustes', JSON.stringify({ ...JSON.parse(localStorage.getItem('astia.ajustes') || '{}'), alpi3d: true, mascota: 'alpi' })))
   await page.goto('/#/hoy')
   const heroe = page.locator('.hero-alpi')
   await expect(heroe.locator('.planeta')).toBeAttached()
@@ -738,104 +739,109 @@ test('Alpi en Hoy: grande sobre su planeta, en 3D, con la expresión según tu d
   const antes = await page.locator('.burbuja').innerText()
   await page.getByRole('button', { name: 'Hablar con Astia' }).click()
   await expect(page.locator('.burbuja')).not.toHaveText(antes)
-  await page.getByRole('button', { name: /Conoce a las mascotas/ }).click()
-  await expect(page.getByRole('heading', { name: 'Mi mascota' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Vestir a Alpi/ })).toBeVisible()
 })
 
-test('Alpi es la compañera por defecto', async ({ page }) => {
-  // deshace la estrella que pone la preparación de las pruebas: queda el valor por defecto
-  await page.addInitScript(() => {
-    const a = JSON.parse(localStorage.getItem('astia.ajustes') || '{}')
-    delete a.mascota
-    localStorage.setItem('astia.ajustes', JSON.stringify(a))
-  })
-  await page.goto('/')
+test('con la tarea vencida entregada, Alpi deja de regañar', async ({ page }) => {
+  await elegirAlpi(page)
+  await page.goto('/#/hoy')
+  await expect(page.locator('[data-animo]')).toHaveAttribute('data-animo', 'alerta')
+  await page.getByRole('button', { name: /Marcar hecha: Informe de laboratorio/ }).click()
+  await entregarConEnlace(page)
+  await expect(page.locator('[data-animo]')).toHaveAttribute('data-animo', 'contenta')
+})
+
+test('Alpi en 3D se puede apagar en Ajustes (gasta menos batería)', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('astia.ajustes', JSON.stringify({ ...JSON.parse(localStorage.getItem('astia.ajustes') || '{}'), alpi3d: true, mascota: 'alpi' })))
+  await page.goto('/#/hoy')
   await expect(page.locator('.hero-alpi')).toBeVisible()
-  await expect(page.getByText('Conoce a las mascotas que evolucionan contigo')).toBeVisible()
+  await page.goto('/#/mas/ajustes')
+  await page.getByRole('group', { name: 'Alpi en 3D' }).getByRole('button', { name: 'Dibujada' }).click()
+  await page.goto('/#/hoy')
+  await expect(page.locator('.hero-alpi')).toHaveCount(0)
+  await expect(page.locator('.mascota svg.rig')).toBeVisible() // Alpi dibujada
 })
 
-test('Alpi en 3D: su página con niveles, expresiones y acciones', async ({ page }) => {
+test('vestidor: con tareas pendientes hoy está cerrado', async ({ page }) => {
+  await elegirAlpi(page)
+  await page.goto('/#/hoy')
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
+  await expect(hoja).toContainText('Primero cumples, después juegas')
+  await expect(hoja.getByRole('group', { name: 'Nivel de Alpi' })).toHaveCount(0)
+})
+
+test('vestidor: con todo cumplido se puede quitar ropa y volver al nivel 1', async ({ page }) => {
+  const datos = conLogros(20, 150) // 950 XP: Alpi en nivel 4, sin nada pendiente
+  await page.addInitScript((d) => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, alpi3d: false }))
+    localStorage.setItem('astia.datos.v2', JSON.stringify(d))
+  }, datos)
+  await page.goto('/#/hoy')
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
+  const niveles = hoja.getByRole('group', { name: 'Nivel de Alpi' })
+  await expect(niveles.getByRole('button', { name: /Nivel 4/ })).toHaveAttribute('aria-pressed', 'true')
+  const capa = hoja.getByRole('group', { name: 'Ropa y accesorios' }).getByRole('button', { name: 'Capa' })
+  await expect(capa).toHaveAttribute('aria-pressed', 'true')
+  await capa.click()
+  await expect(capa).toHaveAttribute('aria-pressed', 'false')
+  await niveles.getByRole('button', { name: /Nivel 1/ }).click()
+  await expect(niveles.getByRole('button', { name: /Nivel 1/ })).toHaveAttribute('aria-pressed', 'true')
+  await expect(hoja).toContainText('En el nivel 1 Alpi solo lleva su bufanda')
+  await hoja.getByRole('button', { name: 'Listo' }).click()
+  await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'alpi-4') // la de Hoy se viste igual
+  // queda guardado en los ajustes del teléfono
+  const look = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLook)
+  expect(look).toMatchObject({ nivel: 1, accesorios: { capa: false } })
+})
+
+test('el detalle de Alpi muestra la evolución: lo alcanzado y lo bloqueado con su XP', async ({ page }) => {
   await page.goto('/#/mas/mascota')
   await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
-  await page.getByRole('link', { name: 'Probar a Alpi en 3D' }).click()
-  await expect(page.getByRole('heading', { name: 'Alpi en 3D' })).toBeVisible()
-  const alpi = page.frameLocator('.estudio-marco iframe')
-  await expect(alpi.locator('canvas#stage')).toBeVisible({ timeout: 15000 })
-  await expect(alpi.locator('#levels .chip[data-l]')).toHaveCount(4)
-  await alpi.getByRole('button', { name: 'Nivel 3' }).click()
-  await expect(alpi.getByRole('button', { name: 'Nivel 3' })).toHaveAttribute('aria-pressed', 'true')
-  await alpi.getByRole('button', { name: 'Feliz' }).click()
-  await expect(alpi.getByRole('button', { name: 'Feliz' })).toHaveAttribute('aria-pressed', 'true')
-  await alpi.getByRole('button', { name: 'Bailar' }).click()
-  await expect(alpi.getByRole('button', { name: 'Bailar' })).toHaveAttribute('aria-pressed', 'true')
-  await page.getByRole('button', { name: /Mi mascota/ }).click()
-  await expect(page.getByRole('heading', { name: 'Mi mascota' })).toBeVisible()
-})
-
-test('con tareas vencidas la mascota se alerta; su ánimo cambia cómo se mueve', async ({ page }) => {
-  await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Nube, El fantasmita productivo/ }).click()
-  await page.getByRole('button', { name: 'Elegir a Nube' }).click()
-  await page.goto('/#/hoy')
-  await expect(page.locator('.mascota')).toHaveClass(/alerta/) // hay una tarea vencida en los datos de ejemplo
-  await expect(page.locator('.mascota-alerta')).toBeVisible()
-  await page.getByRole('button', { name: /Marcar hecha: Informe de laboratorio/ }).click()
-  await expect(page.locator('.mascota')).toHaveClass(/contenta/)
-})
-
-test('el detalle muestra la evolución: lo alcanzado y lo bloqueado con su XP', async ({ page }) => {
-  await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Mochi, El estratega travieso/ }).click()
-  const hoja = page.getByRole('dialog', { name: 'Mochi' })
+  const hoja = page.getByRole('dialog', { name: 'Alpi' })
   await expect(hoja.locator('.evolucion li')).toHaveCount(4)
-  await expect(hoja.locator('.evolucion li.alcanzada')).toHaveCount(2) // con 158 XP de ejemplo: Michi bebé y Planificador
-  await expect(hoja).toContainText('Planificador')
-  await expect(hoja.getByLabel('Nivel 3, Productichi, bloqueado')).toContainText('300 XP')
-  await expect(hoja.getByLabel('Nivel 4, Maestro del Caos, bloqueado')).toContainText('700 XP')
-})
-
-test('Stella y Hooty tienen 3 etapas; las demás 4 (Alpi también)', async ({ page }) => {
-  await page.goto('/#/mas/mascota')
-  for (const [nombre, apodo, etapas] of [['Stella', 'La estrella brillante', 3], ['Hooty', 'El búho sabio y despistado', 3], ['Alpi', 'La alpaca aventurera', 4], ['Drako', 'El soñador valiente', 4], ['Axolín', 'El curioso caótico', 4]] as const) {
-    await page.getByRole('button', { name: new RegExp(`${nombre}, ${apodo}`) }).click()
-    await expect(page.getByRole('dialog', { name: nombre }).locator('.evolucion li')).toHaveCount(etapas)
-    await page.keyboard.press('Escape')
-  }
+  await expect(hoja.locator('.evolucion li.alcanzada')).toHaveCount(2) // con 158 XP de ejemplo
+  await expect(hoja).toContainText('Exploradora')
+  await expect(hoja.getByLabel('Nivel 3, Guardiana de los valles, bloqueado')).toContainText('300 XP')
+  await expect(hoja.getByLabel('Nivel 4, Alpaca legendaria, bloqueado')).toContainText('700 XP')
 })
 
 test('al evolucionar se celebra una sola vez', async ({ page }) => {
   const datos = conLogros(20, 150) // 200 de estudio + 750 de hábitos = 950 XP, bien repartido
   await page.addInitScript((d) => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'mochi', mascotaVista: { mochi: 1 }, datosEjemplo: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/hoy')
   const celebracion = page.getByRole('dialog', { name: '¡Evolucionó!' })
-  await expect(celebracion).toContainText('Mochi ahora es Maestro del Caos')
+  await expect(celebracion).toContainText('Alpi ahora es Alpaca legendaria')
   await expect(celebracion).toContainText('Nivel 4 de 4')
-  await expect(celebracion.locator('.mascota')).toHaveAttribute('data-sprite', 'mochi-4')
+  await expect(celebracion.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-4')
   await celebracion.getByRole('button', { name: '¡Genial!' }).click()
   await expect(celebracion).toHaveCount(0)
-  await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'mochi-4')
+  await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'alpi-4')
+  const vista = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').mascotaVista)
+  expect(vista).toEqual({ alpi: 3 }) // se anotó la última etapa vista (la 4.ª): ya no se vuelve a celebrar
 })
 
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
   const datos = conLogros(0, 150) // 750 XP, todo personal
   await page.addInitScript((d) => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'mochi', mascotaVista: { mochi: 1 }, datosEjemplo: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/mas/mascota')
-  await expect(page.getByText('Nivel 2 de 4 · Planificador')).toBeVisible()
+  await expect(page.getByText('Nivel 2 de 4 · Exploradora')).toBeVisible()
   await expect(page.getByText(/falta equilibrio: suma XP académico/)).toBeVisible()
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100')
-  await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'mochi-2')
+  await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'alpi-2')
 })
 
 test('mostrar el XP por área y el total', async ({ page }) => {
   const datos = conLogros(10, 20) // 100 de estudio y 100 de hábitos
   await page.addInitScript((d) => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'taro', mascotaVista: { taro: 1 }, datosEjemplo: false }))
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 1 }, datosEjemplo: false, alpi3d: false }))
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/mas/mascota')

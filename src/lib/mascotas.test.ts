@@ -11,37 +11,26 @@ const vacio = { tareas: [], habitos: [], rutinas: [], progreso: [] }
 const xp = (a = 0, p = 0, h = 0, c = 0): XP => ({ academico: a, personal: p, habitos: h, cuidado: c })
 
 describe('catálogo de mascotas', () => {
-  it('son 8, con textos completos', () => {
-    expect(MASCOTAS).toHaveLength(8)
-    for (const m of MASCOTAS) expect(m.nombre && m.apodo && m.descripcion && m.etiquetas[0] && m.etiquetas[1]).toBeTruthy()
-    expect(new Set(MASCOTAS.map((m) => m.id)).size).toBe(8)
+  it('solo está Alpi, con 4 etapas y textos completos', () => {
+    expect(MASCOTAS.map((m) => m.id)).toEqual(['alpi'])
+    const [alpi] = MASCOTAS
+    expect(alpi.nombre && alpi.apodo && alpi.descripcion && alpi.etiquetas[0] && alpi.etiquetas[1]).toBeTruthy()
+    expect(alpi.etapas).toHaveLength(4)
   })
-  it('seis tienen 4 etapas y dos tienen 3', () => {
-    expect(MASCOTAS.filter((m) => m.etapas.length === 4).map((m) => m.id)).toEqual(['axolin', 'taro', 'nube', 'mochi', 'drako', 'alpi'])
-    expect(MASCOTAS.filter((m) => m.etapas.length === 3).map((m) => m.id)).toEqual(['stella', 'hooty'])
-  })
-  it('cada etapa se dibuja por piezas, en cada ánimo, con cara y sin ids repetidos', () => {
-    for (const m of MASCOTAS)
-      m.etapas.forEach((_, i) => {
-        for (const animo of ['seria', 'alerta', 'contenta', 'durmiendo'] as const) {
-          const html = renderToStaticMarkup(createElement(Rig, { mascota: m.id, etapa: i + 1, animo }))
-          expect(html, `${m.id} etapa ${i + 1} ${animo}`).toContain('rig-cara')
-          expect(html).toContain('<svg')
-          expect(html).not.toContain('NaN')
-        }
-      })
-  })
-  it('las etapas de una misma mascota no comparten ids de degradado', () => {
-    const ids = (etapa: number) => [...renderToStaticMarkup(createElement(Rig, { mascota: 'drako', etapa, animo: 'seria' })).matchAll(/id="([^"]+)"/g)].map((r) => r[1])
-    const a = ids(1)
-    const b = ids(2)
-    expect(a.length).toBeGreaterThan(0)
-    expect(a.filter((x) => b.includes(x))).toEqual([])
+  it('cada etapa de Alpi se dibuja en vectores (respaldo sin 3D), en cada ánimo', () => {
+    MASCOTAS[0].etapas.forEach((_, i) => {
+      for (const animo of ['seria', 'alerta', 'contenta', 'durmiendo'] as const) {
+        const html = renderToStaticMarkup(createElement(Rig, { mascota: 'alpi', etapa: i + 1, animo }))
+        expect(html, `etapa ${i + 1} ${animo}`).toContain('rig-cara')
+        expect(html).not.toContain('NaN')
+      }
+    })
   })
   it('esMascota y mascotaPorId', () => {
-    expect(esMascota('mochi')).toBe(true)
+    expect(esMascota('alpi')).toBe(true)
+    expect(esMascota('mochi')).toBe(false) // ya no existe
     expect(esMascota('astia')).toBe(false)
-    expect(mascotaPorId('drako')?.apodo).toBe('El soñador valiente')
+    expect(mascotaPorId('alpi')?.apodo).toBe('La alpaca aventurera')
   })
 })
 
