@@ -11,8 +11,7 @@ import { planDeHoy } from '../lib/plan'
 import { rutinaDeAhora } from '../lib/rutinas'
 import { saludoDe } from '../lib/saludo'
 import { urgenciaDe } from '../lib/urgencia'
-import { AvatarMascota } from '../mascotas/AvatarMascota'
-import { AvisoMascotas } from '../mascotas/AvisoMascotas'
+import { HeroAstia } from '../mascotas/HeroAstia'
 import { useAviso } from '../ui/Aviso'
 import { FilaHabito } from '../ui/FilaHabito'
 import { FilaTarea } from '../ui/FilaTarea'
@@ -88,15 +87,7 @@ export function HoyPersonal() {
         {saludoDe(ahora.getHours())}, {ajustes.nombre}.
       </h1>
 
-      <div className="hero">
-        <button className="avatar-btn" onClick={tocarAvatar} aria-label="Hablar con Astia">
-          <AvatarMascota animo={animo} habla={habla} />
-        </button>
-        <div className="burbuja" aria-live="polite">
-          <p>{frase}</p>
-        </div>
-      <AvisoMascotas />
-      </div>
+      <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} />
 
       <TarjetaHabitos
         hechos={hechos}

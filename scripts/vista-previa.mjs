@@ -6,8 +6,10 @@ import { readFile, writeFile } from 'node:fs/promises'
 execSync('npx vite build -c vite.vista.config.ts', { stdio: 'inherit' })
 
 const html = await readFile('dist-vista/index.html', 'utf8')
-const cabeza = html.match(/<head>([\s\S]*?)<\/head>/)[1]
-const cuerpo = html.match(/<body>([\s\S]*?)<\/body>/)[1]
+// El código de Alpi lleva dentro su propia página (con <head> y <body>), así que se buscan
+// las etiquetas reales: las últimas del archivo.
+const cabeza = html.slice(html.indexOf('<head>') + 6, html.lastIndexOf('</head>'))
+const cuerpo = html.slice(html.lastIndexOf('<body>') + 6, html.lastIndexOf('</body>'))
 
 // La plataforma envuelve la página con su propio <html>/<head>/<body>, así que
 // entregamos solo el contenido: título, estilos, el contenedor y el script.

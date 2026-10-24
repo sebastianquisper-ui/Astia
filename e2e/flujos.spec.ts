@@ -5,7 +5,25 @@ import { expect, test } from '@playwright/test'
 test.beforeEach(async ({ page }) => {
   // El reloj arranca ahí y sigue corriendo; una prueba puede adelantarlo con fastForward
   await page.clock.install({ time: new Date(2026, 9, 15, 10, 30) })
+  // Alpi en 3D viene por defecto, pero sin tarjeta gráfica (como en estas pruebas) ocupa todo el
+  // procesador. Las pruebas usan la estrella, salvo las de Alpi, que la eligen.
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('e2e-iniciado')) return
+    sessionStorage.setItem('e2e-iniciado', '1')
+    try {
+      const a = JSON.parse(localStorage.getItem('astia.ajustes') || '{}')
+      if (!a.mascota) localStorage.setItem('astia.ajustes', JSON.stringify({ ...a, mascota: 'astia' }))
+    } catch {
+      /* sin almacenamiento */
+    }
+  })
 })
+
+async function elegirAlpi(page: import('@playwright/test').Page) {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
+  await page.getByRole('button', { name: 'Elegir a Alpi' }).click()
+}
 
 test('Hoy muestra el saludo y la navegación tiene 5 pestañas', async ({ page }) => {
   await page.goto('/')
@@ -64,7 +82,7 @@ test('Hoy: al marcar una tarea Astia reacciona y avisa', async ({ page }) => {
   await page.getByRole('button', { name: /Marcar hecha/ }).first().click()
   await expect(page.getByRole('status')).toContainText('Hecha')
   await expect(page.locator('.burbuja')).toContainText('Una menos')
-  await expect(page.locator('.avatar')).toHaveClass(/contenta/)
+  await expect(page.locator('[data-animo]')).toHaveAttribute('data-animo', 'contenta')
 })
 
 test('Hoy: tocar a Astia la hace hablar', async ({ page }) => {
@@ -709,38 +727,47 @@ test('la mascota está dibujada por piezas: las capas se separan al inclinarla y
   await expect(page.locator('.mascota .boca-habla')).toBeVisible()
 })
 
-test('Alpi es 3D de verdad (lienzo WebGL) y reacciona al toque', async ({ page }) => {
-  await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
-  await page.getByRole('button', { name: 'Elegir a Alpi' }).click()
+test('Alpi en Hoy: grande sobre su planeta, en 3D, con la expresión según tu día', async ({ page }) => {
+  await elegirAlpi(page)
   await page.goto('/#/hoy')
-  await expect(page.locator('.mascota canvas')).toBeVisible({ timeout: 10000 })
+  const heroe = page.locator('.hero-alpi')
+  await expect(heroe.locator('.planeta')).toBeAttached()
+  await expect(page.frameLocator('.hero-alpi iframe').locator('canvas#stage')).toBeVisible({ timeout: 15000 })
+  // hay una tarea vencida en los datos de ejemplo: Alpi regaña
+  await expect(heroe.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'reganona')
+  const antes = await page.locator('.burbuja').innerText()
   await page.getByRole('button', { name: 'Hablar con Astia' }).click()
-  await expect(page.locator('.mascota')).toHaveClass(/saltando/)
-  await expect(page.locator('.chispa').first()).toBeVisible()
+  await expect(page.locator('.burbuja')).not.toHaveText(antes)
+  await page.getByRole('button', { name: /Conoce a las mascotas/ }).click()
+  await expect(page.getByRole('heading', { name: 'Mi mascota' })).toBeVisible()
 })
 
-test('Alpi en 3D: se prueban sus 4 niveles, 8 expresiones y 7 animaciones', async ({ page }) => {
+test('Alpi es la compañera por defecto', async ({ page }) => {
+  // deshace la estrella que pone la preparación de las pruebas: queda el valor por defecto
+  await page.addInitScript(() => {
+    const a = JSON.parse(localStorage.getItem('astia.ajustes') || '{}')
+    delete a.mascota
+    localStorage.setItem('astia.ajustes', JSON.stringify(a))
+  })
+  await page.goto('/')
+  await expect(page.locator('.hero-alpi')).toBeVisible()
+  await expect(page.getByText('Conoce a las mascotas que evolucionan contigo')).toBeVisible()
+})
+
+test('Alpi en 3D: su página con niveles, expresiones y acciones', async ({ page }) => {
   await page.goto('/#/mas/mascota')
   await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
   await page.getByRole('link', { name: 'Probar a Alpi en 3D' }).click()
   await expect(page.getByRole('heading', { name: 'Alpi en 3D' })).toBeVisible()
-  await expect(page.locator('.escenario-alpi canvas')).toBeVisible({ timeout: 10000 })
-  const alpi = page.locator('.escenario-alpi .alpi3d')
-  await expect(page.getByRole('group', { name: 'Nivel' }).getByRole('button')).toHaveCount(4)
-  await expect(page.getByRole('group', { name: 'Expresión' }).getByRole('button')).toHaveCount(8)
-  await expect(page.getByRole('group', { name: 'Animación' }).getByRole('button')).toHaveCount(7)
-  await page.getByRole('button', { name: /Nivel 4/ }).click()
-  await expect(alpi).toHaveAttribute('data-nivel', '4')
-  await expect(page.locator('.escenario-titulo')).toContainText('Alpaca legendaria')
-  await page.getByRole('group', { name: 'Expresión' }).getByRole('button', { name: /Triste/ }).click()
-  await expect(alpi).toHaveAttribute('data-expresion', 'triste')
-  await page.getByRole('group', { name: 'Animación' }).getByRole('button', { name: 'Descansando' }).click()
-  await expect(alpi).toHaveAttribute('data-animacion', 'descansando')
-  await expect(alpi).toHaveAttribute('data-expresion', 'dormida') // descansar la duerme
-  await expect(page.locator('.alpi-efecto.zzz')).toBeVisible()
-  await page.getByRole('group', { name: 'Animación' }).getByRole('button', { name: 'Estudiando' }).click()
-  await expect(alpi).toHaveAttribute('data-expresion', 'concentrada')
+  const alpi = page.frameLocator('.estudio-marco iframe')
+  await expect(alpi.locator('canvas#stage')).toBeVisible({ timeout: 15000 })
+  await expect(alpi.locator('#levels .chip[data-l]')).toHaveCount(4)
+  await alpi.getByRole('button', { name: 'Nivel 3' }).click()
+  await expect(alpi.getByRole('button', { name: 'Nivel 3' })).toHaveAttribute('aria-pressed', 'true')
+  await alpi.getByRole('button', { name: 'Feliz' }).click()
+  await expect(alpi.getByRole('button', { name: 'Feliz' })).toHaveAttribute('aria-pressed', 'true')
+  await alpi.getByRole('button', { name: 'Bailar' }).click()
+  await expect(alpi.getByRole('button', { name: 'Bailar' })).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: /Mi mascota/ }).click()
   await expect(page.getByRole('heading', { name: 'Mi mascota' })).toBeVisible()
 })

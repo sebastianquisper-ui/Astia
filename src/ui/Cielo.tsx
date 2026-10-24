@@ -23,11 +23,22 @@ export function Cielo() {
   const chicas = useMemo(() => sombras(70, 7, 0.9), [])
   const medias = useMemo(() => sombras(16, 21, 1.6), [])
   const titilan = useMemo(() => sombras(14, 99, 1.3), [])
+  // Las capas lejanas suben despacio (cada una dos veces, una debajo de la otra, para que el
+  // movimiento no tenga corte); las cercanas titilan y de vez en cuando pasa una estrella fugaz.
   return (
     <div className="cielo" aria-hidden="true">
-      <div className="estrellas e1" style={{ boxShadow: chicas }} />
-      <div className="estrellas e2" style={{ boxShadow: medias }} />
+      <div className="deriva lenta">
+        <div className="estrellas e1" style={{ boxShadow: chicas }} />
+        <div className="estrellas e1 copia" style={{ boxShadow: chicas }} />
+      </div>
+      <div className="deriva">
+        <div className="estrellas e2" style={{ boxShadow: medias }} />
+        <div className="estrellas e2 copia" style={{ boxShadow: medias }} />
+      </div>
       <div className="estrellas e3" style={{ boxShadow: titilan }} />
+      <span className="fugaz f1" />
+      <span className="fugaz f2" />
+      <span className="fugaz f3" />
     </div>
   )
 }

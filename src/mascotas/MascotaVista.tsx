@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent } from 'react'
 import type { Animo } from '../lib/avatar'
 import type { MascotaId } from '../lib/mascotas'
 import { fondoDe } from './sprites'
 import { Rig } from './rig/Rig'
 
-import { Alpi3D, hayWebGL } from './alpi/Alpi3D'
 import { desdeAnimo, nivelAlpi } from './alpi/datos'
+import { hayWebGL } from './alpi/webgl'
+
+// Alpi en 3D (su propia página con la librería 3D adentro): se descarga solo cuando aparece.
+const AlpiIframe = lazy(() => import('./alpi/AlpiIframe'))
 
 interface Chispa {
   id: number
@@ -81,7 +84,9 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
       <span className="mascota-sombra" aria-hidden="true" />
       <span className="mascota-marco vec" style={{ transform: transformacion }}>
         {en3d ? (
-          <Alpi3D nivel={nivelAlpi(etapa)} {...desdeAnimo(animo, { tocada: saltando, fiesta })} habla={habla} inclina={inclina} />
+          <Suspense fallback={<Rig mascota={mascota} etapa={etapa} animo={animo} habla={habla} />}>
+            <AlpiIframe nivel={nivelAlpi(etapa)} {...desdeAnimo(animo, { fiesta })} />
+          </Suspense>
         ) : (
           <Rig key={mascota + etapa} mascota={mascota} etapa={etapa} animo={animo} habla={habla} />
         )}
