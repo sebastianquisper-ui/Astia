@@ -27,9 +27,12 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   ganas (se calcula de lo que haces; no se guarda) y piden equilibrio entre estudios y vida personal desde la etapa 3.
   **Alpi es 3D de verdad** (`src/mascotas/alpi/`): 4 niveles (Alpaca bebé, Exploradora, Guardiana de los valles,
   Alpaca legendaria), 8 expresiones (feliz, emocionada, curiosa, dormida, concentrada, sorprendida, triste, guiño) y
-  7 animaciones (reposo, caminar, saltar, celebrar, estudiando, descansando, saludar). Está hecha con formas de
-  Three.js, sin imágenes ni archivos de modelo: `datos.ts` define niveles, expresiones y animaciones; `Modelo.tsx` el
-  cuerpo, la cara y los accesorios por nivel; `EstudioAlpi.tsx` es la pantalla para probarla (Más → Mi mascota →
+  7 animaciones (reposo, caminar, saltar, celebrar, estudiando, descansando, saludar). El modelo se hace en Blender:
+  `herramientas/alpi/alpi_app.py` (basado en el paquete original, que se guarda intacto junto a su referencia) genera
+  `src/assets/alpi/alpi.glb` con piezas con nombre (cabeza, brazos, patas, orejas, ojos), los accesorios de los 4 niveles
+  (`Niv_<niveles>_<pieza>`) y las piezas de cada expresión. Se regenera con `python herramientas/alpi/construir.py`
+  (necesita `pip install bpy` y Node; comprime con meshopt, unos 650 KB). `datos.ts` define niveles, expresiones y
+  animaciones; `Modelo.tsx` carga el .glb, enciende las piezas y las anima; `EstudioAlpi.tsx` es la pantalla para probarla (Más → Mi mascota →
   Alpi → Probar a Alpi en 3D). Se descarga solo al usarla y tiene la versión vectorial de respaldo sin WebGL.
   Las otras 7 usan profundidad simulada con capas. Los dibujos originales de la hoja siguen en
   `herramientas/mascotas/` y `src/mascotas/sprites/` por si se quiere volver a ellos.

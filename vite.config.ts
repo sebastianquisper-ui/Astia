@@ -31,7 +31,7 @@ export default defineConfig({
       },
       workbox: {
         // Todo lo de la app queda guardado en el teléfono: abre sin internet
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,glb}'],
         navigateFallback: '/index.html',
       },
     }),

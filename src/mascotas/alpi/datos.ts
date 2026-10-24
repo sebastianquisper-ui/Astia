@@ -87,3 +87,21 @@ export function efectoDe(expresion: ExpresionAlpi, animacion: AnimacionAlpi): 'z
   if (expresion === 'emocionada') return 'corazones'
   return null
 }
+
+/** Qué piezas del modelo 3D forman la cara en cada expresión (nombres del archivo de Blender). */
+export const PIEZAS_EXPRESION: Record<ExpresionAlpi, string[]> = {
+  feliz: ['OjosFelices', 'BocaAbierta'],
+  emocionada: ['OjosAbiertos', 'CejasNormal', 'BocaAbierta'],
+  curiosa: ['OjosAbiertos', 'CejasCuriosa', 'BocaSonrisa'],
+  dormida: ['OjosCerrados', 'BocaSonrisa'],
+  concentrada: ['OjosAbiertos', 'CejasEnfoque', 'BocaSonrisa', 'Lentes'],
+  sorprendida: ['OjosAbiertos', 'CejasNormal', 'BocaO'],
+  triste: ['OjosAbiertos', 'CejasTriste', 'BocaTriste', 'Lagrimas'],
+  guino: ['OjosGuino', 'CejasNormal', 'BocaSonrisa'],
+}
+
+/** Los accesorios se llaman "Niv_<niveles>_<pieza>": "Niv_234_mochila" se ve en los niveles 2, 3 y 4. */
+export function seVeEnNivel(nombre: string, nivel: NivelAlpi): boolean {
+  const m = /^Niv_(\d+)_/.exec(nombre)
+  return !m || m[1].includes(String(nivel))
+}

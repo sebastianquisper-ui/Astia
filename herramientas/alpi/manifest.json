@@ -1,0 +1,7 @@
+{
+  "name": "Alpi Blender Starter",
+  "reference_image": "REFERENCIA_ALPI_SIN_CAMBIOS.jpeg",
+  "blender_generator": "alpi_blender.py",
+  "claude_code_instructions": "CLAUDE_CODE_BRIEF.md",
+  "note": "Script-generated model must be run in Blender; no .blend/.glb is claimed as pre-generated."
+}

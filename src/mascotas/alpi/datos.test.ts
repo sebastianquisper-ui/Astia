@@ -1,5 +1,6 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { ANIMACIONES_ALPI, EXPRESIONES_ALPI, NIVELES_ALPI, desdeAnimo, efectoDe, nivelAlpi } from './datos'
+import { ANIMACIONES_ALPI, EXPRESIONES_ALPI, NIVELES_ALPI, PIEZAS_EXPRESION, desdeAnimo, efectoDe, nivelAlpi, seVeEnNivel } from './datos'
 import { mascotaPorId } from '../../lib/mascotas'
 
 describe('Alpi', () => {
@@ -26,5 +27,30 @@ describe('Alpi', () => {
   it('el nivel se limita de 1 a 4', () => {
     expect(nivelAlpi(0)).toBe(1)
     expect(nivelAlpi(9)).toBe(4)
+  })
+})
+
+describe('el modelo 3D de Alpi (alpi.glb)', () => {
+  // Lee los nombres de las piezas guardados en el archivo .glb (su parte JSON).
+  const nombres = (() => {
+    const b = readFileSync('src/assets/alpi/alpi.glb')
+    const largo = b.readUInt32LE(12)
+    const json = JSON.parse(b.subarray(20, 20 + largo).toString('utf8')) as { nodes: { name?: string }[] }
+    return new Set(json.nodes.map((n) => n.name ?? ''))
+  })()
+  it('trae las piezas que se mueven', () => {
+    for (const p of ['Raiz', 'Cuerpo', 'Cabeza', 'BrazoL', 'BrazoR', 'PataL', 'PataR', 'OrejaL', 'OrejaR', 'OjoL', 'OjoR', 'Libro', 'Tronco']) expect(nombres.has(p), p).toBe(true)
+  })
+  it('trae todas las piezas de cada expresión', () => {
+    for (const piezas of Object.values(PIEZAS_EXPRESION)) for (const p of piezas) expect(nombres.has(p), p).toBe(true)
+  })
+  it('cada nivel tiene sus propios accesorios', () => {
+    for (const nivel of [1, 2, 3, 4] as const) {
+      const propios = [...nombres].filter((n) => n.startsWith('Niv_') && seVeEnNivel(n, nivel))
+      expect(propios.length, `nivel ${nivel}`).toBeGreaterThan(1)
+    }
+    expect(seVeEnNivel('Niv_234_mochila', 1)).toBe(false)
+    expect(seVeEnNivel('Niv_234_mochila', 3)).toBe(true)
+    expect(seVeEnNivel('Cabeza', 2)).toBe(true)
   })
 })
