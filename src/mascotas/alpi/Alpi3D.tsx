@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, useState, type PointerEvent } from 'react'
+import { Component, lazy, Suspense, useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { Rig } from '../rig/Rig'
 import { efectoDe, type AnimacionAlpi, type ExpresionAlpi, type NivelAlpi } from './datos'
 
@@ -16,6 +16,17 @@ export function hayWebGL(): boolean {
     webgl = false
   }
   return webgl
+}
+
+/** Si el 3D falla (el teléfono o la página no lo permiten), se queda la Alpi dibujada y la app sigue. */
+class SiFalla extends Component<{ respaldo: ReactNode; children: ReactNode }, { fallo: boolean }> {
+  state = { fallo: false }
+  static getDerivedStateFromError() {
+    return { fallo: true }
+  }
+  render() {
+    return this.state.fallo ? this.props.respaldo : this.props.children
+  }
 }
 
 const TEXTO_EFECTO = { zzz: ['z', 'z', 'Z'], pregunta: ['?'], exclama: ['!'], corazones: ['♥', '♥', '♥'], chispas: ['✦', '★', '✧', '✦'] }
@@ -59,9 +70,11 @@ export function Alpi3D({ nivel, expresion, animacion, habla = false, inclina = n
   return (
     <div className={'alpi3d' + (girable ? ' girable' : '')} data-nivel={nivel} data-expresion={expresion} data-animacion={animacion} {...eventos}>
       {hayWebGL() ? (
-        <Suspense fallback={respaldo}>
-          <Escena nivel={nivel} expresion={expresion} animacion={animacion} habla={habla} giro={giro} inclina={inclina} />
-        </Suspense>
+        <SiFalla respaldo={respaldo}>
+          <Suspense fallback={respaldo}>
+            <Escena nivel={nivel} expresion={expresion} animacion={animacion} habla={habla} giro={giro} inclina={inclina} />
+          </Suspense>
+        </SiFalla>
       ) : (
         respaldo
       )}

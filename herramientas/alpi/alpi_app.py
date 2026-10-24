@@ -264,7 +264,7 @@ for i, p in enumerate(fibonacci(70, (0, 0, 0.98), (0.6, 0.5, 0.64))):
     if p.z < 0.45 or (p.y < -0.25 and p.z > 1.3):
         continue
     s = 0.11 + (i * 37 % 10) / 220
-    mechones.append(esfera(f'lana_cuerpo{i}', p, (s, s * 0.9, s), M['lana_luz'] if i % 3 else M['lana'], cuerpo, 18, 12))
+    mechones.append(esfera(f'lana_cuerpo{i}', p, (s, s * 0.9, s), M['lana_luz'] if i % 3 else M['lana'], cuerpo, 14, 10))
 unir('CuerpoLana', [base_cuerpo, pecho] + mechones)
 esfera('colita', (0, 0.6, 0.82), (0.16, 0.17, 0.16), M['lana_luz'], cuerpo)
 
@@ -290,7 +290,7 @@ for i, p in enumerate(fibonacci(110, centro_cabeza, (0.7, 0.59, 0.66))):
     if p.y < -0.28 and p.z < 2.44 and abs(p.x) < 0.58:
         continue
     s = 0.12 + (i * 53 % 10) / 200
-    lana_cabeza.append(esfera(f'lana_cabeza{i}', p, (s, s, s * 0.95), M['lana_luz'] if i % 4 else M['lana'], cabeza, 18, 12))
+    lana_cabeza.append(esfera(f'lana_cabeza{i}', p, (s, s, s * 0.95), M['lana_luz'] if i % 4 else M['lana'], cabeza, 14, 10))
 unir('CabezaLana', [base_cabeza] + lana_cabeza)
 
 # mechón rosado (del original)
@@ -556,6 +556,7 @@ bpy.ops.export_scene.gltf(
     export_yup=True,
     export_extras=False,
     export_animations=False,
+    export_texcoords=False,  # sin texturas: no hacen falta coordenadas UV (archivo más liviano)
     export_cameras=False,
     export_lights=False,
 )

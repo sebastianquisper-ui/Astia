@@ -1,8 +1,7 @@
-import { useFrame, useLoader } from '@react-three/fiber'
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { use, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
+import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import urlModelo from '../../assets/alpi/alpi.glb?url'
 import { PIEZAS_EXPRESION, seVeEnNivel, type AnimacionAlpi, type ExpresionAlpi, type NivelAlpi } from './datos'
 
@@ -25,15 +24,31 @@ const TODAS_LAS_PIEZAS = [...new Set(Object.values(PIEZAS_EXPRESION).flat())]
 // El modelo mide 2,9 de alto; la cámara está pensada para unos 2,3.
 const ESCALA = 0.8
 
-const conMeshopt = (l: GLTFLoader) => {
-  l.setMeshoptDecoder(MeshoptDecoder)
+// El modelo se lee una sola vez. En la vista previa viene incrustado en la página (data:): se
+// decodifica a mano, porque esas páginas no dejan usar fetch con data:.
+function bytesDe(url: string): Promise<ArrayBuffer> {
+  if (url.startsWith('data:')) {
+    const binario = atob(url.slice(url.indexOf(',') + 1))
+    const bytes = new Uint8Array(binario.length)
+    for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i)
+    return Promise.resolve(bytes.buffer)
+  }
+  return fetch(url).then((r) => {
+    if (!r.ok) throw new Error(`No se pudo cargar a Alpi (${r.status})`)
+    return r.arrayBuffer()
+  })
+}
+let cargando: Promise<GLTF> | null = null
+export function cargarAlpi(): Promise<GLTF> {
+  cargando ??= bytesDe(urlModelo).then((b) => new GLTFLoader().parseAsync(b, ''))
+  return cargando
 }
 
 const DORADO = new THREE.MeshStandardMaterial({ color: '#e9b949', roughness: 0.3, emissive: '#e9b949', emissiveIntensity: 0.9 })
 const OCTAEDRO = new THREE.OctahedronGeometry(1, 0)
 
 export function Modelo({ nivel, expresion, animacion, habla = false, giro = 0, inclina = null }: PropsModelo) {
-  const gltf = useLoader(GLTFLoader, urlModelo, conMeshopt)
+  const gltf = use(cargarAlpi())
   // Cada Alpi en pantalla tiene su propia copia (comparten geometría y materiales).
   const escena = useMemo(() => gltf.scene.clone(true), [gltf])
   const n = useMemo(() => {
