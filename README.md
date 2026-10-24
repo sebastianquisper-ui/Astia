@@ -20,9 +20,13 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   y "Solo 10 minutos". Astia sugiere uno por tarea (se puede cambiar en el formulario). Se usan desde
   Hoy → Empezar ya, desde Más → Enfoque y descanso, y el enfoque se suma al progreso del día.
 - **Mascotas que evolucionan:** completo. 8 mascotas (Axolín, Taro, Nube, Mochi, Drako, Stella, Hooty, Alpi) con sus
-  etapas, tomadas de la hoja "Mascotas originales" (`herramientas/mascotas/`). Se mueven con perspectiva
-  al tocarlas, evolucionan con el XP que ganas (se calcula de lo que haces; no se guarda) y piden equilibrio
-  entre estudios y vida personal desde la etapa 3. No son modelos 3D reales: son sus dibujos con movimiento.
+  etapas. Están dibujadas por piezas en vectores (`src/mascotas/rig/`): cuerpo, cara (ojos que parpadean, cejas,
+  boca que habla), orejas, cola, alas y branquias que se mueven solas, y accesorios por etapa (sombreros, lentes,
+  bufandas, corona...). Al tocarlas se inclinan con perspectiva, las capas se separan en profundidad y saltan con
+  chispas; su ánimo (seria, alerta, contenta, durmiendo) cambia la cara y el movimiento. Evolucionan con el XP que
+  ganas (se calcula de lo que haces; no se guarda) y piden equilibrio entre estudios y vida personal desde la etapa 3.
+  No son modelos 3D reales: es profundidad simulada con capas. Los dibujos originales de la hoja siguen en
+  `herramientas/mascotas/` y `src/mascotas/sprites/` por si se quiere volver a ellos.
 - **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
 
 ## Comandos

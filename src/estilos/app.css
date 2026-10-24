@@ -780,3 +780,43 @@ button.habito-texto { background: none; padding: 0; border: 0; }
 
 .celebracion { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding-top: 6px; }
 .celebracion .mascota { margin: 12px 0 14px; }
+
+/* =====================================================================
+   Mascotas dibujadas por piezas (rig)
+   ===================================================================== */
+.mascota-marco.vec { border-radius: 0; overflow: visible; box-shadow: none; background: none; }
+.rig { display: block; width: 100%; height: 100%; overflow: visible; pointer-events: none; filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.22)); }
+.rig * { transform-box: view-box; }
+.rig-resp { transform-origin: 100px 188px; animation: rig-respirar 3.8s ease-in-out infinite; }
+.rig-atras { transform: translate(calc(var(--ix, 0) * -5px), calc(var(--iy, 0) * -3px)); transition: transform 0.2s ease-out; }
+.rig-cuerpo { transform: translate(calc(var(--ix, 0) * 1px), calc(var(--iy, 0) * 1px)); transition: transform 0.2s ease-out; }
+.rig-cara { transform: translate(calc(var(--ix, 0) * 5px), calc(var(--iy, 0) * 3px)); transition: transform 0.2s ease-out; }
+.rig-frente { transform: translate(calc(var(--ix, 0) * 8px), calc(var(--iy, 0) * 5px)); transition: transform 0.2s ease-out; }
+.rig .ojo { transform-box: fill-box; transform-origin: center; }
+.rig .boca-habla { transform-box: fill-box; transform-origin: center; }
+.rig .r-branq { animation: rig-balanceo 2.6s ease-in-out infinite; }
+.rig .r-ala { animation: rig-aleteo 2.4s ease-in-out infinite; }
+.rig .r-cola { animation: rig-cola 2.2s ease-in-out infinite; }
+.rig .r-oreja { animation: rig-oreja 5.2s ease-in-out infinite; }
+.rig .r-hoja { animation: rig-balanceo 3.2s ease-in-out infinite; }
+.rig .r-flota { animation: rig-flota 3.4s ease-in-out infinite; }
+.rig .r-huevo { animation: rig-huevo 3.6s ease-in-out infinite; }
+.rig .r-chispa { transform-box: fill-box; transform-origin: center; animation: rig-titila 2.2s ease-in-out infinite; }
+@keyframes rig-respirar { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.015, 1.035); } }
+@keyframes rig-balanceo { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(7deg); } }
+@keyframes rig-aleteo { 0%, 100% { transform: rotate(0deg) scaleX(1); } 50% { transform: rotate(-7deg) scaleX(0.92); } }
+@keyframes rig-cola { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(8deg); } }
+@keyframes rig-oreja { 0%, 82%, 100% { transform: rotate(0deg); } 88% { transform: rotate(-9deg); } 94% { transform: rotate(5deg); } }
+@keyframes rig-flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes rig-huevo { 0%, 70%, 100% { transform: rotate(0deg); } 76% { transform: rotate(-4deg); } 82% { transform: rotate(4deg); } 88% { transform: rotate(-2deg); } }
+@keyframes rig-titila { 0%, 100% { opacity: 0.35; transform: scale(0.6); } 50% { opacity: 1; transform: scale(1.1); } }
+.mascota.durmiendo .rig-resp { animation-duration: 6.5s; }
+.mascota.durmiendo .rig .r-ala, .mascota.durmiendo .rig .r-cola, .mascota.durmiendo .rig .r-branq, .mascota.durmiendo .rig .r-oreja { animation-duration: 7s; }
+.mascota.contenta .rig .r-cola, .mascota.contenta .rig .r-ala, .mascota.contenta .rig .r-branq { animation-duration: 0.7s; }
+.mascota.alerta .rig .r-oreja { animation: rig-oreja 1.2s ease-in-out infinite; }
+.mascota.habla .rig-resp { animation: rig-hablar 0.3s ease-in-out infinite alternate; }
+@keyframes rig-hablar { from { transform: scale(1, 1); } to { transform: scale(0.99, 1.025); } }
+.rig.quieta *, .rig.quieta .rig-resp { animation: none !important; }
+.mascota-mini .rig { position: absolute; inset: 6%; width: 88%; height: 88%; filter: none; }
+.mascota-mini.bloqueada .rig { filter: grayscale(1) brightness(0.55) blur(2px); }
+@media (prefers-reduced-motion: reduce) { .rig *, .rig-resp { animation: none !important; } }

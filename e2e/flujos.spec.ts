@@ -695,6 +695,20 @@ test('la mascota se inclina hacia donde tocas (perspectiva 3D) y vuelve a su sit
   await expect(page.locator('.mascota-marco')).not.toHaveAttribute('style', /rotateY/)
 })
 
+test('la mascota está dibujada por piezas: las capas se separan al inclinarla y la cara cambia de ánimo', async ({ page }) => {
+  await page.goto('/#/mas/mascota')
+  await page.getByRole('button', { name: /Axolín/ }).click()
+  await page.getByRole('button', { name: 'Elegir a Axolín' }).click()
+  await page.goto('/#/hoy')
+  await expect(page.locator('.mascota svg.rig .rig-atras')).toHaveCount(1)
+  await expect(page.locator('.mascota svg.rig .ojo')).toHaveCount(2)
+  const caja = (await page.locator('.mascota').boundingBox())!
+  await page.mouse.move(caja.x + caja.width * 0.95, caja.y + caja.height * 0.5)
+  await expect(page.locator('.mascota')).toHaveAttribute('style', /--ix: 0\.[5-9]|--ix: 1/)
+  await page.getByRole('button', { name: 'Hablar con Astia' }).click()
+  await expect(page.locator('.mascota .boca-habla')).toBeVisible()
+})
+
 test('con tareas vencidas la mascota se alerta; su ánimo cambia cómo se mueve', async ({ page }) => {
   await page.goto('/#/mas/mascota')
   await page.getByRole('button', { name: /Nube, El fantasmita productivo/ }).click()

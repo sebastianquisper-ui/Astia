@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { Habito, ProgresoDia, Rutina, Tarea } from '../dominio/tipos'
-import { hayEtapa } from '../mascotas/sprites'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { createElement } from 'react'
+import { Rig } from '../mascotas/rig/Rig'
 import { MASCOTAS, calcularXP, debeCelebrar, equilibrio, esMascota, estadoDe, mascotaPorId, totalXP, umbralesDe, type XP } from './mascotas'
 
 const tarea = (extra: Partial<Tarea>): Tarea => ({ id: 't', titulo: 't', area: 'universidad', cursoId: null, tipo: 'tarea', fecha: '2026-10-20', prioridad: 'media', pideEvidencia: false, pasos: [], estado: 'hecha', actualizadoEn: 1, ...extra })
@@ -18,11 +20,23 @@ describe('catálogo de mascotas', () => {
     expect(MASCOTAS.filter((m) => m.etapas.length === 4).map((m) => m.id)).toEqual(['axolin', 'taro', 'nube', 'mochi', 'drako'])
     expect(MASCOTAS.filter((m) => m.etapas.length === 3).map((m) => m.id)).toEqual(['stella', 'hooty', 'alpi'])
   })
-  it('cada etapa tiene su imagen incluida en la app', () => {
-    for (const m of MASCOTAS) m.etapas.forEach((_, i) => expect(hayEtapa(m.id, i + 1), `${m.id} etapa ${i + 1}`).toBe(true))
+  it('cada etapa se dibuja por piezas, en cada ánimo, con cara y sin ids repetidos', () => {
+    for (const m of MASCOTAS)
+      m.etapas.forEach((_, i) => {
+        for (const animo of ['seria', 'alerta', 'contenta', 'durmiendo'] as const) {
+          const html = renderToStaticMarkup(createElement(Rig, { mascota: m.id, etapa: i + 1, animo }))
+          expect(html, `${m.id} etapa ${i + 1} ${animo}`).toContain('rig-cara')
+          expect(html).toContain('<svg')
+          expect(html).not.toContain('NaN')
+        }
+      })
   })
-  it('no hay imagen para una etapa que no existe', () => {
-    expect(hayEtapa('stella', 4)).toBe(false)
+  it('las etapas de una misma mascota no comparten ids de degradado', () => {
+    const ids = (etapa: number) => [...renderToStaticMarkup(createElement(Rig, { mascota: 'drako', etapa, animo: 'seria' })).matchAll(/id="([^"]+)"/g)].map((r) => r[1])
+    const a = ids(1)
+    const b = ids(2)
+    expect(a.length).toBeGreaterThan(0)
+    expect(a.filter((x) => b.includes(x))).toEqual([])
   })
   it('esMascota y mascotaPorId', () => {
     expect(esMascota('mochi')).toBe(true)

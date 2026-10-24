@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import type { Animo } from '../lib/avatar'
 import type { MascotaId } from '../lib/mascotas'
-import { fondoDe, spriteDe } from './sprites'
+import { fondoDe } from './sprites'
+import { Rig } from './rig/Rig'
 
 interface Chispa {
   id: number
@@ -24,8 +25,8 @@ interface Props {
 }
 
 /**
- * Una mascota con movimiento. No es un modelo 3D: es su dibujo dentro de un marco que se inclina
- * hacia donde tocas (con perspectiva y brillo), respira, flota y salta con chispas al tocarla.
+ * Una mascota con movimiento. Está dibujada por piezas (ojos, boca, orejas, cola, accesorios) que se
+ * mueven solas; al tocarla se inclina con perspectiva, las capas se separan y salta con chispas.
  * El ánimo cambia cómo se mueve: duerme, se alerta o celebra.
  */
 export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, tam = 112, nivel }: Props) {
@@ -64,7 +65,7 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
       ref={raiz}
       className={clases}
       data-sprite={`${mascota}-${etapa}`}
-      style={{ width: tam, height: tam, ['--bx' as string]: `${50 + (inclina?.x ?? 0) * 35}%`, ['--by' as string]: `${30 + (inclina?.y ?? 0) * 30}%` }}
+      style={{ width: tam, height: tam, ['--ix' as string]: inclina?.x ?? 0, ['--iy' as string]: inclina?.y ?? 0 }}
       onPointerMove={inclinar}
       onPointerDown={tocar}
       onPointerLeave={soltar}
@@ -72,9 +73,8 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
       onPointerCancel={soltar}
     >
       <span className="mascota-sombra" aria-hidden="true" />
-      <span className="mascota-marco" style={{ background: fondoDe(mascota, etapa), transform: transformacion }}>
-        <img key={mascota + etapa} className="mascota-img" src={spriteDe(mascota, etapa)} alt="" draggable={false} />
-        <span className="mascota-brillo" aria-hidden="true" />
+      <span className="mascota-marco vec" style={{ transform: transformacion }}>
+        <Rig key={mascota + etapa} mascota={mascota} etapa={etapa} animo={animo} habla={habla} />
       </span>
       {animo === 'durmiendo' && (
         <span className="zzz" aria-hidden="true">
@@ -96,7 +96,7 @@ export function MascotaVista({ mascota, etapa, animo = 'seria', habla = false, t
 export function MascotaMini({ mascota, etapa, bloqueada = false, tam = 72 }: { mascota: MascotaId; etapa: number; bloqueada?: boolean; tam?: number }) {
   return (
     <span className={'mascota-mini' + (bloqueada ? ' bloqueada' : '')} style={{ width: tam, height: tam, background: fondoDe(mascota, etapa) }} aria-hidden="true">
-      <img src={spriteDe(mascota, etapa)} alt="" draggable={false} />
+      <Rig mascota={mascota} etapa={etapa} animo="contenta" quieta />
     </span>
   )
 }
