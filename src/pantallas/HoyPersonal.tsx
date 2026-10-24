@@ -11,7 +11,7 @@ import { cumplido, cumplimientoDeHoy, rachaDe, tocaHoy } from '../lib/habitos'
 import { planDeHoy } from '../lib/plan'
 import { rutinaDeAhora } from '../lib/rutinas'
 import { saludoDe } from '../lib/saludo'
-import { urgenciaDe } from '../lib/urgencia'
+import { diasDeAtraso, urgenciaDe } from '../lib/urgencia'
 import { HeroAstia } from '../mascotas/HeroAstia'
 import { useAviso } from '../ui/Aviso'
 import { FilaHabito } from '../ui/FilaHabito'
@@ -89,7 +89,7 @@ export function HoyPersonal() {
         {saludoDe(ahora.getHours())}, {ajustes.nombre}.
       </h1>
 
-      <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} />
+      <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} progreso={{ vencidas, diasAtraso: diasDeAtraso(personales.filter((t) => t.estado === 'pendiente'), ahora), porHacer: total - hechos, hechas: hechos }} baila={reaccion?.animo === 'contenta'} />
 
       <TarjetaHabitos
         hechos={hechos}

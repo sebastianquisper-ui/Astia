@@ -25,6 +25,9 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   librería 3D adentro (three.js 0.149, sin internet) y le manda nivel, expresión (regaña si hay algo vencido, duerme de
   noche) y la ropa elegida. En Hoy aparece grande sobre su planeta. Se puede apagar el 3D en Ajustes ("Dibujada",
   gasta menos batería). **Vestidor:** con todo lo de hoy cumplido, se le puede quitar ropa o volver a un nivel anterior.
+  **Expresiones:** Alpi te muestra cómo vas: orgullosa si cumpliste todo, feliz mientras avanzas, concentrada si aún no
+  empiezas, regañona si algo venció, molesta si llevas 2 días o 2 pendientes de atraso, furiosa si son 4 o más; baila cuando
+  cumples algo y duerme de noche. Con todo cumplido, en el vestidor se puede elegir la expresión a mano y probar sus movimientos.
 - **Evidencia para cumplir:** ninguna tarea se marca hecha sin evidencia: una foto del trabajo (cámara o galería,
   guardada en el teléfono) o el enlace de la entrega. Reabrir una tarea descarta su evidencia.
 - **Pantallas académicas:** completas. Semana (clases y entregas por día), Cursos con sus semanas del ciclo (tema y

@@ -1016,3 +1016,58 @@ test('Ajustes: el descanso de la vista se puede apagar', async ({ page }) => {
   await grupo.getByRole('button', { name: 'No' }).click()
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes')!).descansoVista)).toBe(false)
 })
+
+
+// ---------- expresiones de Alpi según tu avance, y elegirlas a mano ----------
+
+const ATRASOS: { fecha: string; expresion: string }[] = [
+  { fecha: '2026-10-14', expresion: 'reganona' }, // 1 día
+  { fecha: '2026-10-13', expresion: 'molesta' }, // 2 días
+  { fecha: '2026-10-10', expresion: 'furiosa' }, // 5 días
+]
+for (const caso of ATRASOS) {
+  test(`Alpi se pone ${caso.expresion} cuando la tarea más vieja venció el ${caso.fecha}`, async ({ page }) => {
+    await page.addInitScript((c) => {
+      localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', datosEjemplo: false, etapa: 'universidad', alpi3d: true, descansoVista: false }))
+      localStorage.setItem('astia.datos.v2', JSON.stringify({ cursos: [{ id: 'c', nombre: 'Física', color: '#4FD1A5', actualizadoEn: 1 }], tareas: [{ id: 'v', actualizadoEn: 1, titulo: 'Atrasada', area: 'universidad', cursoId: 'c', tipo: 'tarea', fecha: c.fecha, prioridad: 'media', pideEvidencia: true, pasos: [], estado: 'pendiente' }] }))
+    }, caso)
+    await page.goto('/#/hoy')
+    await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', caso.expresion)
+  })
+}
+
+test('expresión a mano: solo con todo cumplido, y el vestidor la recuerda', async ({ page }) => {
+  const datos = conLogros(20, 150)
+  await page.addInitScript((d) => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: true, descansoVista: false }))
+    localStorage.setItem('astia.datos.v2', JSON.stringify(d))
+  }, datos)
+  await page.goto('/#/hoy')
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
+  const grupo = hoja.getByRole('group', { name: 'Expresión de Alpi' })
+  await expect(grupo.getByRole('button', { name: 'Automática' })).toHaveAttribute('aria-pressed', 'true')
+  await grupo.getByRole('button', { name: 'Furiosa' }).click()
+  await expect(grupo.getByRole('button', { name: 'Furiosa' })).toHaveAttribute('aria-pressed', 'true')
+  await hoja.getByRole('group', { name: 'Movimientos de Alpi' }).getByRole('button', { name: 'Bailar' }).click()
+  await hoja.getByRole('button', { name: 'Listo' }).click()
+  await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'furiosa')
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLook.expresion)).toBe('furiosa')
+  // volver a automática
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  await page.getByRole('dialog', { name: 'Vestidor de Alpi' }).getByRole('button', { name: 'Automática' }).click()
+  await page.getByRole('dialog', { name: 'Vestidor de Alpi' }).getByRole('button', { name: 'Listo' }).click()
+  await expect(page.locator('.hero-alpi-modelo')).not.toHaveAttribute('data-expresion', 'furiosa')
+})
+
+test('expresión a mano: con algo pendiente no se puede elegir y manda tu avance', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', datosEjemplo: true, etapa: 'universidad', alpi3d: true, descansoVista: false, alpiLook: { expresion: 'triste' } }))
+  })
+  await page.goto('/#/hoy')
+  await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'reganona') // la elegida no cuenta mientras debas algo
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
+  await expect(hoja).toContainText('Primero cumples')
+  await expect(hoja.getByRole('group', { name: 'Expresión de Alpi' })).toHaveCount(0)
+})

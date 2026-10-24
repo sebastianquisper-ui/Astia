@@ -38,5 +38,11 @@ export function textoVence(t: Tarea, ahora: Date = new Date()): string {
   return fechaCorta(parseYmd(t.fecha)) + hora
 }
 
+/** Días que lleva vencida la tarea pendiente más antigua (0 si no hay ninguna vencida). */
+export function diasDeAtraso(tareas: Tarea[], ahora: Date = new Date()): number {
+  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate())
+  return Math.max(0, ...tareas.filter((t) => urgenciaDe(t, ahora) === 'vencida').map((t) => diffDays(hoy, parseYmd(t.fecha))))
+}
+
 /** Más urgente primero (las vencidas quedan arriba porque su fecha es la más antigua). */
 export const porUrgencia = (a: Tarea, b: Tarea) => venceEn(a) - venceEn(b)

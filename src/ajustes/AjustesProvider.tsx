@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { ExpresionAlpi } from '../mascotas/alpi/datos'
 import type { Etapa } from '../lib/etapa'
 import type { MascotaElegida } from '../lib/mascotas'
 import { COLOR_BARRA, ESCALA_LETRA, temaEfectivo, type ModoTema, type TamanoLetra } from '../lib/tema'
@@ -17,7 +18,7 @@ export interface Ajustes {
   /** Última etapa que viste de cada mascota (para celebrar cuando evoluciona). 0 = la primera. */
   mascotaVista: Record<string, number>
   /** Cómo vestiste a Alpi: nivel a mostrar (hasta el que alcanzaste) y qué accesorios lleva. */
-  alpiLook?: { nivel?: number; accesorios?: Record<string, boolean> }
+  alpiLook?: { nivel?: number; accesorios?: Record<string, boolean>; expresion?: ExpresionAlpi }
   /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
   alpi3d?: boolean
   /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */

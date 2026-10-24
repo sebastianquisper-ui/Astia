@@ -13,7 +13,7 @@ import { diffDays, ymd } from '../lib/fechas'
 import { cumplimientoDeHoy } from '../lib/habitos'
 import { planDeHoy } from '../lib/plan'
 import { saludoDe } from '../lib/saludo'
-import { urgenciaDe } from '../lib/urgencia'
+import { diasDeAtraso, urgenciaDe } from '../lib/urgencia'
 import { HeroAstia } from '../mascotas/HeroAstia'
 import { Icono } from '../ui/Icono'
 import { useAviso } from '../ui/Aviso'
@@ -96,7 +96,7 @@ export function HoyAcademico() {
         {saludoDe(ahora.getHours())}, {ajustes.nombre}.
       </h1>
 
-      <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} />
+      <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} progreso={{ vencidas, diasAtraso: diasDeAtraso(pendientes, ahora), porHacer: situacion.porHacer, hechas: situacion.hechas }} baila={reaccion?.animo === 'contenta'} />
 
       <TarjetaAhora
         estado={estado}

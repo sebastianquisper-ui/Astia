@@ -31,6 +31,43 @@ export function desdeAnimo(animo: Animo, opciones: { fiesta?: boolean } = {}): {
   }
 }
 
+/** Cómo vas hoy, para que Alpi reaccione a tu avance. */
+export interface ProgresoAlpi {
+  /** Pendientes que ya pasaron su fecha. */
+  vencidas: number
+  /** Días que lleva vencida la más antigua. */
+  diasAtraso: number
+  /** Lo de hoy que falta. */
+  porHacer: number
+  /** Lo de hoy que ya cumpliste. */
+  hechas: number
+}
+
+/**
+ * La expresión según tu avance (estricta y directa): duerme de noche; si estás atrasado te llama la atención y
+ * se enoja más mientras más tiempo la ignoras; si cumpliste todo, está orgullosa; mientras avanzas, feliz;
+ * cuando recién terminas algo, baila.
+ */
+export function expresionPorProgreso(animo: Animo, p: ProgresoAlpi, opciones: { baila?: boolean } = {}): { expresion: ExpresionAlpi; accion?: AccionAlpi } {
+  if (animo === 'durmiendo') return { expresion: 'dormida' }
+  if (opciones.baila) return { expresion: 'feliz', accion: 'bailar' }
+  if (p.vencidas > 0) {
+    if (p.vencidas >= 4 || p.diasAtraso >= 4) return { expresion: 'furiosa' }
+    if (p.vencidas >= 2 || p.diasAtraso >= 2) return { expresion: 'molesta' }
+    return { expresion: 'reganona' }
+  }
+  if (p.hechas > 0 && p.porHacer === 0) return { expresion: 'orgullosa' }
+  if (p.hechas > 0) return { expresion: 'feliz' }
+  if (p.porHacer > 0) return { expresion: 'concentrada' }
+  return { expresion: 'normal' }
+}
+
+export const NOMBRE_EXPRESION: Record<ExpresionAlpi, string> = {
+  normal: 'Normal', feliz: 'Feliz', emocionada: 'Emocionada', curiosa: 'Curiosa', dormida: 'Dormida', concentrada: 'Concentrada', sorpresa: 'Sorprendida',
+  triste: 'Triste', guino: 'Guiño', molesta: 'Molesta', furiosa: 'Furiosa', reganona: 'Regañona', orgullosa: 'Orgullosa',
+}
+export const NOMBRE_ACCION: Record<AccionAlpi, string> = { saludar: 'Saludar', saltar: 'Saltar', bailar: 'Bailar', risa: 'Reír', explorar: 'Explorar' }
+
 /** Ropa y accesorios que se pueden quitar o poner en el vestidor, y en qué niveles existen. */
 export const ACCESORIOS_ALPI: { id: string; nombre: string; niveles: NivelAlpi[] }[] = [
   { id: 'chullo', nombre: 'Chullo', niveles: [2] },

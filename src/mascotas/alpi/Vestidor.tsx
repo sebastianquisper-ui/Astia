@@ -2,12 +2,14 @@ import { lazy, Suspense, useState } from 'react'
 import { Hoja } from '../../ui/Hoja'
 import { Icono } from '../../ui/Icono'
 import { Rig } from '../rig/Rig'
-import { ACCESORIOS_ALPI, type NivelAlpi } from './datos'
+import { ACCESORIOS_ALPI, NOMBRE_ACCION, NOMBRE_EXPRESION, type AccionAlpi, type ExpresionAlpi, type NivelAlpi } from './datos'
 import { useVestidor } from './useVestidor'
 import { useAlpi3D } from './useAlpi3D'
 
 const AlpiIframe = lazy(() => import('./AlpiIframe'))
 const NOMBRES = ['Alpaca bebé', 'Exploradora', 'Guardiana', 'Legendaria']
+const EXPRESIONES = Object.keys(NOMBRE_EXPRESION) as ExpresionAlpi[]
+const ACCIONES = Object.keys(NOMBRE_ACCION) as AccionAlpi[]
 
 /** Botón para abrir el vestidor (con candado mientras te quede algo pendiente hoy). */
 export function BotonVestidor({ className = 'enlace-mascotas' }: { className?: string }) {
@@ -22,7 +24,7 @@ export function BotonVestidor({ className = 'enlace-mascotas' }: { className?: s
         <span>
           <b>Vestir a Alpi</b>
           <br />
-          {v.desbloqueado ? 'Quítale ropa o vuelve a un nivel anterior' : `Se abre al cumplir lo de hoy (te faltan ${v.faltan})`}
+          {v.desbloqueado ? 'Cambia su ropa, su nivel o su expresión' : `Se abre al cumplir lo de hoy (te faltan ${v.faltan})`}
         </span>
         <span className="enlace-mascotas-flecha" aria-hidden="true">›</span>
       </button>
@@ -34,6 +36,7 @@ export function BotonVestidor({ className = 'enlace-mascotas' }: { className?: s
 export function Vestidor({ abierto, alCerrar }: { abierto: boolean; alCerrar: () => void }) {
   const v = useVestidor()
   const en3d = useAlpi3D()
+  const [prueba, setPrueba] = useState<{ accion?: AccionAlpi; vez: number }>({ vez: 0 })
   const deEsteNivel = ACCESORIOS_ALPI.filter((a) => a.niveles.includes(v.nivel))
   return (
     <Hoja titulo="Vestidor de Alpi" abierta={abierto} alCerrar={alCerrar}>
@@ -49,7 +52,7 @@ export function Vestidor({ abierto, alCerrar }: { abierto: boolean; alCerrar: ()
           <div className="vestidor-vista">
             {en3d ? (
               <Suspense fallback={<Rig mascota="alpi" etapa={v.nivel} animo="contenta" />}>
-                <AlpiIframe nivel={v.nivel} expresion="feliz" accesorios={v.accesorios} />
+                <AlpiIframe nivel={v.nivel} expresion={v.expresion ?? 'feliz'} accion={prueba.accion} vez={prueba.vez} accesorios={v.accesorios} />
               </Suspense>
             ) : (
               <Rig mascota="alpi" etapa={v.nivel} animo="contenta" />
@@ -77,6 +80,20 @@ export function Vestidor({ abierto, alCerrar }: { abierto: boolean; alCerrar: ()
           ) : (
             <p className="nota">En el nivel 1 Alpi solo lleva su bufanda.</p>
           )}
+          <h3 className="titulo">Expresión</h3>
+          <p className="nota">Normalmente Alpi te muestra cómo vas: orgullosa si cumples, regañona o furiosa si te atrasas. Ahora que cumpliste, elige la que quieras.</p>
+          <div className="vestidor-accesorios" role="group" aria-label="Expresión de Alpi">
+            <button aria-pressed={!v.expresion} onClick={() => v.elegirExpresion(null)}>Automática</button>
+            {EXPRESIONES.map((e) => (
+              <button key={e} aria-pressed={v.expresion === e} onClick={() => v.elegirExpresion(e)}>{NOMBRE_EXPRESION[e]}</button>
+            ))}
+          </div>
+          <h3 className="titulo">Probar un movimiento</h3>
+          <div className="vestidor-accesorios" role="group" aria-label="Movimientos de Alpi">
+            {ACCIONES.map((a) => (
+              <button key={a} onClick={() => setPrueba((p) => ({ accion: a, vez: p.vez + 1 }))}>{NOMBRE_ACCION[a]}</button>
+            ))}
+          </div>
           <div className="acciones">
             <button className="btn suave" onClick={v.restablecer}>Como venía</button>
             <button className="btn" onClick={alCerrar}>Listo</button>
