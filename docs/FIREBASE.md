@@ -1,13 +1,13 @@
 # Cuenta y nube con Firebase
 
 Astia usa **una sola cuenta de Google** (Firebase Authentication) para todo: estudios, Mi Órbita y Finanstia.
-El proyecto es el mismo de "Mis Finanzas": `finanzas-personales-edb47`.
+El proyecto es **propio de Astia**: `astia-app-ace50` (aparte del de "Mis Finanzas", así las reglas, los datos y las cuotas no se mezclan; Finanstia empieza en cero).
 
 ## Qué vive dónde
 
 | Parte | Dónde se guarda |
 |---|---|
-| **Finanstia** (movimientos, presupuestos, metas) | Firestore, bajo `users/{uid}/config`, `users/{uid}/movimientos` y `users/{uid}/metas` (la misma forma que Mis Finanzas) |
+| **Finanstia** (movimientos, presupuestos, metas) | Firestore, bajo `users/{uid}/config`, `users/{uid}/movimientos` y `users/{uid}/metas` (la misma forma de datos que Mis Finanzas, pero en este proyecto aparte) |
 | Estudios y Mi Órbita (cursos, horario, tareas, hábitos, rutinas, progreso, recordatorios, apuntes, perfil del ciclo) | **Primero el teléfono, y una copia en Firestore** bajo `users/{uid}/estudios/{colección}/registros/{id}` y `users/{uid}/estudios/perfil`. Se sincroniza sola (ver abajo) |
 | Ajustes, sonidos, música, tus pistas | Solo en el teléfono (son preferencias del aparato) |
 | PIN de Finanstia | Solo en el teléfono: una huella PBKDF2 con sal, nunca el número |
@@ -27,8 +27,8 @@ El proyecto es el mismo de "Mis Finanzas": `finanzas-personales-edb47`.
 ## Qué hace falta en la consola de Firebase
 
 1. **Dominio autorizado.** Authentication → Configuración → Dominios autorizados. Se autoriza por sitio (host), así que si Astia se publica en
-   `sebastianquisper-ui.github.io` (como Mis Finanzas) **ya está autorizado**. Si se publica en otro dominio, agrégalo.
-2. **Reglas de seguridad.** `firestore.rules` incluye las de Mis Finanzas **más las de estudios** (campos permitidos, tipos y tamaños por colección):
+   `sebastianquisper-ui.github.io` hay que agregarlo en Authentication → Configuración → Dominios autorizados (ya está hecho). Si se publica en otro dominio, agrégalo.
+2. **Reglas de seguridad.** `firestore.rules` incluye las de Finanstia **más las de estudios** (campos permitidos, tipos y tamaños por colección):
    cada usuario solo lee y escribe lo suyo. No se publican solas: cópialas completas en Firestore Database → Reglas → Publicar.
    **Hay que republicarlas cada vez que este archivo cambie.** Sin ellas la app sigue funcionando en el teléfono, pero la cabecera dice *Sin sincronizar*.
 3. Nada más. No hay claves secretas: el `firebaseConfig` es público por diseño y lo que protege tus datos son las reglas y tu cuenta de Google.

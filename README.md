@@ -50,7 +50,7 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   periodos y gráficos. Se abre con un **PIN propio** (4 a 6 números; solo se guarda una huella, en el teléfono) además de la cuenta de
   Google, y se cierra al salir del modo o tras 2 minutos en segundo plano. Su fondo son billetes de soles estilizados en vez de estrellas.
   Tiene **su propio Alpi** con su propia experiencia (anotar, ahorrar y cumplir suman; gastar no): con el dinero en verde juega con
-  billetes y en rojo pide plata. Usa los mismos datos de Firestore que Mis Finanzas.
+  billetes y en rojo pide plata. Tiene la misma forma de datos que Mis Finanzas, pero guarda en el proyecto de Firebase propio de Astia (empieza en cero).
   Su Alpi también tiene **ruleta de emotes y movimientos** (doble toque) y **vestidor** (quitar y poner ropa, bajar de nivel), separados del Alpi
   de estudios; se abren mientras tu plata no esté en rojo. Puedes **dictar** un movimiento ("gasté 15 soles en almuerzo", "pasé 50 de digital a
   efectivo", "aporté 100 a mi laptop"): Astia lo entiende, te lo muestra y guarda al confirmar (`docs/DICTADO.md`).
