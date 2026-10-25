@@ -681,7 +681,7 @@ test('evidencia: sin foto ni enlace la tarea no se marca hecha', async ({ page }
   await expect(page.getByRole('button', { name: 'Marcar hecha: ' + titulo })).toHaveAttribute('aria-pressed', 'false')
 })
 
-test('evidencia: con una foto la tarea queda hecha y se puede ver después', async ({ page }) => {
+test('evidencia: con una foto la tarea queda hecha y la foto se borra al confirmar', async ({ page }) => {
   await page.goto('/#/tareas')
   await page.getByRole('button', { name: 'Marcar hecha: Informe de laboratorio' }).click()
   const hoja = page.getByRole('dialog', { name: 'Entrega tu evidencia' })
@@ -690,12 +690,13 @@ test('evidencia: con una foto la tarea queda hecha y se puede ver después', asy
   await page.setInputFiles('#evidencia-galeria', { name: 'informe.png', mimeType: 'image/png', buffer: png })
   await expect(hoja.getByRole('img', { name: 'Tu evidencia' })).toBeVisible()
   await hoja.getByRole('button', { name: 'Marcar hecha con evidencia' }).click()
-  await expect(page.getByRole('status')).toContainText('Evidencia guardada')
+  await expect(page.getByRole('status')).toContainText('Evidencia recibida')
   await page.getByRole('button', { name: 'Hechas' }).click()
   await expect(page.locator('.tarea', { hasText: 'Informe de laboratorio' })).toContainText('Con foto')
   await page.getByRole('button', { name: 'Editar: Informe de laboratorio' }).click()
   await expect(page.getByText(/Evidencia entregada el/)).toBeVisible()
-  await expect(page.getByRole('img', { name: 'Evidencia de Informe de laboratorio' })).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Evidencia de Informe de laboratorio' })).toHaveCount(0) // la foto no se conserva
+  await expect(page.getByText(/La foto se borra al confirmar/)).toBeVisible()
 })
 
 test('evidencia: reabrir una tarea descarta su evidencia', async ({ page }) => {

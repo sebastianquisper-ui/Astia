@@ -15,7 +15,7 @@ export function VerEvidencia({ tarea }: { tarea: Tarea }) {
     <div className="ver-evidencia">
       <b>Evidencia entregada el {dia}</b>
       {foto && <img src={foto} alt={'Evidencia de ' + tarea.titulo} />}
-      {ev.foto && !foto && <span className="nota">La foto quedó guardada en el teléfono donde la tomaste.</span>}
+      {ev.foto && !foto && <span className="nota">Entregaste foto como prueba. La foto se borra al confirmar, para no ocupar espacio.</span>}
       {ev.enlace && (
         <a href={ev.enlace} target="_blank" rel="noreferrer">
           {ev.enlace}

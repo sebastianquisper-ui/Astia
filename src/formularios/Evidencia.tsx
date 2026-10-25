@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { useDatos } from '../datos/DatosProvider'
-import { achicarFoto, borrarFoto, guardarFoto } from '../datos/evidencias'
+import { achicarFoto, borrarFoto } from '../datos/evidencias'
 import type { Tarea } from '../dominio/tipos'
 import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
@@ -67,25 +67,14 @@ export function EvidenciaProvider({ children }: { children: ReactNode }) {
       return
     }
     setGuardando(true)
-    let conFoto = false
-    if (foto) {
-      try {
-        await guardarFoto(pedido.tarea.id, foto)
-        conFoto = true
-      } catch {
-        if (!conEnlace) {
-          setGuardando(false)
-          setError('No pude guardar la foto en este teléfono. Pega el enlace de tu entrega.')
-          return
-        }
-      }
-    }
-    alternar(pedido.tarea.id, { foto: conFoto, enlace: conEnlace ? enlace.trim() : undefined, fecha: new Date().toISOString() })
+    // La foto es la prueba del momento: al confirmar se descarta y solo queda anotado que la entregaste (no ocupa espacio)
+    alternar(pedido.tarea.id, { foto: !!foto, enlace: conEnlace ? enlace.trim() : undefined, fecha: new Date().toISOString() })
+    setFoto(null)
     setGuardando(false)
     pedido.alHecha?.()
     void sonar('tareaHecha')
     setPedido(null)
-    avisar('Evidencia guardada. Tarea hecha.')
+    avisar('Evidencia recibida. Tarea hecha.')
   }
 
   return (
