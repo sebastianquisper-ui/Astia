@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+vi.mock('./vozHombre', () => ({ decirConVozDeHombre: vi.fn(() => Promise.resolve()), desbloquearVozDeHombre: vi.fn(), detenerVozDeHombre: vi.fn() }))
+import { decirConVozDeHombre } from './vozHombre'
 import { configurarVoz, hablar, hayVozDelGenero, probarVoz, vocesEspanol } from './voz'
 
 const voces = [
@@ -52,5 +54,17 @@ describe('voz de Alpi', () => {
     configurarVoz({ activa: true, genero: 'mujer' }, 'hombre')
     hablar('Hola')
     expect(dicho[0].voz).toBe('mx')
+  })
+  it('usa la voz de hombre de la app solo si el teléfono no tiene una y ya se descargó', () => {
+    const sinHombre = voces.filter((v) => v.voiceURI !== 'jorge')
+    vi.stubGlobal('speechSynthesis', { getVoices: () => sinHombre, cancel: vi.fn(), speak: vi.fn() })
+    Object.defineProperty(window, 'speechSynthesis', { value: globalThis.speechSynthesis, configurable: true })
+    configurarVoz({ activa: true, vozDeHombreInstalada: true }, 'hombre')
+    hablar('Hola')
+    expect(decirConVozDeHombre).toHaveBeenCalledWith('Hola')
+    vi.mocked(decirConVozDeHombre).mockClear()
+    configurarVoz({ activa: true, vozDeHombreInstalada: false }, 'hombre')
+    hablar('Hola')
+    expect(decirConVozDeHombre).not.toHaveBeenCalled()
   })
 })
