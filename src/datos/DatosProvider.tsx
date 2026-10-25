@@ -108,7 +108,7 @@ export function DatosProvider({ children }: { children: ReactNode }) {
     if (!guardarLocal(CLAVE, reales)) avisar('No se pudieron guardar tus datos en este teléfono. Exporta un respaldo ahora.', 'error')
   }, [reales, avisar])
 
-  const nube = useSincronizacion({ sync, uid: usuario?.uid ?? null, reales, setReales })
+  const nube = useSincronizacion({ sync, uid: usuario?.uid ?? null, dueno: usuario?.correo || usuario?.uid || null, reales, setReales })
 
   const editar = useCallback((fn: (d: Datos) => Datos) => (enEjemplo ? setDemo : setReales)((previo) => fn(previo)), [enEjemplo])
 

@@ -17,11 +17,13 @@ const CLAVE_DE_OTRA = 'astia.datos.v2.de-'
 interface Opciones {
   sync: SyncDatos | null
   uid: string | null
+  /** Quién es el dueño de los datos del teléfono: el correo de la cuenta (así sigue siendo el mismo si cambias de proyecto de Firebase). */
+  dueno: string | null
   reales: Datos
   setReales: (f: (d: Datos) => Datos) => void
 }
 
-export function useSincronizacion({ sync, uid, reales, setReales }: Opciones): EstadoNube {
+export function useSincronizacion({ sync, uid, dueno: duenoActual, reales, setReales }: Opciones): EstadoNube {
   const mapa = useRef(new Map<string, number>())
   const fuentes = useRef(new Set<string>())
   const enVuelo = useRef(0)
@@ -35,7 +37,7 @@ export function useSincronizacion({ sync, uid, reales, setReales }: Opciones): E
     fuentes.current = new Set()
     enVuelo.current = 0
     setListo(false)
-    if (!sync || !uid) {
+    if (!sync || !uid || !duenoActual) {
       setEstado('local')
       return
     }
@@ -44,13 +46,14 @@ export function useSincronizacion({ sync, uid, reales, setReales }: Opciones): E
     // Los datos del teléfono son de UNA cuenta: si entra otra, los de la anterior se apartan para no subirlos a la cuenta nueva
     try {
       const dueno = localStorage.getItem(CLAVE_DUENO)
-      if (dueno && dueno !== uid) {
+      // (una marca antigua guardada con el uid de otro proyecto de Firebase, sin '@', se toma como tuya)
+      if (dueno && dueno.includes('@') && dueno !== duenoActual) {
         localStorage.setItem(CLAVE_DE_OTRA + dueno, JSON.stringify(actual.current))
         setReales(() => datosVacios())
       } else if (!dueno && !localStorage.getItem(CLAVE_ANTES)) {
         localStorage.setItem(CLAVE_ANTES, JSON.stringify(actual.current)) // copia de seguridad antes de la primera mezcla
       }
-      localStorage.setItem(CLAVE_DUENO, uid)
+      localStorage.setItem(CLAVE_DUENO, duenoActual)
     } catch {
       /* sin almacenamiento: se sigue igual */
     }
@@ -75,7 +78,7 @@ export function useSincronizacion({ sync, uid, reales, setReales }: Opciones): E
       },
       () => setEstado('error'),
     )
-  }, [sync, uid, setReales])
+  }, [sync, uid, duenoActual, setReales])
 
   // Sube lo que cambió (se espera a haber recibido lo de la nube para no pisar nada más nuevo)
   useEffect(() => {
