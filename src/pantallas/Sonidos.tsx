@@ -6,6 +6,7 @@ import { elegidoPara, olvidarPropio, probar } from '../sonidos/reproductor'
 import { PRESETS } from '../sonidos/sintetizador'
 import { borrarPista, guardarPista, MAX_SEGUNDOS_MUSICA, validarPista } from '../sonidos/archivosMusica'
 import { MAX_PISTAS, PREDETERMINADA, VOLUMEN_INICIAL } from '../sonidos/musica'
+import { descargarVozDeHombre, PESO_VOZ_DE_HOMBRE_MB, quitarVozDeHombre, vozDeHombreInstalada } from '../sonidos/vozHombre'
 import { generoEfectivo, hayVozDelGenero, probarVoz, vocesEspanol, vozDisponible } from '../sonidos/voz'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
@@ -31,6 +32,31 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
   }, [])
   const voz = prefs.voz ?? {}
   const guardarVoz = (parcial: NonNullable<PreferenciasSonido['voz']>) => cambiar({ sonidos: { ...prefs, voz: { ...voz, ...parcial } } })
+
+  // La voz de hombre propia de la app: se descarga solo si el usuario lo pide
+  const [bajando, setBajando] = useState<number | null>(null)
+  useEffect(() => {
+    void vozDeHombreInstalada().then((si) => si !== (voz.vozDeHombreInstalada === true) && guardarVoz({ vozDeHombreInstalada: si }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const bajarVozDeHombre = async () => {
+    setBajando(0)
+    try {
+      await descargarVozDeHombre(setBajando)
+      guardarVoz({ vozDeHombreInstalada: true, genero: 'hombre', voz: undefined })
+      avisar('Voz de hombre lista.')
+      setTimeout(() => probarVoz(), 0)
+    } catch {
+      avisar('No se pudo descargar la voz. Revisa tu internet e inténtalo de nuevo.', 'error')
+    } finally {
+      setBajando(null)
+    }
+  }
+  const quitarVoz = async () => {
+    await quitarVozDeHombre()
+    guardarVoz({ vozDeHombreInstalada: false })
+    avisar('Voz de hombre quitada.')
+  }
 
   const musica = prefs.musica ?? {}
   const guardarMusica = (parcial: NonNullable<PreferenciasSonido['musica']>) => cambiar({ sonidos: { ...prefs, musica: { ...musica, ...parcial } } })
@@ -175,6 +201,18 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
             </div>
             {voces.length > 0 && voz.voz === undefined && !hayVozDelGenero(voces, generoEfectivo()) && (
               <p className="nota">Tu teléfono no comparte con Astia ninguna voz de {generoEfectivo()}, así que se usa la que hay. En iPhone pasa aunque la hayas descargado: Safari solo entrega algunas voces.</p>
+            )}
+            {voces.length > 0 && !hayVozDelGenero(voces, 'hombre') && (
+              <div className="campo">
+                {voz.vozDeHombreInstalada ? (
+                  <button className="btn suave pequeno" onClick={quitarVoz}>Quitar la voz de hombre de Astia</button>
+                ) : (
+                  <button className="btn suave pequeno" disabled={bajando !== null} onClick={bajarVozDeHombre}>
+                    {bajando === null ? `Descargar voz de hombre (${PESO_VOZ_DE_HOMBRE_MB} MB)` : `Descargando… ${Math.round(bajando * 100)}%`}
+                  </button>
+                )}
+                <p className="nota">Una voz de hombre que viene con Astia, gratis. Se descarga una sola vez con internet y queda en tu teléfono. Es la opción para Alpi si tu iPhone no comparte ninguna.</p>
+              </div>
             )}
             {voces.length > 0 && (
               <div className="sonido-controles">

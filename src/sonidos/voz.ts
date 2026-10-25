@@ -1,3 +1,5 @@
+import { decirConVozDeHombre, desbloquearVozDeHombre, detenerVozDeHombre } from './vozHombre'
+
 // Alpi lee los avisos en voz alta con la voz del iPhone (Web Speech API): gratis y sin servidor.
 // Solo habla con la app abierta, y en iOS después de que tocaste la pantalla.
 
@@ -8,6 +10,8 @@ export interface PreferenciasVoz {
   voz?: string
   /** 'hombre' o 'mujer'; si falta, sigue a la mascota elegida. */
   genero?: GeneroVoz
+  /** La voz de hombre de la app ya está descargada en este teléfono. */
+  vozDeHombreInstalada?: boolean
 }
 
 export type GeneroVoz = 'hombre' | 'mujer'
@@ -47,9 +51,24 @@ function elegirVoz(): SpeechSynthesisVoice | undefined {
   return candidatas.find((v) => v.lang.toLowerCase().replace('_', '-') === 'es-pe') ?? candidatas.find((v) => v.lang.toLowerCase().includes('us') || v.lang.toLowerCase().includes('mx')) ?? candidatas[0]
 }
 
+/** La voz propia de la app se usa solo si pides voz de hombre, el teléfono no tiene una y ya la descargaste. */
+const usarVozDeHombreDeLaApp = () => prefs.vozDeHombreInstalada === true && prefs.voz === undefined && generoEfectivo() === 'hombre' && !hayVozDelGenero(vocesEspanol(), 'hombre')
+
 function decir(texto: string) {
   const m = motor()
-  if (!m || !texto.trim()) return
+  if (!texto.trim()) return
+  if (usarVozDeHombreDeLaApp()) {
+    m?.cancel()
+    decirConVozDeHombre(texto).catch(() => decirConElTelefono(texto))
+    return
+  }
+  decirConElTelefono(texto)
+}
+
+function decirConElTelefono(texto: string) {
+  const m = motor()
+  if (!m) return
+  detenerVozDeHombre()
   m.cancel() // el aviso nuevo reemplaza al anterior, sin acumular
   const u = new SpeechSynthesisUtterance(texto)
   const v = elegirVoz()
@@ -74,6 +93,7 @@ export function decirRecordatorio(texto: string) {
 
 /** En iOS la primera frase hay que pedirla con un toque: con un susurro vacío queda desbloqueada para después. */
 export function desbloquearVoz() {
+  desbloquearVozDeHombre()
   const m = motor()
   if (!m) return
   try {
