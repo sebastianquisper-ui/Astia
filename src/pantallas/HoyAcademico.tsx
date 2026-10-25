@@ -111,6 +111,9 @@ export function HoyAcademico() {
       <button className="btn suave" style={{ width: '100%' }} onClick={() => setPreguntando(true)}>
         <Icono nombre="mic" tam={18} /> Pregúntale a Astia
       </button>
+      <button className="btn suave" style={{ width: '100%' }} onClick={() => (window.location.hash = '#/mas/agenda')}>
+        <Icono nombre="reloj" tam={18} /> Recordarme algo
+      </button>
 
       {hayDatos && (
         <div className="chips">

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Icono } from '../ui/Icono'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
 import { useCumplirTarea } from '../formularios/Evidencia'
@@ -92,6 +93,10 @@ export function HoyPersonal() {
       </h1>
 
       <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} progreso={{ vencidas, diasAtraso: diasDeAtraso(personales.filter((t) => t.estado === 'pendiente'), ahora), porHacer: total - hechos, hechas: hechos }} baila={reaccion?.animo === 'contenta'} />
+
+      <button className="btn suave" style={{ width: '100%' }} onClick={() => irA('#/mas/agenda')}>
+        <Icono nombre="reloj" tam={18} /> Recordarme algo
+      </button>
 
       <TarjetaHabitos
         hechos={hechos}

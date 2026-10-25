@@ -2,7 +2,7 @@ import type { PreferenciasMusica } from './musica'
 import type { PreferenciasVoz } from './voz'
 // Cuándo suena Astia y qué sonido tiene cada momento por defecto.
 
-export type EventoSonido = 'evolucion' | 'tareaHecha' | 'enfoqueFin' | 'descansoFin' | 'vista2020' | 'metaCumplida'
+export type EventoSonido = 'evolucion' | 'tareaHecha' | 'enfoqueFin' | 'descansoFin' | 'vista2020' | 'metaCumplida' | 'recordatorio'
 
 export interface InfoEvento {
   id: EventoSonido
@@ -18,6 +18,7 @@ export const EVENTOS: InfoEvento[] = [
   { id: 'enfoqueFin', nombre: 'Cuando termina un enfoque', detalle: 'El fin de un Pomodoro o de un bloque de estudio', predeterminado: 'campana' },
   { id: 'descansoFin', nombre: 'Cuando termina un descanso', detalle: 'Para volver a empezar', predeterminado: 'ding' },
   { id: 'vista2020', nombre: 'Para descansar la vista', detalle: 'El recordatorio 20-20-20', predeterminado: 'gota' },
+  { id: 'recordatorio', nombre: 'Cuando suena un recordatorio', detalle: 'Tus avisos de "en 10 minutos…"', predeterminado: 'alerta' },
   { id: 'metaCumplida', nombre: 'Cuando cumples una meta de ahorro', detalle: 'En Finanstia', predeterminado: 'tada' },
 ]
 

@@ -13,10 +13,11 @@ import { EvidenciaProvider } from './formularios/Evidencia'
 import { CuentaProvider } from './cuenta/CuentaProvider'
 import { PuertaCuenta } from './cuenta/PuertaCuenta'
 import { intentarMusica } from './sonidos/musica'
+import { desbloquearVoz } from './sonidos/voz'
 
 // En el iPhone el audio solo suena después de tocar la pantalla: el primer toque lo deja listo
 // (y es también cuando empieza la música de fondo)
-window.addEventListener('pointerdown', intentarMusica, { once: true, passive: true })
+window.addEventListener('pointerdown', () => (intentarMusica(), desbloquearVoz()), { once: true, passive: true })
 
 // Registra el service worker: es lo que permite instalar la app y abrirla sin internet
 registerSW({ immediate: true })

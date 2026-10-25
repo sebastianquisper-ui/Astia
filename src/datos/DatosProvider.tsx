@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { Clase, Curso, Datos, Evidencia, Habito, Mejora, PlanDia, Perfil, ProgresoDia, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
+import type { Apunte, Recordatorio, Clase, Curso, Datos, Evidencia, Habito, Mejora, PlanDia, Perfil, ProgresoDia, Rutina, SemanaTema, Tarea } from '../dominio/tipos'
 import { datosDeEjemplo } from '../demo/datosEjemplo'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { guardarLocal } from '../lib/almacen'
@@ -41,6 +41,8 @@ export interface Contexto {
   rutinas: Rutina[]
   mejoras: Mejora[]
   planes: PlanDia[]
+  recordatorios: Recordatorio[]
+  apuntes: Apunte[]
   progreso: ProgresoDia[]
   /** Hay algo cargado (cursos o tareas). */
   hayDatos: boolean
@@ -48,6 +50,10 @@ export interface Contexto {
   enEjemplo: boolean
   /** Reabre una tarea hecha, o la marca hecha con su evidencia (sin evidencia no se marca). */
   alternar: (id: string, evidencia?: Evidencia) => void
+  guardarRecordatorio: (r: Recordatorio) => void
+  borrarRecordatorio: (id: string) => void
+  guardarApunte: (a: Apunte) => void
+  borrarApunte: (id: string) => void
   guardarTarea: (t: Tarea) => void
   borrarTarea: (id: string) => void
   guardarCurso: (c: Curso) => void
@@ -110,10 +116,16 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       rutinas: activos(datos.rutinas),
       mejoras: activos(datos.mejoras),
       planes: activos(datos.planes),
+      recordatorios: activos(datos.recordatorios),
+      apuntes: activos(datos.apuntes),
       progreso: activos(datos.progreso),
       hayDatos: activos(datos.cursos).length > 0 || activos(datos.tareas).length > 0 || activos(datos.habitos).length > 0,
       enEjemplo,
       alternar: (id, evidencia) => editar((d) => alternarTarea(d, id, new Date(), evidencia)),
+      guardarRecordatorio: (r) => editar((d) => ({ ...d, recordatorios: guardarRegistro(d.recordatorios, r, ahora()) })),
+      borrarRecordatorio: (id) => editar((d) => ({ ...d, recordatorios: borrarRegistro(d.recordatorios, id, ahora()) })),
+      guardarApunte: (a) => editar((d) => ({ ...d, apuntes: guardarRegistro(d.apuntes, a, ahora()) })),
+      borrarApunte: (id) => editar((d) => ({ ...d, apuntes: borrarRegistro(d.apuntes, id, ahora()) })),
       guardarTarea: (t) => editar((d) => ({ ...d, tareas: guardarRegistro(d.tareas, t, ahora()) })),
       borrarTarea: (id) => editar((d) => ({ ...d, tareas: borrarRegistro(d.tareas, id, ahora()) })),
       guardarCurso: (c) => editar((d) => ({ ...d, cursos: guardarRegistro(d.cursos, c, ahora()) })),

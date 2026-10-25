@@ -12,14 +12,14 @@ export interface TareaDictada {
   hora: string | null
 }
 
-const sinTildes = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+export const sinTildes = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 const DIAS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const NUMEROS: Record<string, number> = { un: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10, once: 11, doce: 12 }
 const NUM = '(\\d{1,2}|' + Object.keys(NUMEROS).join('|') + ')'
 const aNumero = (s: string) => (/^\d+$/.test(s) ? Number(s) : NUMEROS[s])
 
-function fechaDe(t: string, hoy: Date): { fecha: string; texto: string } | null {
+export function fechaDe(t: string, hoy: Date): { fecha: string; texto: string } | null {
   let m: RegExpMatchArray | null
   if ((m = t.match(/\bpasado manana\b/))) return { fecha: ymd(addDays(hoy, 2)), texto: m[0] }
   if ((m = t.match(/\bmanana\b/))) return { fecha: ymd(addDays(hoy, 1)), texto: m[0] }
@@ -49,7 +49,7 @@ function fechaDe(t: string, hoy: Date): { fecha: string; texto: string } | null 
   return null
 }
 
-function horaDe(t: string): { hora: string; texto: string } | null {
+export function horaDe(t: string): { hora: string; texto: string } | null {
   let m = t.match(/\ba las (\d{1,2})(?:[:.](\d{2}))?\s*(am|pm|a\. ?m\.?|p\. ?m\.?)?/)
   let aviso = true
   if (!m) {

@@ -132,6 +132,26 @@ export interface PlanDia extends Registro {
   tareaIds: string[]
 }
 
+/** Algo que Astia te recuerda a una hora exacta ("en 10 minutos comprar pan"). */
+export interface Recordatorio extends Registro {
+  texto: string
+  /** Momento exacto en que te avisa (ISO). */
+  cuando: string
+  /** Ya te avisó. */
+  avisado?: boolean
+  /** Id del evento que creó en Google Calendar (para borrarlo cuando pase). */
+  calendarioId?: string
+}
+
+/** Un evento que viene o un apunte de algo que pasó (Mi Órbita y estudios). */
+export interface Apunte extends Registro {
+  texto: string
+  /** "AAAA-MM-DD". */
+  fecha: string
+  hora?: string
+  tipo: 'evento' | 'apunte'
+}
+
 export interface Perfil {
   inicioCiclo: string
   semanasCiclo: number
@@ -153,4 +173,6 @@ export interface Datos {
   mejoras: Mejora[]
   progreso: ProgresoDia[]
   planes: PlanDia[]
+  recordatorios: Recordatorio[]
+  apuntes: Apunte[]
 }

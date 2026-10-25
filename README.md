@@ -63,6 +63,8 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   En Hoy, **Dictar** entiende una tarea hablada o escrita ("examen de cálculo el viernes a las 3 de la tarde"): detecta curso, tipo, fecha y hora, y abre el formulario ya lleno para confirmar.
   **Pregúntale a Astia** (en Hoy, hablando o escribiendo): "¿qué pendientes tengo hoy?", "¿cuál es el más urgente?", "¿qué clase me toca?", exámenes, semana, enfoque,
   hábitos y racha. Responde con tus datos, con reglas del español: gratis y sin internet.
+  **Recordatorios** (Más → Recordatorios y apuntes): "en 10 minutos comprar pan" suena y Alpi lo dice en voz alta con Astia abierta; al volver avisa lo que se pasó.
+  Opcional: crear el aviso también en Google Calendar para que llegue con la app cerrada (`docs/CALENDAR.md`). Ahí mismo, **eventos y apuntes**.
   También puedes activar que **Alpi lea los avisos en voz alta** (voz del iPhone, gratis; solo con la app abierta; apagado por defecto).
 - **Una sola cuenta (Firebase):** Astia pide iniciar sesión con Google antes de mostrar nada. Detalles y pasos en `docs/FIREBASE.md`.
   Los datos de estudios y Mi Órbita todavía están en el teléfono; pasarlos a la nube es el siguiente paso (`docs/SUPABASE.md` quedó

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { hashDe, leerRuta, PESTANAS_FINANZAS, type Pestana, type Ruta } from './lib/ruta'
 import { Estrella, Icono } from './ui/Icono'
 import { BotonMusica } from './ui/BotonMusica'
+import { MotorRecordatorios } from './recordatorios/MotorRecordatorios'
 import { NavInferior } from './ui/NavInferior'
 import { Hoy } from './pantallas/Hoy'
 import { Semana } from './pantallas/Semana'
@@ -83,6 +84,7 @@ function Cuerpo({ ruta, elegirPestana, abrirMas, cambiarModo, irAMas }: { ruta: 
     <>
       {finanzas ? <FondoDinero /> : <Cielo />}
       <DescansoVista />
+      <MotorRecordatorios />
       <Bienvenida />
       <div className="app">
         <header className="cabecera">

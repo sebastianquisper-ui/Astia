@@ -1,4 +1,4 @@
-import type { Clase, Curso, Datos, Frecuencia, Habito, Mejora, Momento, PasoRutina, PlanDia, ProgresoDia, Registro, Rutina, SemanaTema, Tarea, Evidencia } from '../dominio/tipos'
+import type { Apunte, Recordatorio, Clase, Curso, Datos, Frecuencia, Habito, Mejora, Momento, PasoRutina, PlanDia, ProgresoDia, Registro, Rutina, SemanaTema, Tarea, Evidencia } from '../dominio/tipos'
 import { ymd } from '../lib/fechas'
 
 // Funciones puras para manejar los datos. Todas devuelven objetos NUEVOS (nunca modifican
@@ -16,6 +16,8 @@ export const datosVacios = (): Datos => ({
   mejoras: [],
   progreso: [],
   planes: [],
+  recordatorios: [],
+  apuntes: [],
 })
 
 let contador = 0
@@ -66,6 +68,8 @@ export function fusionarDatos(local: Datos, remoto: Datos): Datos {
     mejoras: fusionarLista(local.mejoras, remoto.mejoras),
     progreso: fusionarLista(local.progreso, remoto.progreso),
     planes: fusionarLista(local.planes, remoto.planes),
+    recordatorios: fusionarLista(local.recordatorios, remoto.recordatorios),
+    apuntes: fusionarLista(local.apuntes, remoto.apuntes),
   }
 }
 
@@ -244,5 +248,7 @@ export function normalizarDatos(bruto: unknown): Datos {
     mejoras: lista<Mejora>(bruto.mejoras),
     progreso: lista<ProgresoDia>(bruto.progreso),
     planes: lista<PlanDia>(bruto.planes).map((p2) => ({ ...p2, tareaIds: Array.isArray(p2.tareaIds) ? p2.tareaIds : [] })),
+    recordatorios: lista<Recordatorio>(bruto.recordatorios).filter((r) => typeof r.texto === 'string' && typeof r.cuando === 'string'),
+    apuntes: lista<Apunte>(bruto.apuntes).filter((a) => typeof a.texto === 'string' && typeof a.fecha === 'string').map((a) => ({ ...a, tipo: a.tipo === 'evento' ? 'evento' : 'apunte' })),
   }
 }

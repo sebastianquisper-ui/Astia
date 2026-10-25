@@ -967,6 +967,44 @@ test('si el iPhone no deja usar el reconocimiento de voz, explica qué hacer y e
   await expect(hoja.getByText(/micrófono del teclado/).first()).toBeVisible()
 })
 
+test('recordatorio: "en 10 minutos comprar pan" avisa a la hora y queda anotado como ya avisado', async ({ page }) => {
+  await page.goto('/#/mas/agenda')
+  await page.getByLabel('Qué quieres recordar').fill('en 10 minutos comprar pan')
+  await page.getByRole('button', { name: 'Recordar', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'te aviso en 10 min' })).toBeVisible()
+  await expect(page.locator('.fila', { hasText: 'Comprar pan' })).toContainText('en 10 min')
+  await page.clock.fastForward('09:00')
+  await expect(page.getByRole('status').filter({ hasText: 'tienes que comprar pan' })).toHaveCount(0)
+  await page.clock.fastForward('01:01')
+  await expect(page.getByRole('status').filter({ hasText: 'tienes que comprar pan' })).toBeVisible()
+  await expect(page.locator('.fila', { hasText: 'Comprar pan' })).toContainText('Ya avisé')
+})
+
+test('recordatorio sin hora: no inventa el cuándo y explica cómo decirlo', async ({ page }) => {
+  await page.goto('/#/mas/agenda')
+  await page.getByLabel('Qué quieres recordar').fill('comprar pan')
+  await page.getByRole('button', { name: 'Recordar', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'No entendí cuándo' })).toBeVisible()
+  await expect(page.getByText('Sin recordatorios')).toBeVisible()
+})
+
+test('eventos y apuntes: se guardan, se ordenan y se pueden borrar con deshacer', async ({ page }) => {
+  await page.goto('/#/mas/agenda')
+  await page.getByLabel('Qué quieres apuntar').fill('Hoy conseguí la beca')
+  await page.getByRole('button', { name: 'Guardar', exact: true }).click()
+  await expect(page.locator('.fila', { hasText: 'Hoy conseguí la beca' })).toBeVisible()
+  await page.getByRole('button', { name: 'Evento', exact: true }).click()
+  await page.getByLabel('Qué evento es').fill('Cumpleaños de mamá')
+  await page.getByLabel('Fecha').fill('2026-10-20')
+  await page.getByRole('button', { name: 'Guardar', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Próximos eventos' })).toBeVisible()
+  await expect(page.locator('.fila', { hasText: 'Cumpleaños de mamá' })).toContainText('evento')
+  await page.getByRole('button', { name: 'Borrar: Cumpleaños de mamá' }).click()
+  await expect(page.locator('.fila', { hasText: 'Cumpleaños de mamá' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Deshacer' }).click()
+  await expect(page.locator('.fila', { hasText: 'Cumpleaños de mamá' })).toBeVisible()
+})
+
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
   const datos = conLogros(0, 700) // 1400 XP, todo personal
   await page.addInitScript((d) => {

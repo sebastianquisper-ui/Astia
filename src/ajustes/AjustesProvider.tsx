@@ -27,6 +27,8 @@ export interface Ajustes {
   alpiLookFinanzas?: { nivel?: number; accesorios?: Record<string, boolean>; expresion?: ExpresionAlpi }
   /** Qué suena en cada momento (evolución, tarea cumplida, fin de enfoque…). Por defecto todo con su sonido predeterminado. */
   sonidos?: PreferenciasSonido
+  /** Si quedó activado crear los recordatorios también en Google Calendar. */
+  calendario?: { activo?: boolean }
   /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
   alpi3d?: boolean
   /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */

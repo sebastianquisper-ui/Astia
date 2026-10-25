@@ -47,3 +47,21 @@ export function hablar(texto: string) {
 
 /** Para el botón "Probar": suena aunque la voz no esté activa. */
 export const probarVoz = (texto = 'Hola, soy Alpi. Así te leeré los avisos.') => decir(texto)
+
+/** Los recordatorios se dicen en voz alta salvo que apagues la voz a propósito. */
+export function decirRecordatorio(texto: string) {
+  if (prefs.activa !== false) decir(texto)
+}
+
+/** En iOS la primera frase hay que pedirla con un toque: con un susurro vacío queda desbloqueada para después. */
+export function desbloquearVoz() {
+  const m = motor()
+  if (!m) return
+  try {
+    const u = new SpeechSynthesisUtterance(' ')
+    u.volume = 0
+    m.speak(u)
+  } catch {
+    /* sin voz en este navegador */
+  }
+}
