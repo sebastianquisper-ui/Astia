@@ -20,12 +20,15 @@ export function animoDe(s: Situacion): Animo {
   return 'seria'
 }
 
+/** "Ana, " o nada: sin nombre la frase sigue sonando natural. */
+const vocativo = (nombre: string) => (nombre.trim() ? `${nombre.trim()}, ` : '')
+
 const rotar = (frases: string[], semilla: number) => frases[semilla % frases.length]
 
 /** La frase cambia cada día pero no cada vez que abres la app. */
 export function fraseDe(s: Situacion, nombre: string, semilla: number): string {
   const animo = animoDe(s)
-  if (animo === 'durmiendo') return rotar([`${nombre}, ya es tarde. Duerme. Mañana empezamos temprano.`, 'Pantalla fuera. Descansar también es parte del plan.'], semilla)
+  if (animo === 'durmiendo') return rotar([`${vocativo(nombre)}ya es tarde. Duerme. Mañana empezamos temprano.`, 'Pantalla fuera. Descansar también es parte del plan.'], semilla)
   if (!s.hayCursos) return 'Aún no me diste tus cursos ni tu horario. Cárgalos ahora y empezamos.'
   if (animo === 'alerta') {
     const n = s.vencidas
@@ -41,10 +44,10 @@ export function fraseDe(s: Situacion, nombre: string, semilla: number): string {
 export function frasesToque(nombre: string): string[] {
   return [
     'Deja de mirarme y empieza.',
-    `No hay excusas, ${nombre}.`,
+    nombre.trim() ? `No hay excusas, ${nombre.trim()}.` : 'No hay excusas.',
     'Diez minutos. Solo diez. Ya.',
     'El celular no te va a hacer la tarea.',
-    `${nombre}, ¿cuál es la siguiente tarea? Esa. Ahora.`,
+    `${vocativo(nombre)}¿cuál es la siguiente tarea? Esa. Ahora.`,
     'Tocarme no cuenta como estudiar.',
   ]
 }
@@ -74,7 +77,7 @@ export function animoPersonal(s: SituacionPersonal): Animo {
 
 export function frasePersonal(s: SituacionPersonal, nombre: string, semilla: number): string {
   const animo = animoPersonal(s)
-  if (animo === 'durmiendo') return rotar([`${nombre}, a dormir. Dormir bien también es un hábito.`, 'Pantalla fuera. Mañana cumples mejor descansado.'], semilla)
+  if (animo === 'durmiendo') return rotar([`${vocativo(nombre)}a dormir. Dormir bien también es un hábito.`, 'Pantalla fuera. Mañana cumples mejor descansado.'], semilla)
   if (!s.hayHabitos) return 'Aún no tienes hábitos. Crea el primero: uno solo, el más fácil, y lo cumples hoy.'
   if (animo === 'alerta') {
     const que = s.vencidas === 1 ? 'Tienes 1 pendiente personal vencido' : `Tienes ${s.vencidas} pendientes personales vencidos`
@@ -93,7 +96,7 @@ export function frasePersonal(s: SituacionPersonal, nombre: string, semilla: num
 export function frasesToquePersonal(nombre: string): string[] {
   return [
     'Un hábito no se cumple mirando la pantalla.',
-    `${nombre}, la versión mínima también vale. Empieza con eso.`,
+    `${vocativo(nombre)}la versión mínima también vale. Empieza con eso.`,
     'Cinco minutos. Solo cinco. Ya.',
     'Tu yo de la próxima semana te lo va a agradecer.',
     'La motivación no llega sola: llega cuando ya empezaste.',

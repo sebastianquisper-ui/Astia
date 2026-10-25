@@ -1196,3 +1196,9 @@ a.enlace-mascotas { text-decoration: none; color: var(--text); }
 @media (prefers-reduced-motion: reduce) { .preguntar-respuesta { animation: none; } }
 
 .estado-error { color: var(--danger, #e5484d); }
+
+/* Celulares de gama baja (los marca main.tsx): sin desenfoques y con menos movimiento */
+:root[data-ligero] * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+:root[data-ligero] .deriva, :root[data-ligero] .fugaz, :root[data-ligero] .estrellas.e2, :root[data-ligero] .estrellas.e3, :root[data-ligero] .mascota-sombra, :root[data-ligero] .avatar, :root[data-ligero] .rig-resp { animation: none; }
+:root[data-ligero] .fugaz { display: none; }
+:root[data-ligero] .mascota-sombra { filter: none; }

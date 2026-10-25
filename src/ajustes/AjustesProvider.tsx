@@ -45,7 +45,7 @@ export interface Ajustes {
 }
 
 const CLAVE = 'astia.ajustes'
-const INICIALES: Ajustes = { nombre: 'Sebastián', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: false, modo: 'academico', mascota: 'alpi', mascotaVista: {} }
+const INICIALES: Ajustes = { nombre: '', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: false, modo: 'academico', mascota: 'alpi', mascotaVista: {} }
 
 interface Contexto {
   ajustes: Ajustes

@@ -43,7 +43,7 @@ async function elegirAlpi(page: import('@playwright/test').Page) {
 
 test('Hoy muestra el saludo y la navegación tiene 5 pestañas', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Sebastián')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(/Buen/)
   await expect(page.getByRole('navigation').getByRole('button')).toHaveCount(5)
 })
 
@@ -54,7 +54,7 @@ test('cambiar de pestaña actualiza la pantalla y la dirección', async ({ page 
   await expect(page).toHaveURL(/#\/tareas$/)
   // El gesto "volver" del iPhone regresa a la pantalla anterior
   await page.goBack()
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Sebastián')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(/Buen/)
 })
 
 test('el horario tiene entrada propia y visible en Más', async ({ page }) => {
