@@ -8,6 +8,7 @@ import { apartadoDe } from '../lib/apartados'
 import { SUGERENCIAS_HABITOS } from '../lib/sugerencias'
 import { FilaHabito, PuntosSemana } from '../ui/FilaHabito'
 import { Hoja } from '../ui/Hoja'
+import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
 import { useAhora } from '../ui/useAhora'
 import { Vacio } from '../ui/Vacio'
@@ -56,7 +57,7 @@ export function Habitos() {
           <div className="tlista">
             {ordenados.map((h) => (
               <div key={h.id} className="habito-card">
-                <FilaHabito habito={h} hoy={ahora} alAlternar={() => alternarHabito(h.id)} alAbrir={() => setDetalleId(h.id)} />
+                <FilaHabito habito={h} hoy={ahora} alAlternar={() => (cumplido(h, ahora) || void sonar('tareaHecha'), alternarHabito(h.id))} alAbrir={() => setDetalleId(h.id)} />
                 <PuntosSemana habito={h} hoy={ahora} />
               </div>
             ))}

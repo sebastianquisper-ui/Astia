@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { SEGUNDOS_DE_DESCANSO, segundosParaDescansar } from '../lib/descansoVista'
+import { sonar } from '../sonidos/reproductor'
 import { Hoja } from './Hoja'
 
 /**
@@ -24,6 +25,7 @@ export function DescansoVista() {
         usados.current = 0
         setQuedan(SEGUNDOS_DE_DESCANSO)
         setDescansando(true)
+        void sonar('vista2020')
       }
     }, 1000)
     return () => window.clearInterval(id)

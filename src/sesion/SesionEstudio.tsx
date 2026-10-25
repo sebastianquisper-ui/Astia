@@ -5,7 +5,7 @@ import { useDatos } from '../datos/DatosProvider'
 import type { Fase } from '../lib/metodos'
 import { AvatarMascota } from '../mascotas/AvatarMascota'
 import { Icono } from '../ui/Icono'
-import { pitar } from './sonido'
+import { sonar } from '../sonidos/reproductor'
 
 const R = 104
 const C = 2 * Math.PI * R
@@ -52,7 +52,7 @@ export function SesionEstudio({ titulo, fases, tarea, esPomodoro, esArranque, de
 
   const terminarFase = (entera: boolean) => {
     registrarFase(entera)
-    pitar()
+    void sonar(fases[s.idx].tipo === 'enfoque' ? 'enfoqueFin' : 'descansoFin')
     if (s.idx < fases.length - 1) {
       s.idx += 1
       s.fin = Date.now() + fases[s.idx].minutos * 60_000

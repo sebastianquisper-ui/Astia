@@ -12,6 +12,10 @@ import { DatosProvider } from './datos/DatosProvider'
 import { EvidenciaProvider } from './formularios/Evidencia'
 import { CuentaProvider } from './cuenta/CuentaProvider'
 import { PuertaCuenta } from './cuenta/PuertaCuenta'
+import { desbloquearAudio } from './sonidos/sintetizador'
+
+// En el iPhone el audio solo suena después de tocar la pantalla: el primer toque lo deja listo
+window.addEventListener('pointerdown', desbloquearAudio, { once: true, passive: true })
 
 // Registra el service worker: es lo que permite instalar la app y abrirla sin internet
 registerSW({ immediate: true })

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 import { useDatos } from '../datos/DatosProvider'
 import { achicarFoto, borrarFoto, guardarFoto } from '../datos/evidencias'
 import type { Tarea } from '../dominio/tipos'
+import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
 import { Hoja } from '../ui/Hoja'
 
@@ -82,6 +83,7 @@ export function EvidenciaProvider({ children }: { children: ReactNode }) {
     alternar(pedido.tarea.id, { foto: conFoto, enlace: conEnlace ? enlace.trim() : undefined, fecha: new Date().toISOString() })
     setGuardando(false)
     pedido.alHecha?.()
+    void sonar('tareaHecha')
     setPedido(null)
     avisar('Evidencia guardada. Tarea hecha.')
   }

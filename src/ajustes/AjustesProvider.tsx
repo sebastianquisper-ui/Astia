@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { ExpresionAlpi } from '../mascotas/alpi/datos'
+import { configurarSonidos } from '../sonidos/reproductor'
+import type { PreferenciasSonido } from '../sonidos/catalogo'
 import type { Etapa } from '../lib/etapa'
 import type { MascotaElegida } from '../lib/mascotas'
 import { COLOR_BARRA, ESCALA_LETRA, temaEfectivo, type ModoTema, type TamanoLetra } from '../lib/tema'
@@ -21,6 +23,8 @@ export interface Ajustes {
   alpiLook?: { nivel?: number; accesorios?: Record<string, boolean>; expresion?: ExpresionAlpi }
   /** Lo mismo para el Alpi de Finanstia (es otro Alpi, con su propia ropa). */
   alpiLookFinanzas?: { nivel?: number; accesorios?: Record<string, boolean>; expresion?: ExpresionAlpi }
+  /** Qué suena en cada momento (evolución, tarea cumplida, fin de enfoque…). Por defecto todo con su sonido predeterminado. */
+  sonidos?: PreferenciasSonido
   /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
   alpi3d?: boolean
   /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */
@@ -60,6 +64,9 @@ export function AjustesProvider({ children }: { children: ReactNode }) {
   }, [ajustes.modoTema])
 
   const tema = useMemo(() => temaEfectivo(ajustes.modoTema), [ajustes.modoTema, minuto])
+
+  // Los sonidos se leen desde fuera de React (por ejemplo, al terminar un temporizador)
+  useEffect(() => configurarSonidos(ajustes.sonidos), [ajustes.sonidos])
 
   // Aplica tema y tamaño de letra al documento
   useEffect(() => {

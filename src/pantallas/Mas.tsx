@@ -10,6 +10,7 @@ import { Enfoque } from './Enfoque'
 import { Horario } from './Horario'
 import { Mascotas } from './Mascotas'
 import { Progreso } from './Progreso'
+import { Sonidos } from './Sonidos'
 import { Rutinas } from './Rutinas'
 
 // La pantalla de Alpi en 3D trae Three.js: se descarga solo al abrirla.
@@ -34,6 +35,7 @@ const ENTRADAS: Entrada[] = [
   { id: 'ciclo', titulo: 'Ciclo completo', detalle: 'Todas las semanas y su carga', icono: 'ciclo', modos: ['academico'] },
   { id: 'progreso', titulo: 'Progreso y rachas', detalle: 'Cuántos días seguidos cumples', icono: 'progreso', modos: ['academico', 'personal'] },
   { id: 'enfoque', titulo: 'Enfoque y descanso', detalle: 'Pomodoro, Feynman, Cornell y más técnicas', icono: 'enfoque', modos: ['academico'] },
+  { id: 'sonidos', titulo: 'Sonidos', detalle: 'Qué suena cuando evolucionas, cumples y descansas', icono: 'sonido', modos: ['academico', 'personal'] },
   { id: 'ajustes', titulo: 'Ajustes', detalle: 'Tema, tamaño de letra, respaldo', icono: 'ajustes', modos: ['academico', 'personal'] },
   { id: 'mejora', titulo: 'Pedir mejora', detalle: 'Cuéntame qué le falta a Astia', icono: 'mejora', modos: ['academico', 'personal'] },
 ]
@@ -53,6 +55,7 @@ export function Mas({ sub, alAbrir }: { sub: string; alAbrir: (sub: string) => v
     )
   if (sub === 'calendario') return <Calendario alVolver={() => alAbrir('')} />
   if (sub === 'ciclo') return <Ciclo alVolver={() => alAbrir('')} alAjustes={() => alAbrir('ajustes')} />
+  if (sub === 'sonidos') return <Sonidos alVolver={() => alAbrir('')} />
   if (sub === 'progreso') return <Progreso alVolver={() => alAbrir('')} />
   if (sub === 'rutinas') return <Rutinas alVolver={() => alAbrir('')} />
 

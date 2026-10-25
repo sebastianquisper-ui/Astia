@@ -1170,3 +1170,12 @@ a.enlace-mascotas { text-decoration: none; color: var(--text); }
 .fz-dudas li { color: var(--amber); font-weight: 600; font-size: 0.875rem; }
 .fz-dictado .acciones { flex-wrap: wrap; }
 .btn.escuchando { background: var(--red); color: #fff; }
+
+/* sonidos */
+.sonidos-lista { display: flex; flex-direction: column; gap: 10px; }
+.sonido-evento { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.sonido-evento b { display: block; }
+.sonido-evento .nota { margin-top: 2px; display: block; }
+.sonido-controles { display: flex; gap: 8px; align-items: center; }
+.sonido-controles select { flex: 1; min-width: 0; min-height: 44px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--line); padding: 0 12px; color: var(--text); }
+.sonido-propio { display: flex; gap: 8px; flex-wrap: wrap; }

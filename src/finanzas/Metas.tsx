@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
 import { Hoja } from '../ui/Hoja'
 import { Icono } from '../ui/Icono'
@@ -165,6 +166,7 @@ function FormAporte({ meta, modoInicial, alCerrar }: { meta: Meta; modoInicial: 
     }
     alCerrar()
     const cumplida = progresoMeta({ ...meta, aportes: [...(meta.aportes ?? []), { id: 'x', monto: firmado, fecha }] }, hoy).cumplida
+    if (cumplida && modo === 'aportar') void sonar('metaCumplida')
     avisar(cumplida && modo === 'aportar' ? `¡Meta cumplida! ${meta.nombre} llegó a su objetivo.` : modo === 'aportar' ? 'Aporte registrado' : 'Retiro registrado')
   }
   return (

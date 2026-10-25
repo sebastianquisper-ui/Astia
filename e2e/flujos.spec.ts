@@ -834,15 +834,58 @@ test('al evolucionar se celebra una sola vez', async ({ page }) => {
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/hoy')
-  const celebracion = page.getByRole('dialog', { name: '¡Evolucionó!' })
-  await expect(celebracion).toContainText('Alpi ahora es Alpaca legendaria')
-  await expect(celebracion).toContainText('Nivel 4 de 4')
-  await expect(celebracion.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-4')
-  await celebracion.getByRole('button', { name: '¡Genial!' }).click()
-  await expect(celebracion).toHaveCount(0)
+  const celebracion = page.getByRole('dialog', { name: '¡Hora de evolucionar!' })
+  await expect(celebracion).toContainText('Alpi está lista para ser Alpaca legendaria')
+  await expect(celebracion.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-2') // primero se ve como estaba
+  await expect(celebracion.getByRole('button', { name: '¡Evolucionar!' })).toBeEnabled()
+  await celebracion.getByRole('button', { name: '¡Evolucionar!' }).click()
+  const hecha = page.getByRole('dialog', { name: '¡Evolucionó!' })
+  await expect(hecha).toContainText('Alpi ahora es Alpaca legendaria')
+  await expect(hecha).toContainText('Nivel 4 de 4')
+  await expect(hecha.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-4')
+  await hecha.getByRole('button', { name: '¡Genial!' }).click()
+  await expect(hecha).toHaveCount(0)
   await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'alpi-4')
   const vista = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').mascotaVista)
   expect(vista).toEqual({ alpi: 3 }) // se anotó la última etapa vista (la 4.ª): ya no se vuelve a celebrar
+})
+
+test('Sonidos: se puede escoger uno de la biblioteca, silenciar y subir uno propio', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('astia.ajustes', JSON.stringify({ datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
+    ;(window as any).__sonidos = 0
+    class Falso {
+      currentTime = 0
+      state = 'running'
+      destination = {}
+      resume() { return Promise.resolve() }
+      createGain() { const g: any = { gain: { value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime() {}, cancelScheduledValues() {} }, connect: () => g, disconnect() {} }; return g }
+      createOscillator() { (window as any).__sonidos++; const o: any = { type: '', frequency: { value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} }, detune: { value: 0 }, connect: () => o, start() {}, stop() {}, disconnect() {} }; return o }
+      createBiquadFilter() { const f: any = { type: '', frequency: { value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, exponentialRampToValueAtTime() {} }, Q: { value: 0 }, connect: () => f }; return f }
+      createBuffer() { return { getChannelData: () => new Float32Array(10) } }
+      createBufferSource() { (window as any).__sonidos++; const n: any = { buffer: null, loop: false, connect: () => n, start() {}, stop() {} }; return n }
+      get sampleRate() { return 44100 }
+    }
+    ;(window as any).AudioContext = Falso
+    ;(window as any).webkitAudioContext = Falso
+  })
+  await page.goto('/#/mas/sonidos')
+  await expect(page.getByRole('heading', { name: 'Sonidos', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Sonido: Cuando Alpi evoluciona')).toHaveValue('alpi') // predeterminado: el de Alpi
+  await page.getByRole('button', { name: 'Probar el sonido de Cuando Alpi evoluciona' }).click()
+  await expect.poll(() => page.evaluate(() => (window as any).__sonidos)).toBeGreaterThan(0)
+  await page.getByLabel('Sonido: Cuando Alpi evoluciona').selectOption('silencio')
+  await expect(page.getByRole('button', { name: 'Probar el sonido de Cuando Alpi evoluciona' })).toBeDisabled()
+  await page.getByLabel('Sonido: Cuando cumples una tarea o un hábito').selectOption('moneda')
+  const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').sonidos)
+  expect(prefs.eventos).toMatchObject({ evolucion: 'silencio', tareaHecha: 'moneda' })
+  // un archivo que no es audio se rechaza
+  const elegir = page.waitForEvent('filechooser')
+  await page.getByRole('button', { name: 'Subir mi sonido' }).first().click()
+  await (await elegir).setFiles({ name: 'nota.txt', mimeType: 'text/plain', buffer: Buffer.from('hola') })
+  await expect(page.getByRole('status').or(page.getByRole('alert')).filter({ hasText: /audio|archivo|sonido/i }).first()).toBeVisible()
+  const sinPropio = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').sonidos?.propios)
+  expect(sinPropio ?? {}).toEqual({})
 })
 
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {

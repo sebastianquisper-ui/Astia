@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { hayDictado, useDictado } from '../lib/dictado'
+import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
 import { Hoja } from '../ui/Hoja'
 import { Icono } from '../ui/Icono'
@@ -92,6 +93,7 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
         datos.aportarAMeta(meta, firmado, res.fecha).catch(alFallar)
         alCerrar()
         const cumplida = progresoMeta({ ...meta, aportes: [...meta.aportes, { id: 'x', monto: firmado, fecha: res.fecha }] }, fechaLocal()).cumplida
+        if (cumplida && res.tipo === 'aporte') void sonar('metaCumplida')
         avisar(cumplida && res.tipo === 'aporte' ? `¡Meta cumplida! ${meta.nombre} llegó a su objetivo.` : res.tipo === 'aporte' ? 'Aporte registrado' : 'Retiro registrado')
       }
     } catch (err) {

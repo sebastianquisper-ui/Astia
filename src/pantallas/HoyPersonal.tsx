@@ -13,6 +13,7 @@ import { rutinaDeAhora } from '../lib/rutinas'
 import { saludoDe } from '../lib/saludo'
 import { diasDeAtraso, urgenciaDe } from '../lib/urgencia'
 import { HeroAstia } from '../mascotas/HeroAstia'
+import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
 import { FilaHabito } from '../ui/FilaHabito'
 import { FilaTarea } from '../ui/FilaTarea'
@@ -73,6 +74,7 @@ export function HoyPersonal() {
   const cumplirHabito = (id: string, estabaHecho: boolean) => {
     alternarHabito(id)
     if (estabaHecho) return avisar('Hábito desmarcado.')
+    void sonar('tareaHecha')
     const faltan = deHoy.filter((h) => !cumplido(h, ahora) && h.id !== id).length
     reaccionar(faltan === 0 ? 'Todos tus hábitos de hoy, cumplidos. Eso es disciplina.' : 'Uno menos. Sigue con el siguiente.', 'contenta')
     avisar(faltan === 0 ? 'Cumpliste todos tus hábitos de hoy.' : `Cumplido. Te faltan ${faltan} hoy.`)

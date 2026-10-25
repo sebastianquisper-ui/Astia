@@ -3,7 +3,7 @@ import { useDatos } from '../datos/DatosProvider'
 import { FASE_ARRANQUE, fasesDe, metodoPorId, sugerirMetodo, type MetodoId } from '../lib/metodos'
 import { useCumplirTarea } from '../formularios/Evidencia'
 import { SesionEstudio } from './SesionEstudio'
-import { prepararSonido } from './sonido'
+import { desbloquearAudio } from '../sonidos/sintetizador'
 
 /**
  * Para iniciar una sesión guiada desde cualquier pantalla.
@@ -16,7 +16,7 @@ export function useSesion() {
   const [sesion, setSesion] = useState<{ metodo: MetodoId | 'arranque'; tareaId?: string; clave: number } | null>(null)
 
   const iniciar = useCallback((metodo: MetodoId | 'arranque', tareaId?: string) => {
-    prepararSonido() // el sonido solo se permite después de tocar la pantalla
+    desbloquearAudio() // el sonido solo se permite después de tocar la pantalla
     setSesion((previa) => ({ metodo, tareaId, clave: (previa?.clave ?? 0) + 1 }))
   }, [])
   const cerrar = useCallback(() => setSesion(null), [])

@@ -54,6 +54,10 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   Su Alpi también tiene **ruleta de emotes y movimientos** (doble toque) y **vestidor** (quitar y poner ropa, bajar de nivel), separados del Alpi
   de estudios; se abren mientras tu plata no esté en rojo. Puedes **dictar** un movimiento ("gasté 15 soles en almuerzo", "pasé 50 de digital a
   efectivo", "aporté 100 a mi laptop"): Astia lo entiende, te lo muestra y guarda al confirmar (`docs/DICTADO.md`).
+- **Sonidos (Más → Sonidos):** cada momento (evolución, tarea o hábito cumplido, fin de enfoque o descanso, pausa de vista, meta de ahorro)
+  tiene un sonido predeterminado, sintetizado en el teléfono (sin archivos). El de la evolución suena por defecto al tocar "¡Evolucionar!".
+  Puedes cambiarlo por otro de la biblioteca, ponerlo en silencio o **subir el tuyo** (mp3, m4a, wav u ogg; hasta 30 s y 2.5 MB; se guarda
+  solo en el teléfono, en IndexedDB). En el iPhone el audio se activa con el primer toque en la app.
 - **Una sola cuenta (Firebase):** Astia pide iniciar sesión con Google antes de mostrar nada. Detalles y pasos en `docs/FIREBASE.md`.
   Los datos de estudios y Mi Órbita todavía están en el teléfono; pasarlos a la nube es el siguiente paso (`docs/SUPABASE.md` quedó
   como referencia del plan anterior, ya no se usa).
