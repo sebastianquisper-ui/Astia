@@ -7,6 +7,14 @@ test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date(2026, 9, 15, 10, 30) })
   // Alpi en 3D viene por defecto, pero sin tarjeta gráfica (como en estas pruebas) ocupa todo el
   // procesador. Las pruebas usan la estrella y Alpi dibujada, salvo las que prueban el 3D.
+  // Las pruebas corren sin nube ni cuenta de Google (Finanstia guarda sus datos en el navegador)
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('astia.sinNube', '1')
+    } catch {
+      /* sin almacenamiento */
+    }
+  })
   await page.addInitScript(() => {
     if (sessionStorage.getItem('e2e-iniciado')) return
     sessionStorage.setItem('e2e-iniciado', '1')
@@ -1038,6 +1046,7 @@ for (const caso of ATRASOS) {
 
 test('ruleta: con todo cumplido, tocar dos veces a Alpi abre emotes y movimientos', async ({ page }) => {
   test.setTimeout(90_000) // el 3D sin tarjeta gráfica es lento en estas pruebas
+  await page.emulateMedia({ reducedMotion: 'reduce' }) // sin animaciones los botones están quietos al instante, aunque el 3D esté ocupando el procesador
   const datos = conLogros(100, 400)
   await page.addInitScript((d) => {
     localStorage.setItem('astia.ajustes', JSON.stringify({ mascota: 'alpi', mascotaVista: { alpi: 4 }, datosEjemplo: false, etapa: 'universidad', alpi3d: true, descansoVista: false }))
@@ -1122,4 +1131,259 @@ test('el 3D de Alpi no queda dentro de una caja con borde y sombra', async ({ pa
   await expect(marco).toBeAttached({ timeout: 15000 })
   const estilo = await marco.evaluate((e) => { const c = getComputedStyle(e); return { borde: c.borderTopWidth, radio: c.borderTopLeftRadius, sombra: c.boxShadow, fondo: c.backgroundColor } })
   expect(estilo).toEqual({ borde: '0px', radio: '0px', sombra: 'none', fondo: 'rgba(0, 0, 0, 0)' })
+})
+
+
+// ---------- Finanstia: tu plata, con PIN, una sola cuenta y su propio Alpi ----------
+
+async function ponerPin(page: import('@playwright/test').Page, pin: string) {
+  for (const t of pin) await page.getByRole('button', { name: t, exact: true }).click()
+  await page.getByRole('button', { name: 'Confirmar PIN' }).click()
+}
+
+/** Entra a Finanstia y crea el PIN 1234 (la primera vez). */
+async function entrarAFinanstia(page: import('@playwright/test').Page) {
+  await page.goto('/#/hoy')
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Finanstia' }).click()
+  await expect(page.getByRole('heading', { name: 'Crea tu PIN' })).toBeVisible()
+  await ponerPin(page, '1234')
+  await expect(page.getByRole('heading', { name: 'Confirma tu PIN' })).toBeVisible()
+  await ponerPin(page, '1234')
+  await expect(page.getByRole('heading', { name: 'Inicio', level: 1 })).toBeVisible()
+}
+
+async function registrar(page: import('@playwright/test').Page, tipo: 'Gasto' | 'Ingreso', monto: string, categoria: string) {
+  await page.getByRole('button', { name: 'Registrar un movimiento' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Nuevo movimiento' })
+  await hoja.getByRole('group', { name: 'Tipo' }).getByRole('button', { name: tipo }).click()
+  await hoja.getByLabel('Monto en soles').fill(monto)
+  await hoja.getByRole('button', { name: categoria, exact: true }).click()
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(hoja).toHaveCount(0)
+}
+
+test('el selector tiene tres modos y Finanstia pide crear un PIN antes de mostrar nada', async ({ page }) => {
+  await page.goto('/#/hoy')
+  const modos = page.getByRole('group', { name: 'Modo' }).getByRole('button')
+  await expect(modos).toHaveText(['Académico', 'Mi Órbita', 'Finanstia'])
+  await modos.nth(2).click()
+  await expect(page.getByRole('heading', { name: 'Crea tu PIN' })).toBeVisible()
+  await expect(page.getByText('Saldo registrado')).toHaveCount(0) // la plata no se ve sin PIN
+  await expect(page.getByRole('navigation').getByRole('button')).toHaveCount(0) // ni la barra de abajo
+})
+
+test('PIN: se crea con confirmación, no se guarda el número y vuelve a pedirse al salir y entrar', async ({ page }) => {
+  await entrarAFinanstia(page)
+  const guardado = await page.evaluate(() => Object.entries(localStorage).filter(([k]) => k.startsWith('astia.finanzas.pin')).map(([, v]) => v).join('|'))
+  expect(guardado).toContain('huella')
+  expect(guardado).not.toContain('1234')
+  // al pasar a otro modo se cierra
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Académico' }).click()
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Finanstia' }).click()
+  await expect(page.getByRole('heading', { name: 'Finanstia', level: 1 })).toBeVisible()
+  await ponerPin(page, '9999')
+  await expect(page.getByRole('status').filter({ hasText: 'PIN incorrecto' })).toBeVisible()
+  await ponerPin(page, '1234')
+  await expect(page.getByRole('heading', { name: 'Inicio', level: 1 })).toBeVisible()
+})
+
+test('PIN: si no coinciden al crearlo, se vuelve a empezar', async ({ page }) => {
+  await page.goto('/#/hoy')
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Finanstia' }).click()
+  await ponerPin(page, '1234')
+  await ponerPin(page, '4321')
+  await expect(page.getByText('No coinciden')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Crea tu PIN' })).toBeVisible()
+})
+
+test('PIN: tras 5 errores seguidos hay que esperar', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Académico' }).click()
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Finanstia' }).click()
+  for (let i = 0; i < 5; i++) await ponerPin(page, '0000')
+  await expect(page.getByText(/Vuelve a intentar en \d+ s/)).toBeVisible()
+  await expect(page.getByRole('button', { name: '1', exact: true })).toBeDisabled()
+})
+
+test('PIN: "Olvidé mi PIN" confirma tu cuenta y deja crear uno nuevo', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Académico' }).click()
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Finanstia' }).click()
+  await page.getByRole('button', { name: 'Olvidé mi PIN' }).click()
+  await expect(page.getByRole('heading', { name: 'Crea tu PIN' })).toBeVisible()
+  await ponerPin(page, '5555')
+  await ponerPin(page, '5555')
+  await expect(page.getByRole('heading', { name: 'Inicio', level: 1 })).toBeVisible()
+})
+
+test('Finanstia: el fondo son billetes (no estrellas) y los otros modos siguen con su cielo', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await expect(page.locator('.fondo-dinero .billete-flota').first()).toBeAttached()
+  await expect(page.locator('.estrellas')).toHaveCount(0)
+  await expect(page.locator('html')).toHaveAttribute('data-modo', 'finanzas')
+  await page.getByRole('group', { name: 'Modo' }).getByRole('button', { name: 'Académico' }).click()
+  await expect(page.locator('.estrellas').first()).toBeAttached()
+  await expect(page.locator('.fondo-dinero')).toHaveCount(0)
+})
+
+test('registrar ingresos y gastos actualiza el saldo, el resumen y los últimos movimientos', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await registrar(page, 'Ingreso', '1500', 'Sueldo')
+  await registrar(page, 'Gasto', '12,50', 'Almuerzos')
+  await expect(page.getByRole('status')).toContainText('Gasto registrado')
+  const digital = page.locator('.fz-billetera', { hasText: 'Digital' })
+  await expect(digital).toContainText('S/ 1,487.50')
+  await expect(page.locator('.fz-resumen-tarjeta.ingreso')).toContainText('S/ 1,500.00')
+  await expect(page.locator('.fz-resumen-tarjeta.gasto')).toContainText('S/ 12.50')
+  await expect(page.locator('.fz-mov', { hasText: 'Almuerzos' })).toContainText('−S/ 12.50')
+  await expect(page.getByRole('button', { name: 'Ver movimientos de Almuerzos' })).toBeVisible() // la dona
+})
+
+test('un movimiento inválido muestra el error y no se guarda', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('button', { name: 'Registrar un movimiento' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Nuevo movimiento' })
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(hoja.getByRole('alert')).toContainText('monto mayor que 0')
+  await hoja.getByLabel('Monto en soles').fill('5')
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(hoja.getByRole('alert')).toContainText('Elige una categoría')
+})
+
+test('editar y borrar un movimiento (con deshacer) corrige el saldo', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await registrar(page, 'Gasto', '20', 'Pasajes')
+  await page.locator('.fz-mov', { hasText: 'Pasajes' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Editar movimiento' })
+  await hoja.getByLabel('Monto en soles').fill('30')
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('−S/ 30.00')
+  await page.locator('.fz-mov', { hasText: 'Pasajes' }).click()
+  await page.getByRole('dialog', { name: 'Editar movimiento' }).getByRole('button', { name: 'Eliminar' }).click()
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('S/ 0.00')
+  await page.getByRole('button', { name: 'Deshacer' }).click()
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('−S/ 30.00')
+})
+
+test('una transferencia mueve plata entre Digital y Efectivo sin contar como gasto', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await registrar(page, 'Ingreso', '200', 'Sueldo')
+  await page.getByRole('button', { name: 'Transferir entre Digital y Efectivo' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Nuevo movimiento' })
+  await hoja.getByLabel('Monto en soles').fill('50')
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('status')).toContainText('Transferencia registrada')
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('S/ 150.00')
+  await expect(page.locator('.fz-billetera', { hasText: 'Efectivo' })).toContainText('S/ 50.00')
+  await expect(page.locator('.fz-resumen-tarjeta.gasto')).toContainText('S/ 0.00') // no es un gasto
+})
+
+test('el presupuesto avisa al 70 % y al pasarte del tope', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('navigation').getByRole('button', { name: 'Presupuesto' }).click()
+  await page.getByLabel('Tope mensual de Almuerzos').fill('100')
+  await page.keyboard.press('Enter')
+  await page.getByRole('navigation').getByRole('button', { name: 'Inicio' }).click()
+  await registrar(page, 'Gasto', '75', 'Almuerzos')
+  await expect(page.getByRole('status')).toContainText('va en 75 % de su presupuesto')
+  await expect(page.getByRole('button', { name: /Presupuesto al 70 %/ })).toBeVisible()
+  await registrar(page, 'Gasto', '40', 'Almuerzos')
+  await expect(page.getByRole('status')).toContainText('pasó su presupuesto')
+  await expect(page.getByRole('button', { name: /Presupuesto excedido/ })).toBeVisible()
+  await page.getByRole('navigation').getByRole('button', { name: 'Presupuesto' }).click()
+  await expect(page.getByText('Te pasaste por S/ 15.00').first()).toBeVisible()
+})
+
+test('movimientos: buscar, filtrar por categoría y ver todo el historial', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await registrar(page, 'Gasto', '12', 'Almuerzos')
+  await registrar(page, 'Gasto', '8', 'Pasajes')
+  await page.getByRole('navigation').getByRole('button', { name: 'Movimientos' }).click()
+  await expect(page.locator('.fz-mov')).toHaveCount(2)
+  await page.getByLabel('Buscar movimientos').fill('pasa')
+  await expect(page.locator('.fz-mov')).toHaveCount(1)
+  await page.getByLabel('Buscar movimientos').fill('')
+  await page.getByRole('group', { name: 'Filtrar por categoría' }).getByRole('button', { name: 'Almuerzos' }).click()
+  await expect(page.locator('.fz-mov')).toHaveCount(1)
+  await page.getByRole('button', { name: 'Todo el historial' }).click()
+  await expect(page.locator('.fz-mov')).toHaveCount(1)
+  await page.getByLabel('Buscar movimientos').fill('zzz')
+  await expect(page.getByText('Ningún movimiento coincide')).toBeVisible()
+})
+
+test('metas: crear, aportar, no retirar de más y cumplir', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('navigation').getByRole('button', { name: 'Metas' }).click()
+  await page.getByRole('button', { name: 'Nueva meta' }).click()
+  await page.getByLabel('Nombre').fill('Laptop')
+  await page.getByLabel('Monto objetivo en soles').fill('1000')
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('heading', { name: 'Laptop' })).toBeVisible()
+  await page.getByRole('button', { name: 'Aportar' }).click()
+  await page.getByRole('dialog').getByLabel('Monto en soles').fill('400')
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.locator('.fz-meta')).toContainText('40 %')
+  await page.getByRole('button', { name: 'Retirar' }).click()
+  await page.getByRole('dialog').getByLabel('Monto en soles').fill('500')
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('más de lo ahorrado')
+  await page.getByRole('dialog').getByRole('button', { name: 'Cerrar' }).click()
+  await page.getByRole('button', { name: 'Aportar' }).click()
+  await page.getByRole('dialog').getByLabel('Monto en soles').fill('600')
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('status')).toContainText('Meta cumplida')
+  await expect(page.getByText('¡Meta cumplida!').first()).toBeVisible()
+  // el dinero de las metas no toca los saldos
+  await page.getByRole('navigation').getByRole('button', { name: 'Inicio' }).click()
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('S/ 0.00')
+})
+
+test('ocultar montos difumina los números y se recuerda', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await registrar(page, 'Ingreso', '300', 'Sueldo')
+  await page.getByRole('button', { name: 'Ocultar montos' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-montos', 'ocultos')
+  expect(await page.locator('.fz-billetera-saldo').first().evaluate((e) => getComputedStyle(e).filter)).toContain('blur')
+  await page.getByRole('button', { name: 'Mostrar montos' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-montos', 'visibles')
+})
+
+test('Más en Finanstia: comparar periodos, respaldo, bloquear', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await registrar(page, 'Gasto', '30', 'Extras')
+  await page.getByRole('button', { name: 'Más opciones de Finanstia' }).click()
+  await page.getByRole('button', { name: /Comparar periodos/ }).click()
+  await expect(page.getByLabel('Tipo del periodo A')).toBeVisible()
+  await expect(page.getByRole('cell', { name: 'S/ 30.00' }).first()).toBeVisible()
+  await page.getByRole('button', { name: 'Más', exact: true }).click()
+  await page.getByRole('button', { name: /Respaldo de mis finanzas/ }).click()
+  await expect(page.getByRole('heading', { name: 'Respaldo de mis finanzas' })).toBeVisible()
+  await page.getByRole('button', { name: 'Más', exact: true }).click()
+  await page.getByRole('button', { name: /Bloquear Finanstia/ }).click()
+  await expect(page.getByRole('heading', { name: 'Finanstia', level: 1 })).toBeVisible()
+})
+
+test('Alpi de Finanstia: en verde juega con billetes y en rojo pide plata, con su propio nivel', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await expect(page.locator('.fz-hero')).toHaveAttribute('data-estado', 'neutro')
+  await registrar(page, 'Ingreso', '500', 'Sueldo')
+  await expect(page.locator('.fz-hero')).toHaveAttribute('data-estado', 'verde')
+  await expect(page.locator('.fz-extras.verde .billete')).toHaveCount(4)
+  await registrar(page, 'Gasto', '800', 'Tecnología')
+  await expect(page.locator('.fz-hero')).toHaveAttribute('data-estado', 'rojo')
+  await expect(page.locator('.fz-cartel')).toContainText('Una monedita')
+  await expect(page.locator('.burbuja-alpi')).toContainText(/rojo|mendigando|gasto/i)
+  await page.getByRole('link', { name: /Mi Alpi de Finanstia/ }).click()
+  await expect(page.getByRole('heading', { name: 'Mi Alpi de Finanstia' })).toBeVisible()
+  await expect(page.getByText(/Nivel 1 de 4/)).toBeVisible()
+  await expect(page.getByText('Constancia')).toBeVisible()
+})
+
+test('sin sesión de Google no se ve nada de Astia: pide "Continuar con Google"', async ({ page }) => {
+  // como en la app publicada: sin el atajo de la vista previa. Se quita antes de que cargue la app.
+  await page.addInitScript(() => localStorage.removeItem('astia.sinNube'))
+  await page.goto('/#/hoy')
+  await expect(page.getByRole('button', { name: 'Continuar con Google' })).toBeVisible({ timeout: 20000 })
+  await expect(page.getByText('Tus estudios, tu vida y tu plata, con una sola cuenta.')).toBeVisible()
+  await expect(page.getByRole('navigation')).toHaveCount(0)
 })

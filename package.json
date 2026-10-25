@@ -9,21 +9,25 @@
     "preview": "vite preview --host",
     "test": "vitest run",
     "iconos": "node scripts/generar-iconos.mjs",
-    "vista": "node scripts/vista-previa.mjs"
+    "vista": "node scripts/vista-previa.mjs",
+    "test:firestore": "firebase emulators:exec --only firestore --project demo-finanzas \"vitest run --config vitest.emulador.config.ts\""
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource-variable/figtree": "^5.3.0",
+    "firebase": "^12.19.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.10",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "firebase-tools": "^15.34.1",
     "jsdom": "^29.1.1",
     "sharp": "^0.35.5",
     "typescript": "^7.0.2",

@@ -10,6 +10,8 @@ import { AvisoProvider } from './ui/Aviso'
 import { AjustesProvider } from './ajustes/AjustesProvider'
 import { DatosProvider } from './datos/DatosProvider'
 import { EvidenciaProvider } from './formularios/Evidencia'
+import { CuentaProvider } from './cuenta/CuentaProvider'
+import { PuertaCuenta } from './cuenta/PuertaCuenta'
 
 // Registra el service worker: es lo que permite instalar la app y abrirla sin internet
 registerSW({ immediate: true })
@@ -18,11 +20,15 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AvisoProvider>
       <AjustesProvider>
-        <DatosProvider>
-          <EvidenciaProvider>
-            <App />
-          </EvidenciaProvider>
-        </DatosProvider>
+        <CuentaProvider>
+          <PuertaCuenta>
+            <DatosProvider>
+              <EvidenciaProvider>
+                <App />
+              </EvidenciaProvider>
+            </DatosProvider>
+          </PuertaCuenta>
+        </CuentaProvider>
       </AjustesProvider>
     </AvisoProvider>
   </StrictMode>,

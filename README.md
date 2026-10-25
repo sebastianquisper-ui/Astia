@@ -45,7 +45,15 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   periodo a tu medida (nombre, de 4 a 52 semanas, fecha de inicio). Todo se cambia en Ajustes, y en "Ciclo completo" se
   marcan las semanas de exámenes o sin clases (feriados, vacaciones) como lo dicte tu institución.
 - **Empezar de cero:** Astia abre sin datos de ejemplo. Ajustes → "Borrar todos mis datos" la deja como recién instalada.
-- **Fase 2b (login con Google y nube):** pendiente de las claves de Supabase. Guía en `docs/SUPABASE.md`.
+- **Finanstia (tu plata):** el tercer modo de Astia, junto a Académico y Mi Órbita. Trae todo lo de "Mis Finanzas": dos billeteras
+  (Digital y Efectivo), gastos, ingresos y transferencias, presupuestos con avisos al 70 % y al 100 %, metas de ahorro, comparación de
+  periodos y gráficos. Se abre con un **PIN propio** (4 a 6 números; solo se guarda una huella, en el teléfono) además de la cuenta de
+  Google, y se cierra al salir del modo o tras 2 minutos en segundo plano. Su fondo son billetes de soles estilizados en vez de estrellas.
+  Tiene **su propio Alpi** con su propia experiencia (anotar, ahorrar y cumplir suman; gastar no): con el dinero en verde juega con
+  billetes y en rojo pide plata. Usa los mismos datos de Firestore que Mis Finanzas.
+- **Una sola cuenta (Firebase):** Astia pide iniciar sesión con Google antes de mostrar nada. Detalles y pasos en `docs/FIREBASE.md`.
+  Los datos de estudios y Mi Órbita todavía están en el teléfono; pasarlos a la nube es el siguiente paso (`docs/SUPABASE.md` quedó
+  como referencia del plan anterior, ya no se usa).
 
 ## Comandos
 

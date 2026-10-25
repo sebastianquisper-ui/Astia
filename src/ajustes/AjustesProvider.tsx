@@ -8,8 +8,8 @@ import { useAviso } from '../ui/Aviso'
 
 // Ajustes de vista. En la fase 2 se sincronizarán con la nube (tabla `profiles`);
 // por ahora viven en el teléfono.
-/** Académico = universidad. Personal = Mi Órbita (hábitos, rutinas, pendientes personales). */
-export type Modo = 'academico' | 'personal'
+/** Académico = estudios. Personal = Mi Órbita (hábitos, rutinas, pendientes personales). Finanzas = Finanstia (tu plata). */
+export type Modo = 'academico' | 'personal' | 'finanzas'
 
 export interface Ajustes {
   modo: Modo

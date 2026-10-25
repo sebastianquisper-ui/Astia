@@ -39,5 +39,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.ts', 'supabase/**/*.test.ts'],
+    // Estas necesitan el emulador de Firestore: se corren con `npm run test:firestore`
+    exclude: ['**/node_modules/**', '**/*.emulador.test.ts'],
   },
 })

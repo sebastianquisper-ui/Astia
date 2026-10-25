@@ -1,3 +1,5 @@
+> **Reemplazado por Firebase.** Astia usa Firebase (ver `docs/FIREBASE.md`). Este documento queda solo como referencia del plan anterior.
+
 # Conectar Astia con Supabase (login + nube)
 
 Esto lo haces tú una sola vez. Son unos 15 minutos y no cuesta nada (plan gratis).

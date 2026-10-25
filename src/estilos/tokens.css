@@ -54,3 +54,19 @@
   --surface: rgb(18 36 48 / 0.72);
   --surface2: rgb(34 66 80 / 0.55);
 }
+
+/* ---------- Modo Finanstia: negro verdoso con dorado, como el dinero ---------- */
+:root[data-modo='finanzas'] {
+  --accent: #2f7a55;
+  --accent-ink: #f4f5f7;
+}
+:root[data-modo='finanzas'][data-theme='dark'] {
+  --bg: #050a07;
+  --accent: #e0b348;
+  --accent-ink: #1a1405;
+  --line: rgb(224 179 72 / 0.2);
+  --surface: rgb(14 30 22 / 0.78);
+  --surface2: rgb(28 58 42 / 0.55);
+  --green: #6fd29d;
+  --red: #ff8f7a;
+}

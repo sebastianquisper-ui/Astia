@@ -946,3 +946,213 @@ html, body { overflow-x: clip; }
 .rueda-pista { color: var(--muted); font-size: 0.75rem; line-height: 1.3; padding: 0 4px; }
 @keyframes rueda-sale { from { opacity: 0; scale: 0.4; } to { opacity: 1; scale: 1; } }
 @media (prefers-reduced-motion: reduce) { .rueda-op { animation: none; } }
+
+/* acceso con Google */
+.acceso { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 28px; text-align: center; }
+.acceso-marca { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.acceso-marca svg { width: 72px; height: 72px; }
+.acceso-marca h1 { font-family: var(--display); font-size: 2.6rem; font-weight: 800; margin: 0; }
+.acceso-texto { max-width: 290px; font-size: 1.05rem; line-height: 1.4; color: var(--muted); }
+.acceso-boton { width: 100%; max-width: 320px; padding: 15px 18px; font-size: 1.05rem; }
+.acceso-error { color: var(--red); font-weight: 600; max-width: 320px; }
+.acceso-nota { max-width: 300px; }
+
+/* Finanstia: fondo de billetes y barra con botón + */
+.fondo-dinero { background: radial-gradient(70% 38% at 85% -4%, rgb(224 179 72 / 0.14), transparent 70%), radial-gradient(60% 34% at -5% 40%, rgb(60 170 110 / 0.14), transparent 70%); overflow: hidden; }
+:root[data-modo='finanzas'][data-theme='light'] .fondo-dinero { background: radial-gradient(80% 40% at 85% -6%, rgb(224 179 72 / 0.22), transparent 70%), radial-gradient(60% 30% at -5% 30%, rgb(80 190 130 / 0.2), transparent 70%); }
+.billete-flota { position: absolute; top: 105vh; height: auto; opacity: 0.2; animation: billete-sube linear infinite; will-change: transform; }
+:root[data-modo='finanzas'][data-theme='light'] .billete-flota { opacity: 0.4; }
+@keyframes billete-sube { from { transform: translateY(0) rotate(var(--giro)); } to { transform: translateY(-125vh) rotate(calc(var(--giro) * -1)); } }
+@media (prefers-reduced-motion: reduce) { .billete-flota { animation: none; top: auto; } .billete-flota:nth-child(3n) { top: 20vh; } .billete-flota:nth-child(3n + 1) { top: 52vh; } .billete-flota:nth-child(3n + 2) { top: 78vh; } }
+.nav .nav-mas { align-self: center; }
+.nav .nav-mas .pastilla { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); box-shadow: 0 4px 14px rgb(0 0 0 / 0.35); margin-top: -18px; }
+.nav .nav-mas .pastilla svg { width: 26px; height: 26px; }
+
+/* PIN de Finanstia */
+.pin { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding-top: 8px; }
+.pin-billetes { position: relative; width: 200px; height: 92px; margin-bottom: 4px; }
+.pin-billetes .billete { position: absolute; width: 120px; height: auto; box-shadow: 0 6px 16px rgb(0 0 0 / 0.35); border-radius: 8px; }
+.pin-billetes .b1 { left: 4px; top: 22px; transform: rotate(-12deg); }
+.pin-billetes .b2 { left: 40px; top: 4px; transform: rotate(3deg); z-index: 1; }
+.pin-billetes .b3 { left: 76px; top: 24px; transform: rotate(14deg); z-index: 2; }
+.pin .sub { max-width: 280px; }
+.pin-teclado { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 8px; }
+.pin-puntos { display: flex; gap: 12px; height: 18px; }
+.pin-puntos i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); background: transparent; transition: background-color 0.12s ease, border-color 0.12s ease; }
+.pin-puntos i.obligatorio { border-color: var(--muted); }
+.pin-puntos i.lleno { background: var(--accent); border-color: var(--accent); }
+.pin-teclas { display: grid; grid-template-columns: repeat(3, 76px); gap: 12px; }
+.pin-teclas button { height: 64px; border-radius: 50%; background: var(--surface2); font-family: var(--display); font-size: 1.5rem; font-weight: 700; border: 1px solid var(--line); }
+.pin-teclas button:active:not([disabled]) { background: color-mix(in srgb, var(--accent) 26%, var(--surface2)); }
+.pin-teclas button[disabled] { opacity: 0.4; }
+.pin-teclas .aux { font-size: 1.2rem; }
+.pin-teclas .ok { background: var(--accent); color: var(--accent-ink); }
+.pin-mensaje { min-height: 1.4em; font-weight: 600; color: var(--muted); }
+.pin-mensaje.error { color: var(--red); }
+.enlace { color: var(--accent); font-weight: 700; padding: 8px; text-decoration: underline; text-underline-offset: 3px; }
+
+.aviso-accion { margin-left: 12px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; color: inherit; }
+
+/* =====================================================================
+   FINANSTIA (fz-)
+   ===================================================================== */
+.cabecera-botones { display: flex; gap: 8px; }
+.fz-vista-previa { font-size: 0.75rem; color: var(--muted); background: var(--surface2); padding: 6px 12px; border-radius: 10px; margin: -4px 0 10px; }
+.fz-vista { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+.fz-tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px; box-shadow: var(--sombra); }
+.fz-tarjeta h2 { font-family: var(--display); font-size: 1.0625rem; font-weight: 700; margin: 0 0 10px; }
+.fz-tarjeta-cab { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.fz-tarjeta-cab h2 { margin: 0; }
+.fz-enlace { color: var(--accent); font-weight: 700; padding: 4px; }
+.fz-vacio { text-align: center; color: var(--muted); padding: 14px 6px; }
+.fz-nota, .fz-suave { color: var(--muted); }
+.fz-nota { font-size: 0.8125rem; }
+.fz-error { color: var(--red); font-weight: 600; }
+.fz-ancho { width: 100%; }
+.monto { font-variant-numeric: tabular-nums; transition: filter 0.15s ease; }
+:root[data-montos='ocultos'] .monto { filter: blur(7px); user-select: none; }
+.seg.ancho { width: 100%; }
+
+/* billeteras y periodo */
+.fz-billeteras { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+.fz-billetera { display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 14px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.fz-billetera[aria-pressed='true'] { background: linear-gradient(160deg, #10281d, #07130d); border-color: var(--accent); color: #f3ecd6; }
+.fz-billetera[aria-pressed='true'] .fz-billetera-saldo { color: var(--accent); }
+.fz-billetera-nombre { font-weight: 700; font-size: 0.875rem; }
+.fz-billetera-saldo { font-family: var(--display); font-size: 1.2rem; font-weight: 800; overflow-wrap: anywhere; }
+.fz-billetera-nota { font-size: 0.7rem; opacity: 0.7; }
+.fz-transferir { width: 40px; height: 40px; border-radius: 50%; background: var(--surface2); display: grid; place-items: center; color: var(--accent); }
+.fz-periodo { display: flex; flex-direction: column; gap: 10px; }
+.fz-periodo-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fz-periodo-etiqueta { flex: 1; text-align: center; font-weight: 700; }
+.fz-periodo-etiqueta::first-letter, .fz-dia-cab span::first-letter, .fz-comparar-etiqueta::first-letter, .fz-titulo-mes span::first-letter { text-transform: uppercase; }
+.fz-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.fz-scroll { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.fz-scroll::-webkit-scrollbar { display: none; }
+.fz-chip { flex: none; padding: 8px 14px; min-height: 36px; border-radius: 999px; background: var(--surface2); font-weight: 600; font-size: 0.8125rem; border: 1.5px solid transparent; }
+.fz-chip[aria-pressed='true'] { background: color-mix(in srgb, var(--accent) 22%, var(--surface2)); border-color: var(--accent); color: var(--text); }
+.fz-separador { flex: none; width: 1px; background: var(--line); }
+
+/* resumen, aviso, dona, barras */
+.fz-resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.fz-resumen-tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 8px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fz-resumen-titulo { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.fz-resumen-tarjeta .monto { font-family: var(--display); font-weight: 800; font-size: 0.95rem; overflow-wrap: anywhere; }
+.fz-resumen-tarjeta.ingreso .monto { color: var(--green); }
+.fz-resumen-tarjeta.gasto .monto, .fz-resumen-tarjeta.negativo .monto { color: var(--red); }
+.fz-aviso-presupuesto { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 12px 14px; border-radius: 16px; background: var(--surface); border: 1.5px solid var(--amber); }
+.fz-aviso-presupuesto.excedido { border-color: var(--red); }
+.fz-aviso-presupuesto b { color: var(--amber); }
+.fz-aviso-presupuesto.excedido b { color: var(--red); }
+.fz-aviso-ir { color: var(--accent); font-weight: 700; font-size: 0.8125rem; }
+.fz-dona { position: relative; width: 180px; height: 180px; margin: 6px auto 12px; }
+.fz-dona svg { width: 100%; height: 100%; }
+.fz-dona-centro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--display); font-weight: 800; }
+.fz-dona-etiqueta { font-size: 0.72rem; color: var(--muted); font-family: inherit; font-weight: 600; }
+.fz-leyenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.fz-leyenda-fila { display: grid; grid-template-columns: 12px 1fr auto 44px; align-items: center; gap: 10px; width: 100%; padding: 9px 2px; text-align: left; border-top: 1px solid var(--line); }
+.fz-leyenda-color { display: inline-block; width: 12px; height: 12px; border-radius: 4px; }
+.fz-leyenda-color.ingreso { background: var(--green); }
+.fz-leyenda-color.gasto { background: var(--red); }
+.fz-leyenda-pct { color: var(--muted); font-size: 0.8125rem; text-align: right; }
+.fz-serie { list-style: none; margin: 0; padding: 0; display: flex; gap: 12px; font-size: 0.75rem; color: var(--muted); }
+.fz-serie li { display: flex; align-items: center; gap: 5px; }
+.fz-barras { width: 100%; height: auto; }
+.fz-eje { font-size: 8px; fill: var(--muted); }
+
+/* movimientos */
+.fz-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.fz-mov { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 11px 2px; text-align: left; border-bottom: 1px solid var(--line); }
+.fz-lista li:last-child .fz-mov { border-bottom: 0; }
+.fz-mov-texto { display: flex; flex-direction: column; min-width: 0; }
+.fz-mov-categoria { font-weight: 600; overflow-wrap: anywhere; }
+.fz-mov-nota { font-size: 0.78rem; color: var(--muted); overflow-wrap: anywhere; }
+.fz-mov-monto { font-weight: 700; flex: none; }
+.fz-mov-monto.ingreso { color: var(--green); }
+.fz-mov-monto.gasto { color: var(--red); }
+.fz-mov-monto.transfer { color: var(--muted); }
+.fz-busqueda { display: flex; align-items: center; gap: 8px; background: var(--surface2); border-radius: 14px; padding: 0 14px; color: var(--muted); }
+.fz-busqueda input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; min-height: 46px; color: var(--text); }
+.fz-dia-cab { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.8125rem; font-weight: 700; color: var(--muted); margin: 14px 2px 2px; }
+.fz-dia-neto { font-weight: 700; }
+
+/* presupuesto y metas */
+.fz-barra { height: 8px; border-radius: 6px; background: var(--surface2); overflow: hidden; }
+.fz-barra span { display: block; height: 100%; border-radius: 6px; background: var(--green); }
+.fz-barra.nivel-alerta span { background: var(--amber); }
+.fz-barra.nivel-excedido span { background: var(--red); }
+.fz-barra.nivel-meta span { background: var(--accent); }
+
+.fz-presupuesto-total { font-size: 1.3rem; font-weight: 800; margin: 0 0 8px; }
+.fz-restante { margin: 8px 0 0; font-size: 0.875rem; }
+.fz-excedido { color: var(--red); font-weight: 700; }
+.fz-presupuesto-lista { list-style: none; margin: 0; padding: 0; }
+.fz-presupuesto-fila { padding: 12px 0; border-top: 1px solid var(--line); }
+.fz-presupuesto-fila:first-child { border-top: 0; padding-top: 0; }
+.fz-presupuesto-cab { display: flex; justify-content: space-between; font-weight: 700; }
+.fz-presupuesto-detalle { margin: 2px 0 8px; font-size: 0.875rem; color: var(--muted); }
+.fz-pct.nivel-texto-alerta { color: var(--amber); }
+.fz-pct.nivel-texto-excedido { color: var(--red); }
+.fz-pct.nivel-texto-ok { color: var(--green); }
+.fz-tope { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.fz-tope-etiqueta { font-size: 0.78rem; color: var(--muted); flex: 1; }
+.fz-tope .fz-texto { width: 110px; }
+.fz-meta-avance { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin: 0 0 10px; }
+.fz-meta-ahorrado { font-size: 1.3rem; font-weight: 800; }
+.fz-meta-pct { margin-left: auto; font-weight: 800; color: var(--accent); }
+.fz-meta-estado { color: var(--muted); margin: 10px 0 0; }
+.fz-meta-estado.cumplida { color: var(--green); font-weight: 700; }
+.fz-meta-estado.vencida { color: var(--red); }
+
+/* formularios */
+.fz-form { display: flex; flex-direction: column; gap: 14px; }
+.fz-form .campo { margin-top: 0; }
+.fz-monto-envoltura { display: flex; align-items: baseline; gap: 8px; background: var(--surface2); border-radius: 16px; padding: 10px 16px; }
+.fz-monto-prefijo { font-size: 1.4rem; font-weight: 800; color: var(--muted); }
+.fz-monto-campo { flex: 1; min-width: 0; background: none; border: 0; outline: 0; font-size: 2rem; font-weight: 800; color: var(--text); }
+.fz-texto { width: 100%; background: var(--surface2); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; min-height: 44px; color: var(--text); }
+.fz-texto:focus { border-color: var(--accent); outline: 0; }
+.fz-fecha { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.fz-fecha .fz-texto { width: auto; flex: 1; min-width: 150px; }
+.fz-direccion { display: flex; align-items: center; justify-content: center; gap: 14px; font-weight: 700; }
+.fz-respaldo { width: 100%; margin-top: 14px; background: var(--surface2); border: 1px solid var(--line); border-radius: 12px; padding: 10px; font-size: 0.72rem; color: var(--text); }
+
+/* comparar */
+.fz-comparar summary { cursor: pointer; list-style: none; }
+.fz-comparar summary::-webkit-details-marker { display: none; }
+.fz-comparar summary h2 { margin: 0; }
+.fz-comparar[open] summary { margin-bottom: 12px; }
+.fz-comparar-cuerpo { display: flex; flex-direction: column; gap: 10px; }
+.fz-comparar-periodo { display: grid; grid-template-columns: auto 1fr 1.3fr; gap: 8px; align-items: center; }
+.fz-comparar-letra { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 800; }
+.fz-comparar-etiqueta { grid-column: 2 / -1; font-size: 0.75rem; color: var(--muted); }
+.fz-tabla { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.fz-tabla caption { text-align: left; font-weight: 700; padding: 8px 0 4px; }
+.fz-tabla th, .fz-tabla td { padding: 7px 4px; text-align: right; border-bottom: 1px solid var(--line); }
+.fz-tabla th[scope='row'], .fz-tabla th:first-child { text-align: left; font-weight: 600; }
+.fz-tabla .mas, .fz-diferencia.mas .monto { color: var(--red); }
+.fz-tabla .menos, .fz-diferencia.menos .monto { color: var(--green); }
+.fz-diferencia { margin: 4px 0; }
+
+/* Alpi en Finanstia: billetes alrededor */
+.fz-extras { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: visible; }
+.fz-extras .billete { position: absolute; width: 56px; height: auto; border-radius: 6px; box-shadow: 0 4px 10px rgb(0 0 0 / 0.3); }
+.fz-extras.verde .billete { animation: fz-baila 3.2s ease-in-out infinite; }
+.fz-extras.verde .b1 { left: -4%; top: 22%; }
+.fz-extras.verde .b2 { right: -2%; top: 10%; animation-delay: -0.8s; }
+.fz-extras.verde .b3 { left: 2%; bottom: 26%; animation-delay: -1.6s; }
+.fz-extras.verde .b4 { right: 0; bottom: 32%; animation-delay: -2.2s; width: 48px; }
+@keyframes fz-baila { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-16px) rotate(9deg); } }
+.fz-extras.ambar .billete { opacity: 0.85; width: 46px; }
+.fz-extras.ambar .b1 { left: 0; bottom: 22%; transform: rotate(-12deg); }
+.fz-extras.ambar .b2 { right: 4%; bottom: 28%; transform: rotate(10deg); }
+.fz-extras.rojo .b1 { right: 6%; top: 36%; width: 44px; animation: fz-se-va 4.2s ease-in infinite; }
+.fz-extras.rojo .b2 { left: 4%; top: 46%; width: 40px; animation: fz-se-va 5.1s ease-in infinite -2s; }
+@keyframes fz-se-va { 0% { transform: translateY(0) rotate(0); opacity: 0.9; } 100% { transform: translateY(-70px) rotate(40deg); opacity: 0; } }
+.fz-cartel { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%) rotate(-3deg); background: #c9a26b; color: #4a3217; border-radius: 6px; padding: 6px 10px; font-size: 0.7rem; font-weight: 800; white-space: nowrap; box-shadow: 0 3px 8px rgb(0 0 0 / 0.3); }
+.fz-cartel i { position: absolute; left: 50%; top: 100%; width: 5px; height: 16px; margin-left: -2px; background: #7a5a33; }
+@media (prefers-reduced-motion: reduce) { .fz-extras .billete { animation: none !important; } }
+
+a.enlace-mascotas { text-decoration: none; color: var(--text); }
+:root[data-modo='finanzas'] .planeta { background: radial-gradient(60% 120% at 50% 0%, color-mix(in srgb, var(--accent) 34%, #0f2a1d), #06120b 72%); box-shadow: 0 -3px 22px color-mix(in srgb, var(--accent) 45%, transparent), inset 0 2px 0 color-mix(in srgb, var(--accent) 70%, white); }
+:root[data-modo='finanzas'][data-theme='light'] .planeta { background: radial-gradient(60% 120% at 50% 0%, color-mix(in srgb, var(--accent) 30%, white), color-mix(in srgb, var(--accent) 12%, var(--bg)) 72%); }

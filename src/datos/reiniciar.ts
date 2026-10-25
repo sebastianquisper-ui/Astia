@@ -3,7 +3,8 @@
 
 export async function borrarTodoYReiniciar(): Promise<void> {
   try {
-    for (const clave of Object.keys(localStorage)) if (clave.startsWith('astia.')) localStorage.removeItem(clave)
+    // 'astia.sinNube' es solo para la vista previa y las pruebas: se conserva
+    for (const clave of Object.keys(localStorage)) if (clave.startsWith('astia.') && clave !== 'astia.sinNube') localStorage.removeItem(clave)
   } catch {
     /* sin almacenamiento */
   }

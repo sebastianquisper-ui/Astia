@@ -10,6 +10,7 @@ import { Hoja } from '../ui/Hoja'
 import type { ModoTema, TamanoLetra } from '../lib/tema'
 import { Icono } from '../ui/Icono'
 import { useAviso } from '../ui/Aviso'
+import { useCuenta } from '../cuenta/CuentaProvider'
 
 const TEMAS: { id: ModoTema; texto: string }[] = [
   { id: 'hora', texto: 'Automático' },
@@ -28,6 +29,7 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
   const { perfil, guardarPerfil, importar, exportar, enEjemplo } = useDatos()
   const [nombre, setNombre] = useState(ajustes.nombre)
   const { etapa, minuscula } = usePeriodo()
+  const cuenta = useCuenta()
   const [semanas, setSemanas] = useState(String(perfil.semanasCiclo))
   const [borrando, setBorrando] = useState(false)
   const [pendiente, setPendiente] = useState<Extract<Importacion, { ok: true }> | null>(null)
@@ -111,6 +113,19 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
         <Icono nombre="izquierda" /> Más
       </button>
       <h1 className="titulo">Ajustes</h1>
+
+      <div className="campo">
+        <span className="etiqueta">Tu cuenta</span>
+        {cuenta.local ? (
+          <p className="nota">Vista previa: sin cuenta. Con la app publicada, aquí entras con tu cuenta de Google.</p>
+        ) : (
+          <>
+            <p>{cuenta.usuario?.nombre} · {cuenta.usuario?.correo}</p>
+            <button className="btn suave" style={{ marginTop: 8 }} onClick={() => void cuenta.salir()}>Cerrar sesión</button>
+            <p className="nota">Una sola cuenta para tus estudios, Mi Órbita y Finanstia.</p>
+          </>
+        )}
+      </div>
 
       <div className="campo">
         <label htmlFor="nombre">Tu nombre</label>
@@ -221,7 +236,7 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
       <div className="campo">
         <span className="etiqueta">Empezar de cero</span>
         <button className="btn suave" onClick={() => setBorrando(true)}>Borrar todos mis datos</button>
-        <p className="nota">Borra cursos, clases, tareas, hábitos, rutinas, fotos de evidencia y ajustes de este teléfono. Astia queda como recién instalada.</p>
+        <p className="nota">Borra cursos, clases, tareas, hábitos, rutinas, fotos de evidencia y ajustes de este teléfono. Astia queda como recién instalada. Tus finanzas en la nube no se tocan; el PIN de Finanstia sí se borra de este teléfono y lo creas de nuevo.</p>
       </div>
 
       <Hoja titulo="¿Borrar todo?" abierta={borrando} alCerrar={() => setBorrando(false)}>
