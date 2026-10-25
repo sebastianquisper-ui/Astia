@@ -19,6 +19,7 @@ import { Icono } from '../ui/Icono'
 import { useAviso } from '../ui/Aviso'
 import { FilaTarea } from '../ui/FilaTarea'
 import { TarjetaAhora } from '../ui/TarjetaAhora'
+import { DictadoTarea } from '../formularios/DictadoTarea'
 import { useAhora } from '../ui/useAhora'
 import { Vacio } from '../ui/Vacio'
 
@@ -30,6 +31,7 @@ export function HoyAcademico() {
   const sesion = useSesion()
   const [menuEmpezar, setMenuEmpezar] = useState(false)
   const { abrir, nodo } = useEditorTarea()
+  const [dictando, setDictando] = useState(false)
   const avisar = useAviso()
   const ahora = useAhora()
 
@@ -102,7 +104,7 @@ export function HoyAcademico() {
         estado={estado}
         curso={curso}
         alEmpezar={() => setMenuEmpezar(true)}
-        alDictar={() => avisar('El dictado por voz llega en la fase 5.')}
+        alDictar={() => setDictando(true)}
       />
 
       {hayDatos && (
@@ -166,6 +168,7 @@ export function HoyAcademico() {
       </Hoja>
       {sesion.nodo}
       {nodo}
+      <DictadoTarea abierto={dictando} alCerrar={() => setDictando(false)} alEntender={(plantilla) => abrir(undefined, plantilla)} />
     </section>
   )
 }

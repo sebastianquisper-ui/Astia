@@ -919,6 +919,19 @@ test('Música: se elige volumen y se rechaza un archivo que no es audio', async 
   expect(m.propias ?? []).toEqual([])
 })
 
+test('dictar una tarea en Hoy: se entiende, se muestra en el formulario y se guarda al confirmar', async ({ page }) => {
+  await page.goto('/#/hoy')
+  await page.getByRole('button', { name: 'Dictar', exact: true }).click()
+  const dictado = page.getByRole('dialog', { name: 'Dictar una tarea' })
+  await dictado.getByLabel('Lo que quieres anotar').fill('Examen de cálculo el viernes a las 3 de la tarde')
+  await dictado.getByRole('button', { name: 'Entender' }).click()
+  const form = page.getByRole('dialog', { name: 'Nueva tarea' })
+  await expect(form.getByLabel(/Qué hay que hacer|Tarea|Título/i).first()).toHaveValue('Examen de cálculo')
+  await expect(form.getByRole('button', { name: 'Examen' })).toHaveAttribute('aria-pressed', 'true')
+  await form.getByRole('button', { name: /Guardar|Agregar/ }).click()
+  await expect(page.getByText('Tarea agregada.')).toBeVisible()
+})
+
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
   const datos = conLogros(0, 700) // 1400 XP, todo personal
   await page.addInitScript((d) => {

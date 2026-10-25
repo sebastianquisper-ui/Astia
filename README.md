@@ -60,6 +60,7 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   solo en el teléfono, en IndexedDB). En el iPhone el audio se activa con el primer toque en la app.
   **Música de fondo** en toda la app (activada por defecto, empieza con tu primer toque): una musiquita alegre que la app compone sola, o tus
   propias pistas (hasta 5, 12 MB y 10 min cada una, guardadas solo en el teléfono). Se silencia desde el botón ♪ de la cabecera.
+  En Hoy, **Dictar** entiende una tarea hablada o escrita ("examen de cálculo el viernes a las 3 de la tarde"): detecta curso, tipo, fecha y hora, y abre el formulario ya lleno para confirmar.
   También puedes activar que **Alpi lea los avisos en voz alta** (voz del iPhone, gratis; solo con la app abierta; apagado por defecto).
 - **Una sola cuenta (Firebase):** Astia pide iniciar sesión con Google antes de mostrar nada. Detalles y pasos en `docs/FIREBASE.md`.
   Los datos de estudios y Mi Órbita todavía están en el teléfono; pasarlos a la nube es el siguiente paso (`docs/SUPABASE.md` quedó
