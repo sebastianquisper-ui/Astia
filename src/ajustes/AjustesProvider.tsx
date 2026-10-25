@@ -5,7 +5,7 @@ import { configurarVoz } from '../sonidos/voz'
 import { configurarMusica } from '../sonidos/musica'
 import type { PreferenciasSonido } from '../sonidos/catalogo'
 import type { Etapa } from '../lib/etapa'
-import type { MascotaElegida } from '../lib/mascotas'
+import { generoDeMascota, type MascotaElegida } from '../lib/mascotas'
 import { COLOR_BARRA, ESCALA_LETRA, temaEfectivo, type ModoTema, type TamanoLetra } from '../lib/tema'
 import { guardarLocal, leerLocal } from '../lib/almacen'
 import { useAviso } from '../ui/Aviso'
@@ -42,10 +42,12 @@ export interface Ajustes {
   tamanoLetra: TamanoLetra
   /** Muestra cursos, clases y tareas inventados para ver cómo luce la app. */
   datosEjemplo: boolean
+  /** Quita desenfoques y animaciones de fondo, para celulares que van lentos. */
+  ligero: boolean
 }
 
 const CLAVE = 'astia.ajustes'
-const INICIALES: Ajustes = { nombre: '', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: false, modo: 'academico', mascota: 'alpi', mascotaVista: {} }
+const INICIALES: Ajustes = { nombre: '', modoTema: 'hora', tamanoLetra: 'normal', datosEjemplo: false, ligero: false, modo: 'academico', mascota: 'alpi', mascotaVista: {} }
 
 interface Contexto {
   ajustes: Ajustes
@@ -72,16 +74,17 @@ export function AjustesProvider({ children }: { children: ReactNode }) {
   // Los sonidos se leen desde fuera de React (por ejemplo, al terminar un temporizador)
   useEffect(() => configurarSonidos(ajustes.sonidos), [ajustes.sonidos])
   useEffect(() => configurarMusica(ajustes.sonidos?.musica), [ajustes.sonidos?.musica])
-  useEffect(() => configurarVoz(ajustes.sonidos?.voz), [ajustes.sonidos?.voz])
+  useEffect(() => configurarVoz(ajustes.sonidos?.voz, generoDeMascota(ajustes.mascota)), [ajustes.sonidos?.voz, ajustes.mascota])
 
   // Aplica tema y tamaño de letra al documento
   useEffect(() => {
     const raiz = document.documentElement
     raiz.setAttribute('data-theme', tema)
     raiz.setAttribute('data-modo', ajustes.modo)
+    raiz.toggleAttribute('data-ligero', ajustes.ligero)
     raiz.style.fontSize = 16 * ESCALA_LETRA[ajustes.tamanoLetra] + 'px'
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLOR_BARRA[tema])
-  }, [tema, ajustes.tamanoLetra, ajustes.modo])
+  }, [tema, ajustes.tamanoLetra, ajustes.modo, ajustes.ligero])
 
   const cambiar = useCallback(
     (parcial: Partial<Ajustes>) => {

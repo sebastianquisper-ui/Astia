@@ -170,6 +170,15 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
       </div>
 
       <div className="campo">
+        <span className="etiqueta" id="et-ligero">Modo ligero</span>
+        <div className="seg" role="group" aria-labelledby="et-ligero">
+          <button aria-pressed={!ajustes.ligero} onClick={() => cambiar({ ligero: false })}>No</button>
+          <button aria-pressed={ajustes.ligero} onClick={() => cambiar({ ligero: true })}>Sí</button>
+        </div>
+        <p className="nota">Actívalo si la app va lenta o con tirones: quita los desenfoques y las animaciones de fondo.</p>
+      </div>
+
+      <div className="campo">
         <span className="etiqueta" id="et-3d">Alpi en 3D</span>
         <div className="seg" role="group" aria-labelledby="et-3d">
           <button aria-pressed={ajustes.alpi3d !== false} onClick={() => cambiar({ alpi3d: true })}>Sí</button>
