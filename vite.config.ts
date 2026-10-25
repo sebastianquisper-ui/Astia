@@ -5,7 +5,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 // Colores de marca (los mismos del tema oscuro de la v1)
 const FONDO = '#1F2230'
 
+// En GitHub Pages la app vive en /Astia/; en local y en el teléfono, en la raíz
+const BASE = process.env.VITE_BASE ?? '/'
+
 export default defineConfig({
+  base: BASE,
   plugins: [
     react(),
     VitePWA({
@@ -17,8 +21,8 @@ export default defineConfig({
         short_name: 'Astia',
         description: 'Tu asistente personal contra la procrastinación.',
         lang: 'es-PE',
-        start_url: '/',
-        scope: '/',
+        start_url: BASE,
+        scope: BASE,
         display: 'standalone',
         orientation: 'portrait',
         background_color: FONDO,
@@ -32,7 +36,7 @@ export default defineConfig({
       workbox: {
         // Todo lo de la app queda guardado en el teléfono: abre sin internet
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: BASE + 'index.html',
       },
     }),
   ],
