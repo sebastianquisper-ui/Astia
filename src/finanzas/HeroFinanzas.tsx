@@ -6,7 +6,8 @@ import { diffDays } from '../lib/fechas'
 import { estadoDinero, expresionFinanzas, fraseFinanzas, type EstadoDinero } from './estado'
 import { Billete } from './FondoDinero'
 import { useFinanzas } from './FinanzasProvider'
-import { useAlpiFinanzas } from './useAlpiFinanzas'
+import { RuedaAlpi } from '../mascotas/alpi/RuedaAlpi'
+import { BotonVestidorFinanzas, useVestidorFinanzas } from './VestidorFinanzas'
 
 const cargarAlpi = () => import('../mascotas/alpi/AlpiIframe')
 const AlpiIframe = lazy(cargarAlpi)
@@ -48,9 +49,11 @@ function ExtrasDinero({ estado }: { estado: EstadoDinero }) {
 /** Arriba de Inicio en Finanstia: Alpi (con su propio nivel) y lo que dice de tu plata. */
 export function HeroFinanzas() {
   const { config, movsMes } = useFinanzas()
-  const { estado: nivel } = useAlpiFinanzas()
+  const v = useVestidorFinanzas()
+  const [rueda, setRueda] = useState(false)
   const en3d = useAlpi3D()
   const info = estadoDinero({ config, movsMes })
+  const alpiNivel = v.alcanzado
   const hoy = new Date()
   const semilla = diffDays(hoy, new Date(hoy.getFullYear(), 0, 0))
   const [toques, setToques] = useState(0)
@@ -64,16 +67,18 @@ export function HeroFinanzas() {
     antes.current = info.estado
   }, [info.estado])
 
+  // Lo que elegiste en la ruleta manda (cuando tu plata no está en rojo); si no, Alpi reacciona a tu plata
+  const expresion = v.expresion ?? expresionFinanzas(info.estado)
   return (
     <div className="hero-alpi fz-hero" data-estado={info.estado}>
       <div className="planeta" aria-hidden="true" />
-      <div className="hero-alpi-modelo" data-nivel={nivel.nivel} data-expresion={expresionFinanzas(info.estado)}>
+      <div className="hero-alpi-modelo" data-nivel={v.nivel} data-expresion={expresion}>
         {en3d ? (
           <Suspense fallback={null}>
-            <AlpiIframe nivel={nivel.nivel} expresion={expresionFinanzas(info.estado)} accion={mov.accion} vez={mov.vez} alTocar={() => setToques((n) => n + 1)} />
+            <AlpiIframe nivel={v.nivel} expresion={expresion} accion={mov.accion} vez={mov.vez} accesorios={v.accesorios} alTocar={() => setToques((n) => n + 1)} alDobleToque={() => (v.desbloqueado ? setRueda(true) : setToques((n) => n + 1))} />
           </Suspense>
         ) : (
-          <Rig mascota="alpi" etapa={nivel.nivel} animo={ANIMO[info.estado]} />
+          <Rig mascota="alpi" etapa={v.nivel} animo={ANIMO[info.estado]} />
         )}
         <ExtrasDinero estado={info.estado} />
       </div>
@@ -86,11 +91,14 @@ export function HeroFinanzas() {
           <span>
             <b>Mi Alpi de Finanstia</b>
             <br />
-            Nivel {nivel.nivel} de 4
+            Nivel {alpiNivel} de 4
           </span>
           <span className="enlace-mascotas-flecha" aria-hidden="true">›</span>
         </a>
+        <BotonVestidorFinanzas />
+        {v.desbloqueado && <p className="rueda-pista">Toca dos veces a Alpi para cambiar su expresión o hacerla bailar.</p>}
       </div>
+      <RuedaAlpi abierta={rueda} alCerrar={() => setRueda(false)} elegida={v.expresion} alElegirExpresion={v.elegirExpresion} alMovimiento={(a) => setMov((m) => ({ accion: a, vez: m.vez + 1 }))} />
     </div>
   )
 }

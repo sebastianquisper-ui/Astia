@@ -19,6 +19,20 @@ const TIPOS: { id: Tipo; nombre: string }[] = [
 ]
 const otroMedio = (m: Medio): Medio => (m === 'digital' ? 'efectivo' : 'digital')
 
+/** El aviso después de guardar: dice qué se guardó y, si tocaste un presupuesto, cuánto va. */
+export function useAvisarGuardado() {
+  const { config, movsMes, periodo } = useFinanzas()
+  const avisar = useAviso()
+  const hoy = fechaLocal()
+  return (texto: string, fechaMov: string, gasto: { tipo: 'gasto' | 'ingreso'; medio: Medio; categoria: string; monto: number } | null, anterior: { id: string } | null = null) => {
+    const mes = rangoPeriodo('mes', hoy)
+    const presupuesto = gasto && fechaMov >= mes.desde && fechaMov <= mes.hasta ? avisoTrasGasto(movsMes, config, gasto, anterior) : null
+    if (presupuesto) return avisar(`${texto}. ${textoAvisoPresupuesto(presupuesto)}`, 'ok', { duracion: 6000 })
+    const { desde, hasta } = rangoPeriodo(periodo.tipo, periodo.ref)
+    avisar(fechaMov < desde || fechaMov > hasta ? `${texto} (fuera del periodo que estás viendo)` : texto)
+  }
+}
+
 export function textoAvisoPresupuesto(a: AvisoGasto): string {
   return a.nivel === 'excedido' ? `${a.categoria} pasó su presupuesto: ${soles(a.gastado)} de ${soles(a.tope)}.` : `${a.categoria} va en ${a.pct} % de su presupuesto del mes.`
 }
@@ -35,22 +49,24 @@ export function FormMovimiento({ opciones, alCerrar }: { opciones: OpcionesFormu
 }
 
 function Formulario({ opciones, alCerrar }: { opciones: OpcionesFormulario; alCerrar: () => void }) {
-  const { datos, config, movsMes, periodo, medio: medioActivo, alFallar } = useFinanzas()
+  const { datos, config, medio: medioActivo, alFallar, abrirDictado } = useFinanzas()
+  const avisarGuardado = useAvisarGuardado()
   const avisar = useAviso()
   const mov = opciones.mov
+  const previo = mov ? undefined : opciones.previo
   const editando = Boolean(mov)
   const esTransfer = editando && esTransferencia(mov!)
   const hoy = fechaLocal()
 
-  const [tipo, setTipo] = useState<Tipo>(esTransfer ? 'transferencia' : (mov?.tipo ?? opciones.tipo ?? 'gasto'))
-  const [medio, setMedio] = useState<Medio>(mov?.medio ?? medioActivo)
-  const [origen, setOrigen] = useState<Medio>(esTransfer ? (mov!.tipo === 'gasto' ? mov!.medio : otroMedio(mov!.medio)) : medioActivo)
-  const [categoria, setCategoria] = useState<string | null>(esTransfer ? null : (mov?.categoria ?? null))
+  const [tipo, setTipo] = useState<Tipo>(esTransfer ? 'transferencia' : (mov?.tipo ?? previo?.tipo ?? opciones.tipo ?? 'gasto'))
+  const [medio, setMedio] = useState<Medio>(mov?.medio ?? previo?.medio ?? medioActivo)
+  const [origen, setOrigen] = useState<Medio>(esTransfer ? (mov!.tipo === 'gasto' ? mov!.medio : otroMedio(mov!.medio)) : (previo?.origen ?? medioActivo))
+  const [categoria, setCategoria] = useState<string | null>(esTransfer ? null : (mov?.categoria ?? previo?.categoria ?? null))
   const [otra, setOtra] = useState(false)
   const [otraTexto, setOtraTexto] = useState('')
-  const [monto, setMonto] = useState(mov ? String(mov.monto) : '')
-  const [fecha, setFecha] = useState(mov?.fecha ?? hoy)
-  const [nota, setNota] = useState(mov?.nota ?? '')
+  const [monto, setMonto] = useState(mov ? String(mov.monto) : previo?.monto ? String(previo.monto) : '')
+  const [fecha, setFecha] = useState(mov?.fecha ?? previo?.fecha ?? hoy)
+  const [nota, setNota] = useState(mov?.nota ?? previo?.nota ?? '')
   const [error, setError] = useState('')
   const montoRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
@@ -66,14 +82,6 @@ function Formulario({ opciones, alCerrar }: { opciones: OpcionesFormulario; alCe
       const nuevas = t === 'ingreso' ? config.categoriasIngreso : config.categoriasGasto
       if (categoria && !nuevas.includes(categoria)) setCategoria(null)
     }
-  }
-
-  const avisarGuardado = (texto: string, fechaMov: string, gasto: { tipo: 'gasto' | 'ingreso'; medio: Medio; categoria: string; monto: number } | null) => {
-    const mes = rangoPeriodo('mes', hoy)
-    const presupuesto = gasto && fechaMov >= mes.desde && fechaMov <= mes.hasta ? avisoTrasGasto(movsMes, config, gasto, mov ?? null) : null
-    if (presupuesto) return avisar(`${texto}. ${textoAvisoPresupuesto(presupuesto)}`, 'ok', { duracion: 6000 })
-    const { desde, hasta } = rangoPeriodo(periodo.tipo, periodo.ref)
-    avisar(fechaMov < desde || fechaMov > hasta ? `${texto} (fuera del periodo que estás viendo)` : texto)
   }
 
   const guardar = (e: React.FormEvent) => {
@@ -99,7 +107,7 @@ function Formulario({ opciones, alCerrar }: { opciones: OpcionesFormulario; alCe
       else datos.crearMovimiento(nuevo).listo.catch(alFallar)
       if (otra && !existentes.includes(nombre)) datos.guardarCategorias(tipo, [...existentes, nombre]).catch(alFallar)
       alCerrar()
-      avisarGuardado(editando ? 'Cambios guardados' : tipo === 'gasto' ? 'Gasto registrado' : 'Ingreso registrado', fecha, nuevo)
+      avisarGuardado(editando ? 'Cambios guardados' : tipo === 'gasto' ? 'Gasto registrado' : 'Ingreso registrado', fecha, nuevo, mov ?? null)
     } catch (err) {
       if ((err as { code?: string }).code !== 'app/validacion') throw err
       setError((err as Error).message)
@@ -120,6 +128,11 @@ function Formulario({ opciones, alCerrar }: { opciones: OpcionesFormulario; alCe
   const destino = otroMedio(origen)
   return (
     <form className="fz-form" noValidate onSubmit={guardar}>
+      {!editando && (
+        <button type="button" className="fz-dictar-enlace" onClick={() => (alCerrar(), abrirDictado())}>
+          <Icono nombre="mic" tam={18} /> Mejor lo dicto
+        </button>
+      )}
       {!esTransfer && <Segmentado opciones={editando ? TIPOS.slice(0, 2) : TIPOS} valor={tipo} etiqueta="Tipo" ancho alCambiar={cambiarTipo} />}
 
       <label className="fz-monto-envoltura">

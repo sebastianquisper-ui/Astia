@@ -1156,3 +1156,17 @@ html, body { overflow-x: clip; }
 a.enlace-mascotas { text-decoration: none; color: var(--text); }
 :root[data-modo='finanzas'] .planeta { background: radial-gradient(60% 120% at 50% 0%, color-mix(in srgb, var(--accent) 34%, #0f2a1d), #06120b 72%); box-shadow: 0 -3px 22px color-mix(in srgb, var(--accent) 45%, transparent), inset 0 2px 0 color-mix(in srgb, var(--accent) 70%, white); }
 :root[data-modo='finanzas'][data-theme='light'] .planeta { background: radial-gradient(60% 120% at 50% 0%, color-mix(in srgb, var(--accent) 30%, white), color-mix(in srgb, var(--accent) 12%, var(--bg)) 72%); }
+
+/* dictado en Finanstia */
+.fz-dictar { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border-radius: 18px; background: var(--surface); border: 1.5px dashed var(--accent); color: var(--text); }
+.fz-dictar svg { color: var(--accent); flex: none; }
+.fz-dictar b { display: block; }
+.fz-dictar small { color: var(--muted); }
+.fz-dictar-enlace { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-weight: 700; padding: 4px 2px; }
+.fz-dictado-texto { padding: 12px 14px; min-height: 84px; resize: vertical; line-height: 1.4; }
+.fz-entendi { background: var(--surface2); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.fz-entendi h3 { margin: 0; font-family: var(--display); }
+.fz-entendi-lista, .fz-dudas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.fz-dudas li { color: var(--amber); font-weight: 600; font-size: 0.875rem; }
+.fz-dictado .acciones { flex-wrap: wrap; }
+.btn.escuchando { background: var(--red); color: #fff; }

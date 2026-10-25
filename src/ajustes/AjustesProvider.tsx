@@ -19,6 +19,8 @@ export interface Ajustes {
   mascotaVista: Record<string, number>
   /** Cómo vestiste a Alpi: nivel a mostrar (hasta el que alcanzaste) y qué accesorios lleva. */
   alpiLook?: { nivel?: number; accesorios?: Record<string, boolean>; expresion?: ExpresionAlpi }
+  /** Lo mismo para el Alpi de Finanstia (es otro Alpi, con su propia ropa). */
+  alpiLookFinanzas?: { nivel?: number; accesorios?: Record<string, boolean>; expresion?: ExpresionAlpi }
   /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
   alpi3d?: boolean
   /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */

@@ -1387,3 +1387,164 @@ test('sin sesión de Google no se ve nada de Astia: pide "Continuar con Google"'
   await expect(page.getByText('Tus estudios, tu vida y tu plata, con una sola cuenta.')).toBeVisible()
   await expect(page.getByRole('navigation')).toHaveCount(0)
 })
+
+// ---------- Finanstia: ruleta de emotes, vestidor y dictado ----------
+
+/** Deja guardada una vida de movimientos: así Alpi de Finanstia ya tiene nivel 2 sin repetir decenas de registros. */
+function finanzasConHistorial() {
+  const movimientos: Record<string, unknown> = { ing: { id: 'ing', tipo: 'ingreso', categoria: 'Sueldo', monto: 5000, fecha: '2026-08-01', medio: 'digital', nota: '', creado: 1 } }
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(Date.UTC(2026, 8, 1 + i)) // 30 días distintos de septiembre y octubre
+    const fecha = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
+    movimientos['g' + i] = { id: 'g' + i, tipo: 'gasto', categoria: 'Almuerzos', monto: 10, fecha, medio: 'digital', nota: '', creado: 2 + i }
+  }
+  return { config: { saldosCent: { digital: 470000, efectivo: 0 } }, movimientos, metas: {} }
+}
+
+test('Finanstia: ruleta de emotes y movimientos con doble toque, solo si no estás en rojo', async ({ page }) => {
+  test.setTimeout(90_000)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.addInitScript(() => localStorage.setItem('astia.ajustes', JSON.stringify({ ...JSON.parse(localStorage.getItem('astia.ajustes') || '{}'), alpi3d: true, mascota: 'alpi' })))
+  await entrarAFinanstia(page)
+  await registrar(page, 'Ingreso', '500', 'Sueldo')
+  await expect(page.getByText('Toca dos veces a Alpi')).toBeVisible()
+  const lienzo = page.frameLocator('.hero-alpi iframe').locator('canvas#stage')
+  await expect(lienzo).toBeVisible({ timeout: 15000 })
+  await lienzo.dblclick()
+  const emotes = page.getByRole('dialog', { name: 'Emotes de Alpi' })
+  await expect(emotes).toBeVisible()
+  await emotes.getByRole('button', { name: /Orgullosa/ }).click()
+  await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'orgullosa')
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLookFinanzas.expresion)).toBe('orgullosa')
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLook?.expresion)).toBeUndefined() // es otro Alpi: no toca al de estudios
+  await lienzo.dblclick()
+  await page.getByRole('button', { name: 'Ver movimientos' }).click()
+  const movs = page.getByRole('dialog', { name: 'Movimientos de Alpi' })
+  await expect(movs.getByRole('button')).toHaveCount(6)
+  await movs.getByRole('button', { name: /Bailar/ }).click()
+  await expect(movs).toHaveCount(0)
+  // en rojo se cierra el juego: manda tu plata y la ruleta no se abre
+  await registrar(page, 'Gasto', '900', 'Tecnología')
+  await expect(page.locator('.fz-hero')).toHaveAttribute('data-estado', 'rojo')
+  await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'triste')
+  await expect(page.getByText('Toca dos veces a Alpi')).toHaveCount(0)
+  await lienzo.dblclick()
+  await expect(page.getByRole('dialog', { name: 'Emotes de Alpi' })).toHaveCount(0)
+})
+
+test('Finanstia: el vestidor deja quitar y poner ropa al Alpi de Finanstia (y se cierra en rojo)', async ({ page }) => {
+  await page.addInitScript((e) => {
+    if (sessionStorage.getItem('hist')) return
+    sessionStorage.setItem('hist', '1')
+    localStorage.setItem('astia.finanzas.local', JSON.stringify(e))
+  }, finanzasConHistorial())
+  await entrarAFinanstia(page)
+  await expect(page.getByRole('link', { name: /Mi Alpi de Finanstia/ })).toContainText('Nivel 2 de 4')
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  const hoja = page.getByRole('dialog', { name: 'Vestidor de Alpi' })
+  const niveles = hoja.getByRole('group', { name: 'Nivel de Alpi' })
+  await expect(niveles.getByRole('button', { name: /Nivel 2/ })).toHaveAttribute('aria-pressed', 'true')
+  await expect(niveles.getByRole('button', { name: /Nivel 3/ })).toBeDisabled() // aún no lo alcanzas
+  const chullo = hoja.getByRole('group', { name: 'Ropa y accesorios' }).getByRole('button', { name: 'Chullo' })
+  await expect(chullo).toHaveAttribute('aria-pressed', 'true')
+  await chullo.click()
+  await expect(chullo).toHaveAttribute('aria-pressed', 'false')
+  await niveles.getByRole('button', { name: /Nivel 1/ }).click()
+  await expect(hoja).toContainText('En el nivel 1 Alpi solo lleva su bufanda')
+  await hoja.getByRole('button', { name: 'Listo' }).click()
+  const look = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}'))
+  expect(look.alpiLookFinanzas).toMatchObject({ nivel: 1, accesorios: { chullo: false } })
+  expect(look.alpiLook).toBeUndefined() // el Alpi de estudios no se tocó
+  await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-nivel', '1')
+  // en rojo, el vestidor se cierra
+  await registrar(page, 'Gasto', '6000', 'Tecnología')
+  await expect(page.locator('.fz-hero')).toHaveAttribute('data-estado', 'rojo')
+  await page.getByRole('button', { name: /Vestir a Alpi/ }).click()
+  await expect(page.getByRole('dialog', { name: 'Vestidor de Alpi' })).toContainText('Primero ordenas tu plata')
+  await page.getByRole('dialog', { name: 'Vestidor de Alpi' }).getByRole('button', { name: 'Ver mi presupuesto' }).click()
+  await expect(page.getByRole('heading', { name: 'Presupuesto', level: 1 })).toBeVisible()
+})
+
+async function dictar(page: import('@playwright/test').Page, frase: string) {
+  const hoja = page.getByRole('dialog', { name: 'Dictar un movimiento' })
+  await hoja.getByLabel('Frase del movimiento').fill(frase)
+  await hoja.getByRole('button', { name: 'Entender' }).click()
+  return hoja
+}
+
+test('dictar: un ingreso y un gasto se entienden, se muestran y se guardan al confirmar', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('button', { name: /Dictar un movimiento/ }).click()
+  let hoja = await dictar(page, 'Me llegó un ingreso de 200 soles por sueldo')
+  await expect(hoja.getByText('Entendí')).toBeVisible()
+  await expect(hoja).toContainText('Ingreso')
+  await expect(hoja).toContainText('S/ 200.00')
+  await expect(hoja).toContainText('Categoría: Sueldo')
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('S/ 0.00') // todavía no se guardó nada
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('status')).toContainText('Ingreso registrado')
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('S/ 200.00')
+
+  await page.getByRole('button', { name: /Dictar un movimiento/ }).click()
+  hoja = await dictar(page, 'ayer gasté quince soles en almuerzo con yape')
+  await expect(hoja).toContainText('S/ 15.00')
+  await expect(hoja).toContainText('Categoría: Almuerzos')
+  await expect(hoja).toContainText('Fecha: Ayer')
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('status')).toContainText('Gasto registrado')
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('S/ 185.00')
+})
+
+test('dictar: si no está seguro de la categoría no guarda y deja corregir con todo ya rellenado', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('button', { name: /Dictar un movimiento/ }).click()
+  const hoja = await dictar(page, 'gasté 40 soles en algo raro')
+  await expect(hoja).toContainText('No encontré la categoría')
+  await expect(hoja.getByRole('button', { name: 'Guardar' })).toBeDisabled()
+  await hoja.getByRole('button', { name: 'Corregir' }).click()
+  const form = page.getByRole('dialog', { name: 'Nuevo movimiento' })
+  await expect(form.getByLabel('Monto en soles')).toHaveValue('40')
+  await form.getByRole('button', { name: 'Extras', exact: true }).click()
+  await form.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.locator('.fz-billetera', { hasText: 'Digital' })).toContainText('−S/ 40.00')
+})
+
+test('dictar: una frase sin monto no se guarda y explica qué decir', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('button', { name: /Dictar un movimiento/ }).click()
+  const hoja = await dictar(page, 'hola Alpi cómo estás')
+  await expect(hoja.getByRole('alert')).toContainText('No escuché cuánto fue')
+  await expect(hoja.getByRole('button', { name: 'Guardar' })).toHaveCount(0)
+})
+
+test('dictar: una transferencia y un aporte a una meta', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await registrar(page, 'Ingreso', '300', 'Sueldo')
+  await page.getByRole('navigation').getByRole('button', { name: 'Metas' }).click()
+  await page.getByRole('button', { name: 'Nueva meta' }).click()
+  await page.getByLabel('Nombre').fill('Laptop nueva')
+  await page.getByLabel('Monto objetivo en soles').fill('1000')
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click()
+  await page.getByRole('navigation').getByRole('button', { name: 'Inicio' }).click()
+
+  await page.getByRole('button', { name: /Dictar un movimiento/ }).click()
+  let hoja = await dictar(page, 'pasé cincuenta soles de digital a efectivo')
+  await expect(hoja).toContainText('De Digital a Efectivo')
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.locator('.fz-billetera', { hasText: 'Efectivo' })).toContainText('S/ 50.00')
+
+  await page.getByRole('button', { name: /Dictar un movimiento/ }).click()
+  hoja = await dictar(page, 'aporté 100 soles a mi laptop')
+  await expect(hoja).toContainText('Meta: Laptop nueva')
+  await hoja.getByRole('button', { name: 'Guardar' }).click()
+  await expect(page.getByRole('status')).toContainText('Aporte registrado')
+  await page.getByRole('navigation').getByRole('button', { name: 'Metas' }).click()
+  await expect(page.locator('.fz-meta')).toContainText('10 %')
+})
+
+test('registrar: desde el formulario se puede pasar a dictar', async ({ page }) => {
+  await entrarAFinanstia(page)
+  await page.getByRole('button', { name: 'Registrar un movimiento' }).click()
+  await page.getByRole('dialog', { name: 'Nuevo movimiento' }).getByRole('button', { name: 'Mejor lo dicto' }).click()
+  await expect(page.getByRole('dialog', { name: 'Dictar un movimiento' })).toBeVisible()
+})

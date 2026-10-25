@@ -7,6 +7,7 @@ import { porcentaje } from './formato'
 import { gruposTendencia } from './periodos'
 import { alertas, estadoPresupuesto } from './presupuesto'
 import { FILTROS_INICIALES, deMedio, gastosPorCategoria, ordenarRecientes, tendencia, totales, type Totales } from './resumen'
+import { Icono } from '../ui/Icono'
 import { Billeteras, FilaMovimiento, Monto, SelectorPeriodo, Vacio } from './ui'
 
 function Resumen({ t }: { t: Totales }) {
@@ -47,7 +48,7 @@ function AvisoPresupuesto() {
 }
 
 export function Inicio() {
-  const { movs, config, medio, periodo, irA } = useFinanzas()
+  const { movs, config, medio, periodo, irA, abrirDictado } = useFinanzas()
   const [compararAbierto, setCompararAbierto] = useState(false)
   const delMedio = movs ? deMedio(movs, medio) : []
   const porCategoria = gastosPorCategoria(delMedio)
@@ -59,6 +60,13 @@ export function Inicio() {
   return (
     <div className="fz-vista">
       <HeroFinanzas />
+      <button type="button" className="fz-dictar" onClick={abrirDictado}>
+        <Icono nombre="mic" tam={22} />
+        <span>
+          <b>Dictar un movimiento</b>
+          <small>Di "gasté 15 soles en almuerzo" y Alpi lo anota</small>
+        </span>
+      </button>
       <Billeteras />
       <SelectorPeriodo />
       <Resumen t={totales(delMedio)} />

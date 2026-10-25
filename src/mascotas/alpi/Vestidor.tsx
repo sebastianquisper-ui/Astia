@@ -1,13 +1,25 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useState, type ReactNode } from 'react'
 import { Hoja } from '../../ui/Hoja'
 import { Icono } from '../../ui/Icono'
 import { Rig } from '../rig/Rig'
-import { ACCESORIOS_ALPI, type NivelAlpi } from './datos'
+import { ACCESORIOS_ALPI, type ExpresionAlpi, type NivelAlpi } from './datos'
 import { useVestidor } from './useVestidor'
 import { useAlpi3D } from './useAlpi3D'
 
 const AlpiIframe = lazy(() => import('./AlpiIframe'))
 const NOMBRES = ['Alpaca bebé', 'Exploradora', 'Guardiana', 'Legendaria']
+
+/** Lo que necesita el vestidor, sea el de estudios o el de Finanstia (cada uno tiene su Alpi). */
+export interface EstadoVestidor {
+  alcanzado: NivelAlpi
+  nivel: NivelAlpi
+  accesorios: Record<string, boolean>
+  desbloqueado: boolean
+  expresion?: ExpresionAlpi
+  elegirNivel: (n: number) => void
+  alternarAccesorio: (id: string) => void
+  restablecer: () => void
+}
 
 /** Botón para abrir el vestidor (con candado mientras te quede algo pendiente hoy). */
 export function BotonVestidor({ className = 'enlace-mascotas' }: { className?: string }) {
@@ -33,17 +45,31 @@ export function BotonVestidor({ className = 'enlace-mascotas' }: { className?: s
 
 export function Vestidor({ abierto, alCerrar }: { abierto: boolean; alCerrar: () => void }) {
   const v = useVestidor()
+  return (
+    <VestidorHoja
+      v={v}
+      abierto={abierto}
+      alCerrar={alCerrar}
+      bloqueado={
+        <>
+          <p className="sub">
+            Primero cumples, después juegas. Te {v.faltan === 1 ? 'falta 1 tarea' : `faltan ${v.faltan} tareas`} de hoy. Entrégalas con su evidencia y te dejo vestir a Alpi.
+          </p>
+          <button className="btn" onClick={() => (alCerrar(), (window.location.hash = '#/tareas'))}>Ver mis tareas</button>
+        </>
+      }
+    />
+  )
+}
+
+/** La hoja del vestidor: nivel y ropa. `bloqueado` es lo que se muestra mientras todavía no toca jugar. */
+export function VestidorHoja({ v, abierto, alCerrar, bloqueado }: { v: EstadoVestidor; abierto: boolean; alCerrar: () => void; bloqueado: ReactNode }) {
   const en3d = useAlpi3D()
   const deEsteNivel = ACCESORIOS_ALPI.filter((a) => a.niveles.includes(v.nivel))
   return (
     <Hoja titulo="Vestidor de Alpi" abierta={abierto} alCerrar={alCerrar}>
       {!v.desbloqueado ? (
-        <div className="vestidor">
-          <p className="sub">
-            Primero cumples, después juegas. Te {v.faltan === 1 ? 'falta 1 tarea' : `faltan ${v.faltan} tareas`} de hoy. Entrégalas con su evidencia y te dejo vestir a Alpi.
-          </p>
-          <button className="btn" onClick={() => (alCerrar(), (window.location.hash = '#/tareas'))}>Ver mis tareas</button>
-        </div>
+        <div className="vestidor">{bloqueado}</div>
       ) : (
         <div className="vestidor">
           <div className="vestidor-vista">

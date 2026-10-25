@@ -1,12 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useCuenta } from '../cuenta/CuentaProvider'
 import { useAviso } from '../ui/Aviso'
+import { DictadoFinanzas } from './DictadoFinanzas'
 import { FormMovimiento } from './FormMovimiento'
 import { fechaLocal, normalizarConfig } from './modelo'
 import { rangoPeriodo } from './periodos'
 import type { RepoFinanzas } from './repo'
 import { FILTROS_INICIALES, type Filtros } from './resumen'
 import type { Config, Medio, Meta, Movimiento, Periodo } from './tipos'
+import { calcularXPFinanzas, estadoAlpiFinanzas, totalXPFinanzas, type EstadoAlpiFinanzas, type XPFinanzas } from './xp'
 
 // El estado de Finanstia: lo que se está viendo (periodo, billetera, filtros) y lo que llega de la base de datos.
 // Solo existe mientras estás en Finanstia: al salir se dejan de escuchar los datos.
@@ -17,6 +19,8 @@ const CLAVE_MONTOS = 'astia.finanzas.ocultarMontos'
 export interface OpcionesFormulario {
   mov?: Movimiento
   tipo?: 'gasto' | 'ingreso' | 'transferencia'
+  /** Datos para rellenar un movimiento nuevo (por ejemplo, lo que se entendió al dictar). */
+  previo?: { tipo: 'gasto' | 'ingreso' | 'transferencia'; monto?: number; categoria?: string | null; medio?: Medio; origen?: Medio; fecha?: string; nota?: string }
 }
 
 export interface Finanzas {
@@ -39,6 +43,10 @@ export interface Finanzas {
   montosOcultos: boolean
   alternarMontos: () => void
   abrirFormulario: (op?: OpcionesFormulario) => void
+  /** El Alpi de Finanstia: su experiencia y su nivel (se calculan de todos tus movimientos). */
+  alpi: { xp: XPFinanzas; total: number; estado: EstadoAlpiFinanzas; cargado: boolean }
+  /** Abre la pantalla para dictar un movimiento. */
+  abrirDictado: () => void
   /** Sube cada vez que tú cambias algo (para recalcular la experiencia de Alpi). */
   version: number
   /** Para mostrar el error de una operación sin que se cierre la pantalla. */
@@ -92,6 +100,8 @@ export function FinanzasProvider({ irA, children }: { irA: Finanzas['irA']; chil
   const [medio, setMedio] = useState<Medio>('digital')
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_INICIALES)
   const [formulario, setFormulario] = useState<OpcionesFormulario | null>(null)
+  const [dictando, setDictando] = useState(false)
+  const [todos, setTodos] = useState<Movimiento[] | null>(null)
   const [montosOcultos, setMontosOcultos] = useState(() => {
     try {
       return localStorage.getItem(CLAVE_MONTOS) === '1'
@@ -162,6 +172,28 @@ export function FinanzasProvider({ irA, children }: { irA: Finanzas['irA']; chil
     }
   }, [repoBase, filtros.historial, errorCarga])
 
+  // La experiencia de Alpi sale de todos tus movimientos: se leen una vez y de nuevo cuando algo cambia
+  useEffect(() => {
+    if (!datos) return
+    let vigente = true
+    datos
+      .todosLosMovimientos()
+      .then((m) => vigente && setTodos(m))
+      .catch(() => {
+        /* sin conexión o sin permiso: se queda con lo último que se leyó */
+      })
+    return () => {
+      vigente = false
+    }
+  }, [datos, version, movsMes])
+  const alpi = useMemo(() => {
+    const xp = calcularXPFinanzas({ movs: todos ?? [], metas: metas ?? [], config, hoy: fechaLocal() })
+    const total = totalXPFinanzas(xp)
+    return { xp, total, estado: estadoAlpiFinanzas(total), cargado: todos !== null }
+  }, [todos, metas, config])
+
+  const abrirDictado = useCallback(() => setDictando(true), [])
+  const cerrarDictado = useCallback(() => setDictando(false), [])
   const abrirFormulario = useCallback((op: OpcionesFormulario = {}) => setFormulario(op), [])
   const cerrarFormulario = useCallback(() => setFormulario(null), [])
 
@@ -183,11 +215,13 @@ export function FinanzasProvider({ irA, children }: { irA: Finanzas['irA']; chil
         montosOcultos,
         alternarMontos,
         abrirFormulario,
+        abrirDictado,
+        alpi,
         version,
         alFallar,
         irA,
       },
-    [datos, config, movs, movsMes, metas, historial, periodo, medio, filtros, montosOcultos, alternarMontos, abrirFormulario, version, alFallar, irA],
+    [datos, config, movs, movsMes, metas, historial, periodo, medio, filtros, montosOcultos, alternarMontos, abrirFormulario, abrirDictado, alpi, version, alFallar, irA],
   )
 
   if (!valor) return null
@@ -195,6 +229,7 @@ export function FinanzasProvider({ irA, children }: { irA: Finanzas['irA']; chil
     <FinanzasContext.Provider value={valor}>
       {children}
       <FormMovimiento opciones={formulario} alCerrar={cerrarFormulario} />
+      <DictadoFinanzas abierto={dictando} alCerrar={cerrarDictado} />
     </FinanzasContext.Provider>
   )
 }
