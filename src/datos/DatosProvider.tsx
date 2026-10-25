@@ -7,6 +7,9 @@ import { useAviso } from '../ui/Aviso'
 import { ymd } from '../lib/fechas'
 import { activos, sumarMinutos, type MinutosSesion, alternarHabito, alternarRutina, alternarTarea, borrarRegistro, datosVacios, guardarRegistro, normalizarDatos, quitarCurso } from './almacenamiento'
 import { crearRespaldo, type Importacion } from './respaldo'
+import { useCuenta } from '../cuenta/CuentaProvider'
+import { reemplazarDatos } from './nube/registros'
+import { useSincronizacion, type EstadoNube } from './useSincronizacion'
 
 // Fuente de datos de TODAS las pantallas. Hoy guarda en el teléfono (localStorage);
 // en la parte 2b se sincroniza con Supabase sin tocar las pantallas.
@@ -44,6 +47,8 @@ export interface Contexto {
   recordatorios: Recordatorio[]
   apuntes: Apunte[]
   progreso: ProgresoDia[]
+  /** Estado de la copia en tu cuenta: 'local' = solo en este teléfono. */
+  nube: EstadoNube
   /** Hay algo cargado (cursos o tareas). */
   hayDatos: boolean
   /** Estás viendo los datos de ejemplo, no los tuyos. */
@@ -89,6 +94,7 @@ export function DatosProvider({ children }: { children: ReactNode }) {
   const avisar = useAviso()
   const [reales, setReales] = useState<Datos>(cargar)
   const [demo, setDemo] = useState<Datos>(() => datosDeEjemplo(new Date()))
+  const { sync, usuario } = useCuenta()
   const enEjemplo = ajustes.datosEjemplo
   const datos = enEjemplo ? demo : reales
 
@@ -101,6 +107,8 @@ export function DatosProvider({ children }: { children: ReactNode }) {
     }
     if (!guardarLocal(CLAVE, reales)) avisar('No se pudieron guardar tus datos en este teléfono. Exporta un respaldo ahora.', 'error')
   }, [reales, avisar])
+
+  const nube = useSincronizacion({ sync, uid: usuario?.uid ?? null, reales, setReales })
 
   const editar = useCallback((fn: (d: Datos) => Datos) => (enEjemplo ? setDemo : setReales)((previo) => fn(previo)), [enEjemplo])
 
@@ -119,6 +127,7 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       recordatorios: activos(datos.recordatorios),
       apuntes: activos(datos.apuntes),
       progreso: activos(datos.progreso),
+      nube,
       hayDatos: activos(datos.cursos).length > 0 || activos(datos.tareas).length > 0 || activos(datos.habitos).length > 0,
       enEjemplo,
       alternar: (id, evidencia) => editar((d) => alternarTarea(d, id, new Date(), evidencia)),
@@ -143,12 +152,12 @@ export function DatosProvider({ children }: { children: ReactNode }) {
       registrarMinutos: (suma) => editar((d) => ({ ...d, progreso: sumarMinutos(d.progreso, ymd(new Date()), suma, ahora()) })),
       guardarPerfil: (cambios) => editar((d) => ({ ...d, perfil: { ...d.perfil, ...cambios, actualizadoEn: ahora() } })),
       importar: (r) => {
-        setReales(r.datos)
+        setReales((previo) => reemplazarDatos(previo, r.datos, Date.now())) // lo que no viene en el respaldo queda borrado también en la nube
         cambiar({ ...r.ajustes, etapa: r.ajustes.etapa ?? 'universidad', datosEjemplo: false }) // al traer tus datos, se ocultan los de ejemplo
       },
       exportar: () => crearRespaldo(reales),
     }
-  }, [datos, enEjemplo, editar, reales, cambiar])
+  }, [datos, enEjemplo, editar, reales, cambiar, nube])
 
   return <DatosContext.Provider value={valor}>{children}</DatosContext.Provider>
 }

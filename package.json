@@ -10,6 +10,7 @@
     "test": "vitest run",
     "iconos": "node scripts/generar-iconos.mjs",
     "vista": "node scripts/vista-previa.mjs",
+    "test:nube": "firebase emulators:exec --only auth,firestore --project demo-finanzas \"playwright test -c playwright.nube.config.ts\"",
     "test:firestore": "firebase emulators:exec --only firestore --project demo-finanzas \"vitest run --config vitest.emulador.config.ts\""
   },
   "dependencies": {

@@ -1194,3 +1194,5 @@ a.enlace-mascotas { text-decoration: none; color: var(--text); }
 .preguntar-respuesta { animation: preguntar-entra 0.25s ease; }
 @keyframes preguntar-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .preguntar-respuesta { animation: none; } }
+
+.estado-error { color: var(--danger, #e5484d); }

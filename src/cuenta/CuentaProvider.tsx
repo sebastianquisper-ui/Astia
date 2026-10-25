@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { sembrarEjemploFinanzas } from '../finanzas/ejemplo'
 import { crearRepoLocal } from '../finanzas/repoLocal'
 import type { RepoFinanzas } from '../finanzas/repo'
+import type { SyncDatos } from '../datos/nube/syncFirestore'
 import type { UsuarioNube } from './firebase'
 
 // Una sola cuenta de Google para todo Astia (estudios, Mi Órbita y Finanstia).
@@ -24,6 +25,8 @@ export interface Cuenta {
   confirmarIdentidad: () => Promise<boolean>
   /** La base de datos de Finanstia (null mientras no hay sesión). */
   repo: RepoFinanzas | null
+  /** La copia en la nube de estudios y Mi Órbita (null sin sesión o en modo sin nube). */
+  sync: SyncDatos | null
 }
 
 export const modoLocal = (): boolean => {
@@ -67,6 +70,7 @@ export function CuentaProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [entrando, setEntrando] = useState(false)
   const [repo, setRepo] = useState<RepoFinanzas | null>(() => (local ? repoLocalInicial() : null))
+  const [sync, setSync] = useState<SyncDatos | null>(null)
   const nube = useRef<Nube | null>(null)
 
   useEffect(() => {
@@ -84,6 +88,7 @@ export function CuentaProvider({ children }: { children: ReactNode }) {
           if (!activo) return
           setUsuario(u)
           setRepo(u ? m.crearRepo(u.uid) : null)
+          setSync(u ? m.crearSyncDatos(u.uid) : null)
           setEstado(u ? 'dentro' : 'fuera')
           if (u) setError(null)
         })
@@ -127,6 +132,6 @@ export function CuentaProvider({ children }: { children: ReactNode }) {
     }
   }, [local, usuario])
 
-  const valor = useMemo<Cuenta>(() => ({ estado, usuario, local, error, entrando, entrar, salir, confirmarIdentidad, repo }), [estado, usuario, local, error, entrando, entrar, salir, confirmarIdentidad, repo])
+  const valor = useMemo<Cuenta>(() => ({ estado, usuario, local, error, entrando, entrar, salir, confirmarIdentidad, repo, sync }), [estado, usuario, local, error, entrando, entrar, salir, confirmarIdentidad, repo, sync])
   return <CuentaContext.Provider value={valor}>{children}</CuentaContext.Provider>
 }

@@ -67,8 +67,8 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   Opcional: crear el aviso también en Google Calendar para que llegue con la app cerrada (`docs/CALENDAR.md`). Ahí mismo, **eventos y apuntes**.
   También puedes activar que **Alpi lea los avisos en voz alta** (voz del iPhone, gratis; solo con la app abierta; apagado por defecto).
 - **Una sola cuenta (Firebase):** Astia pide iniciar sesión con Google antes de mostrar nada. Detalles y pasos en `docs/FIREBASE.md`.
-  Los datos de estudios y Mi Órbita todavía están en el teléfono; pasarlos a la nube es el siguiente paso (`docs/SUPABASE.md` quedó
-  como referencia del plan anterior, ya no se usa).
+  Los datos de estudios y Mi Órbita se guardan primero en el teléfono y se sincronizan con tu cuenta en Firestore (`docs/FIREBASE.md`).
+  `docs/SUPABASE.md` quedó como referencia del plan anterior, ya no se usa.
 
 ## Comandos
 

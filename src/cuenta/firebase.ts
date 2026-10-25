@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithPopup, signInWithRedirect, signOut, type User } from 'firebase/auth'
 import { connectFirestoreEmulator, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
 import { crearRepoFirestore } from '../finanzas/repoFirestore'
+import { crearSync, type SyncDatos } from '../datos/nube/syncFirestore'
 import type { RepoFinanzas } from '../finanzas/repo'
 import { firebaseConfig } from './firebaseConfig'
 
@@ -24,6 +25,7 @@ if (import.meta.env.VITE_EMULADORES) {
   connectFirestoreEmulator(db, '127.0.0.1', 8080)
   ;(window as unknown as { __entrarConEmulador: (email: string) => Promise<unknown> }).__entrarConEmulador = (email) =>
     signInWithCredential(auth, GoogleAuthProvider.credential(JSON.stringify({ sub: email, email, email_verified: true })))
+  ;(window as unknown as { __salirConEmulador: () => Promise<void> }).__salirConEmulador = () => signOut(auth)
 }
 
 // El popup es el camino principal. Solo se usa redirect cuando el entorno no permite popups
@@ -82,6 +84,9 @@ export async function confirmarMismaCuenta(uid: string): Promise<boolean> {
 }
 
 export const crearRepo = (uid: string): RepoFinanzas => crearRepoFirestore(db, uid)
+
+/** La copia en la nube de tus estudios y Mi Órbita. */
+export const crearSyncDatos = (uid: string): SyncDatos => crearSync(db, uid)
 
 export function mensajeDeError(err: unknown): string {
   switch (codigo(err)) {

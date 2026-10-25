@@ -63,6 +63,137 @@ service cloud.firestore {
         && (opcional(d, 'creado') || d.creado is int);
     }
 
+    // ---- Estudios y Mi Órbita: users/{uid}/estudios/{coleccion}/registros/{id} y users/{uid}/estudios/perfil ----
+
+    function esEnteroEntre(v, min, max) {
+      return v is number && v >= min && v <= max;
+    }
+
+    function base(d, id) {
+      return d.id == id
+        && d.actualizadoEn is number
+        && (opcional(d, 'borradoEn') || d.borradoEn is number);
+    }
+
+    function cursoValido(d) {
+      return d.keys().hasAll(['nombre', 'color'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'nombre', 'color'])
+        && esTexto(d.nombre, 0, 200) && esTexto(d.color, 0, 30);
+    }
+
+    function claseValida(d) {
+      return d.keys().hasAll(['cursoId', 'dia', 'inicio', 'fin', 'aula'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'cursoId', 'dia', 'inicio', 'fin', 'aula'])
+        && esTexto(d.cursoId, 0, 64) && esEnteroEntre(d.dia, 0, 6)
+        && esTexto(d.inicio, 0, 8) && esTexto(d.fin, 0, 8) && esTexto(d.aula, 0, 120);
+    }
+
+    function tareaValida(d) {
+      return d.keys().hasAll(['titulo', 'area', 'cursoId', 'tipo', 'fecha', 'prioridad', 'pideEvidencia', 'pasos', 'estado'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'titulo', 'area', 'cursoId', 'categoria', 'tipo', 'fecha', 'hora', 'prioridad', 'pideEvidencia', 'metodo', 'pasos', 'estado', 'hechaEn', 'evidencia'])
+        && esTexto(d.titulo, 0, 500)
+        && d.area in ['universidad', 'personal']
+        && (d.cursoId == null || esTexto(d.cursoId, 0, 64))
+        && (opcional(d, 'categoria') || esTexto(d.categoria, 0, 100))
+        && d.tipo in ['tarea', 'estudio', 'examen']
+        && esTexto(d.fecha, 0, 10)
+        && (opcional(d, 'hora') || esTexto(d.hora, 0, 8))
+        && d.prioridad in ['alta', 'media', 'baja']
+        && d.pideEvidencia is bool
+        && (opcional(d, 'metodo') || esTexto(d.metodo, 0, 60))
+        && d.pasos is list && d.pasos.size() <= 200
+        && d.estado in ['pendiente', 'hecha']
+        && (opcional(d, 'hechaEn') || esTexto(d.hechaEn, 0, 40))
+        && (opcional(d, 'evidencia') || (d.evidencia is map && d.evidencia.keys().hasOnly(['foto', 'enlace', 'fecha'])));
+    }
+
+    function semanaValida(d) {
+      return d.keys().hasAll(['cursoId', 'semana', 'tema', 'notas'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'cursoId', 'semana', 'tema', 'notas'])
+        && esTexto(d.cursoId, 0, 64) && esEnteroEntre(d.semana, 0, 100)
+        && esTexto(d.tema, 0, 500) && esTexto(d.notas, 0, 20000);
+    }
+
+    function habitoValido(d) {
+      return d.keys().hasAll(['nombre', 'categoria', 'color', 'frecuencia', 'registro'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'nombre', 'categoria', 'color', 'frecuencia', 'minimo', 'registro'])
+        && esTexto(d.nombre, 0, 200) && esTexto(d.categoria, 0, 100) && esTexto(d.color, 0, 30)
+        && d.frecuencia is map
+        && (opcional(d, 'minimo') || esTexto(d.minimo, 0, 300))
+        && d.registro is list && d.registro.size() <= 5000;
+    }
+
+    function rutinaValida(d) {
+      return d.keys().hasAll(['nombre', 'categoria', 'momento', 'dias', 'pasos', 'registro'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'nombre', 'categoria', 'momento', 'dias', 'pasos', 'registro'])
+        && esTexto(d.nombre, 0, 200) && esTexto(d.categoria, 0, 100)
+        && d.momento in ['manana', 'tarde', 'noche', 'libre']
+        && d.dias is list && d.dias.size() <= 7
+        && d.pasos is list && d.pasos.size() <= 200
+        && d.registro is list && d.registro.size() <= 5000;
+    }
+
+    function mejoraValida(d) {
+      return d.keys().hasAll(['texto', 'creadaEn', 'hecha'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'texto', 'creadaEn', 'hecha'])
+        && esTexto(d.texto, 0, 5000) && d.creadaEn is number && d.hecha is bool;
+    }
+
+    function progresoValido(d) {
+      return d.keys().hasAll(['fecha', 'hechas', 'enfoque', 'descanso', 'pomodoros'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'fecha', 'hechas', 'enfoque', 'descanso', 'pomodoros'])
+        && esFecha(d.fecha)
+        && esEnteroEntre(d.hechas, 0, 100000) && esEnteroEntre(d.enfoque, 0, 100000)
+        && esEnteroEntre(d.descanso, 0, 100000) && esEnteroEntre(d.pomodoros, 0, 100000);
+    }
+
+    function planValido(d) {
+      return d.keys().hasAll(['fecha', 'tareaIds'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'fecha', 'tareaIds'])
+        && esFecha(d.fecha) && d.tareaIds is list && d.tareaIds.size() <= 10;
+    }
+
+    function recordatorioValido(d) {
+      return d.keys().hasAll(['texto', 'cuando'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'texto', 'cuando', 'avisado', 'calendarioId'])
+        && esTexto(d.texto, 0, 1000) && esTexto(d.cuando, 0, 40)
+        && (opcional(d, 'avisado') || d.avisado is bool)
+        && (opcional(d, 'calendarioId') || esTexto(d.calendarioId, 0, 300));
+    }
+
+    function apunteValido(d) {
+      return d.keys().hasAll(['texto', 'fecha', 'tipo'])
+        && d.keys().hasOnly(['id', 'actualizadoEn', 'borradoEn', 'texto', 'fecha', 'hora', 'tipo'])
+        && esTexto(d.texto, 0, 10000) && esFecha(d.fecha)
+        && (opcional(d, 'hora') || esTexto(d.hora, 0, 8))
+        && d.tipo in ['evento', 'apunte'];
+    }
+
+    function registroEstudioValido(col, id, d) {
+      return base(d, id) && (
+        (col == 'cursos' && cursoValido(d))
+        || (col == 'clases' && claseValida(d))
+        || (col == 'tareas' && tareaValida(d))
+        || (col == 'semanas' && semanaValida(d))
+        || (col == 'habitos' && habitoValido(d))
+        || (col == 'rutinas' && rutinaValida(d))
+        || (col == 'mejoras' && mejoraValida(d))
+        || (col == 'progreso' && progresoValido(d))
+        || (col == 'planes' && planValido(d))
+        || (col == 'recordatorios' && recordatorioValido(d))
+        || (col == 'apuntes' && apunteValido(d))
+      );
+    }
+
+    function perfilValido(d) {
+      return d.keys().hasAll(['inicioCiclo', 'semanasCiclo', 'enfoqueMin', 'descansoMin', 'actualizadoEn'])
+        && d.keys().hasOnly(['inicioCiclo', 'semanasCiclo', 'semanasEspeciales', 'enfoqueMin', 'descansoMin', 'actualizadoEn'])
+        && esTexto(d.inicioCiclo, 0, 10)
+        && esEnteroEntre(d.semanasCiclo, 1, 60) && esEnteroEntre(d.enfoqueMin, 1, 180) && esEnteroEntre(d.descansoMin, 1, 120)
+        && d.actualizadoEn is number
+        && (opcional(d, 'semanasEspeciales') || d.semanasEspeciales is map);
+    }
+
     match /users/{uid} {
       match /config/{docId} {
         allow read, delete: if esDueno(uid);
@@ -77,6 +208,16 @@ service cloud.firestore {
       match /metas/{id} {
         allow read, delete: if esDueno(uid);
         allow create, update: if esDueno(uid) && metaValida(request.resource.data);
+      }
+
+      match /estudios/{docId} {
+        allow read, delete: if esDueno(uid);
+        allow create, update: if esDueno(uid) && docId == 'perfil' && perfilValido(request.resource.data);
+      }
+
+      match /estudios/{col}/registros/{id} {
+        allow read, delete: if esDueno(uid);
+        allow create, update: if esDueno(uid) && registroEstudioValido(col, id, request.resource.data);
       }
     }
   }

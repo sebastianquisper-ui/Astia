@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { hashDe, leerRuta, PESTANAS_FINANZAS, type Pestana, type Ruta } from './lib/ruta'
 import { Estrella, Icono } from './ui/Icono'
 import { BotonMusica } from './ui/BotonMusica'
+import { EstadoNubeInsignia } from './ui/EstadoNubeInsignia'
 import { MotorRecordatorios } from './recordatorios/MotorRecordatorios'
 import { NavInferior } from './ui/NavInferior'
 import { Hoy } from './pantallas/Hoy'
@@ -113,9 +114,7 @@ function Cuerpo({ ruta, elegirPestana, abrirMas, cambiarModo, irAMas }: { ruta: 
                   <i /> Datos de ejemplo
                 </button>
               ) : (
-                <div className="estado" title="Tus datos de estudios están en este teléfono">
-                  <i /> Solo en este teléfono
-                </div>
+                <EstadoNubeInsignia />
               )}
               <BotonMusica />
             </div>

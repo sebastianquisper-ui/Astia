@@ -1,7 +1,9 @@
-// "Empezar de cero": borra TODO lo que Astia guardó en este teléfono (datos, ajustes, fotos de evidencia)
+// "Empezar de cero": borra TODO lo de estudios y Mi Órbita (en este teléfono y en tu cuenta), los ajustes y las fotos de evidencia
 // y recarga la app, que arranca como recién instalada.
 
-export async function borrarTodoYReiniciar(): Promise<void> {
+export async function borrarTodoYReiniciar(limpiarNube?: () => Promise<void>): Promise<void> {
+  // Primero la nube (si no, al volver a abrir Astia traería todo de vuelta). Las finanzas de Finanstia no se tocan.
+  if (limpiarNube) await limpiarNube()
   try {
     // 'astia.sinNube' es solo para la vista previa y las pruebas: se conserva
     for (const clave of Object.keys(localStorage)) if (clave.startsWith('astia.') && clave !== 'astia.sinNube') localStorage.removeItem(clave)

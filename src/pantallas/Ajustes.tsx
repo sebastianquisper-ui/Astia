@@ -32,6 +32,16 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
   const cuenta = useCuenta()
   const [semanas, setSemanas] = useState(String(perfil.semanasCiclo))
   const [borrando, setBorrando] = useState(false)
+  const [vaciando, setVaciando] = useState(false)
+  const vaciar = async () => {
+    setVaciando(true)
+    try {
+      await borrarTodoYReiniciar(cuenta.sync ? () => cuenta.sync!.borrarTodo() : undefined)
+    } catch {
+      setVaciando(false)
+      avisar('No pude borrar lo de tu cuenta (¿sin internet?). No se borró nada: inténtalo con conexión.', 'error', { duracion: 7000 })
+    }
+  }
   const [pendiente, setPendiente] = useState<Extract<Importacion, { ok: true }> | null>(null)
   const archivo = useRef<HTMLInputElement>(null)
   // En la vista previa web no se pueden descargar archivos: solo se ofrece "Copiar"
@@ -187,7 +197,7 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
           <button aria-pressed={ajustes.datosEjemplo} onClick={() => cambiar({ datosEjemplo: true })}>Mostrar</button>
           <button aria-pressed={!ajustes.datosEjemplo} onClick={() => cambiar({ datosEjemplo: false })}>Ocultar</button>
         </div>
-        <p className="nota">Cursos, clases y tareas inventados para ver cómo luce Astia. Tus datos reales llegan con la base de datos.</p>
+        <p className="nota">Cursos, clases y tareas inventados para ver cómo luce Astia. Tus datos reales se guardan en tu cuenta.</p>
       </div>
 
       <div className="campo">
@@ -240,10 +250,13 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
       </div>
 
       <Hoja titulo="¿Borrar todo?" abierta={borrando} alCerrar={() => setBorrando(false)}>
-        <p>Se borra todo lo que hay en Astia en este teléfono y no se puede deshacer. Si quieres conservarlo, descarga o copia un respaldo antes.</p>
+        <p>
+          Se borran tus cursos, tareas, hábitos, recordatorios y apuntes de este teléfono{cuenta.sync ? ' y también de tu cuenta' : ''}, y no se puede deshacer.
+          Tus movimientos de Finanstia no se tocan. Si quieres conservar lo demás, descarga o copia un respaldo antes.
+        </p>
         <div className="acciones">
           <button className="btn suave" onClick={() => setBorrando(false)}>Cancelar</button>
-          <button className="btn" onClick={() => void borrarTodoYReiniciar()}>Sí, borrar todo</button>
+          <button className="btn" disabled={vaciando} onClick={() => void vaciar()}>{vaciando ? 'Borrando…' : 'Sí, borrar todo'}</button>
         </div>
       </Hoja>
 
