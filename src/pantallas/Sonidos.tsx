@@ -6,7 +6,7 @@ import { elegidoPara, olvidarPropio, probar } from '../sonidos/reproductor'
 import { PRESETS } from '../sonidos/sintetizador'
 import { borrarPista, guardarPista, MAX_SEGUNDOS_MUSICA, validarPista } from '../sonidos/archivosMusica'
 import { MAX_PISTAS, PREDETERMINADA, VOLUMEN_INICIAL } from '../sonidos/musica'
-import { probarVoz, vocesEspanol, vozDisponible } from '../sonidos/voz'
+import { generoEfectivo, hayVozDelGenero, probarVoz, vocesEspanol, vozDisponible } from '../sonidos/voz'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
 
@@ -173,6 +173,9 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
                 <button aria-pressed={voz.genero === 'mujer'} onClick={() => (guardarVoz({ genero: 'mujer', voz: undefined }), probarVoz())}>Mujer</button>
               </div>
             </div>
+            {voces.length > 0 && voz.voz === undefined && !hayVozDelGenero(voces, generoEfectivo()) && (
+              <p className="nota">Tu teléfono no comparte con Astia ninguna voz de {generoEfectivo()}, así que se usa la que hay. En iPhone pasa aunque la hayas descargado: Safari solo entrega algunas voces.</p>
+            )}
             {voces.length > 0 && (
               <div className="sonido-controles">
                 <select aria-label="Voz de Alpi" value={voz.voz ?? ''} onChange={(e) => guardarVoz({ voz: e.target.value || undefined })}>
