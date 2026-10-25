@@ -20,6 +20,7 @@ import { useAviso } from '../ui/Aviso'
 import { FilaTarea } from '../ui/FilaTarea'
 import { TarjetaAhora } from '../ui/TarjetaAhora'
 import { DictadoTarea } from '../formularios/DictadoTarea'
+import { PreguntarAstia } from '../ui/PreguntarAstia'
 import { useAhora } from '../ui/useAhora'
 import { Vacio } from '../ui/Vacio'
 
@@ -32,6 +33,7 @@ export function HoyAcademico() {
   const [menuEmpezar, setMenuEmpezar] = useState(false)
   const { abrir, nodo } = useEditorTarea()
   const [dictando, setDictando] = useState(false)
+  const [preguntando, setPreguntando] = useState(false)
   const avisar = useAviso()
   const ahora = useAhora()
 
@@ -106,6 +108,9 @@ export function HoyAcademico() {
         alEmpezar={() => setMenuEmpezar(true)}
         alDictar={() => setDictando(true)}
       />
+      <button className="btn suave" style={{ width: '100%' }} onClick={() => setPreguntando(true)}>
+        <Icono nombre="mic" tam={18} /> Pregúntale a Astia
+      </button>
 
       {hayDatos && (
         <div className="chips">
@@ -168,6 +173,7 @@ export function HoyAcademico() {
       </Hoja>
       {sesion.nodo}
       {nodo}
+      <PreguntarAstia abierto={preguntando} alCerrar={() => setPreguntando(false)} />
       <DictadoTarea abierto={dictando} alCerrar={() => setDictando(false)} alEntender={(plantilla) => abrir(undefined, plantilla)} />
     </section>
   )

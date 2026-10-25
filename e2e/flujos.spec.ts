@@ -933,6 +933,20 @@ test('dictar una tarea en Hoy: se entiende, se muestra en el formulario y se gua
   await expect(page.getByText('Tarea agregada.')).toBeVisible()
 })
 
+test('Pregúntale a Astia: responde con tus datos, escribiendo o con las preguntas de ejemplo', async ({ page }) => {
+  await page.goto('/#/hoy')
+  await page.getByRole('button', { name: 'Pregúntale a Astia' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Pregúntale a Astia' })
+  await hoja.getByRole('button', { name: '¿Cuál es mi pendiente más urgente?' }).click()
+  await expect(hoja.getByRole('status')).toContainText('Empieza por')
+  await hoja.getByLabel('Tu pregunta').fill('qué clase me toca')
+  await hoja.getByRole('button', { name: 'Preguntar', exact: true }).click()
+  await expect(hoja.getByRole('status')).toContainText(/clase|clases/)
+  await hoja.getByLabel('Tu pregunta').fill('cuál es la capital de Francia')
+  await hoja.getByRole('button', { name: 'Preguntar', exact: true }).click()
+  await expect(hoja.getByRole('status')).toContainText('No entendí esa pregunta')
+})
+
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
   const datos = conLogros(0, 700) // 1400 XP, todo personal
   await page.addInitScript((d) => {
