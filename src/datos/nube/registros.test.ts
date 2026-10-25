@@ -22,6 +22,14 @@ describe('registros para la nube', () => {
       }
     }
   })
+  it('Mi Órbita también viaja a la nube: pendientes personales, hábitos y rutinas', () => {
+    const d = datosDeEjemplo(new Date(2026, 9, 15))
+    const { registros } = cambiosPendientes(d, new Map())
+    const por = (col: string) => registros.filter((r) => r.col === col)
+    expect(por('habitos').length).toBeGreaterThan(0)
+    expect(por('rutinas').length).toBeGreaterThan(0)
+    expect(por('tareas').some((r) => (r.registro as Tarea).area === 'personal')).toBe(true)
+  })
   it('solo marca como pendiente lo que cambió desde lo confirmado', () => {
     const datos: Datos = { ...datosVacios(), tareas: [tarea('a', { actualizadoEn: 100 }), tarea('b', { actualizadoEn: 300 })] }
     const sync = new Map([[clave('tareas', 'a'), 100], [clave('tareas', 'b'), 200], [clave('perfil'), 0]])

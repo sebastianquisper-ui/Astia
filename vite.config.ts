@@ -15,7 +15,7 @@ export default defineConfig({
     VitePWA({
       // La app se actualiza sola cuando publico una versión nueva
       registerType: 'autoUpdate',
-      includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon.svg'],
+      includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon-64.png'],
       manifest: {
         name: 'Astia',
         short_name: 'Astia',
@@ -25,7 +25,7 @@ export default defineConfig({
         scope: BASE,
         display: 'standalone',
         orientation: 'portrait',
-        background_color: FONDO,
+        background_color: '#0A0E21', // el azul oscuro del logo (pantalla de carga)
         theme_color: FONDO,
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
