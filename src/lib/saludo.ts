@@ -5,3 +5,9 @@ export function saludoDe(hora: number): string {
   if (hora < 19) return 'Buenas tardes'
   return 'Buenas noches'
 }
+
+/** "Buenas tardes, Ana." — o solo "Buenas tardes." si todavía no hay nombre. */
+export function saludoConNombre(hora: number, nombre: string): string {
+  const quien = nombre.trim()
+  return quien ? `${saludoDe(hora)}, ${quien}.` : `${saludoDe(hora)}.`
+}

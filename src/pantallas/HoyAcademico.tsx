@@ -12,7 +12,7 @@ import { claseAhora } from '../lib/ahora'
 import { diffDays, ymd } from '../lib/fechas'
 import { cumplimientoDeHoy } from '../lib/habitos'
 import { planDeHoy } from '../lib/plan'
-import { saludoDe } from '../lib/saludo'
+import { saludoConNombre } from '../lib/saludo'
 import { diasDeAtraso, urgenciaDe } from '../lib/urgencia'
 import { HeroAstia } from '../mascotas/HeroAstia'
 import { Icono } from '../ui/Icono'
@@ -97,7 +97,7 @@ export function HoyAcademico() {
   return (
     <section className="pantalla">
       <h1 className="saludo">
-        {saludoDe(ahora.getHours())}, {ajustes.nombre}.
+        {saludoConNombre(ahora.getHours(), ajustes.nombre)}
       </h1>
 
       <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} progreso={{ vencidas, diasAtraso: diasDeAtraso(pendientes, ahora), porHacer: situacion.porHacer, hechas: situacion.hechas }} baila={reaccion?.animo === 'contenta'} />

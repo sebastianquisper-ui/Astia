@@ -6,6 +6,7 @@ import '@fontsource-variable/figtree'
 import './estilos/tokens.css'
 import './estilos/app.css'
 import App from './App'
+import { esEquipoLimitado } from './lib/equipo'
 import { AvisoProvider } from './ui/Aviso'
 import { AjustesProvider } from './ajustes/AjustesProvider'
 import { DatosProvider } from './datos/DatosProvider'
@@ -21,6 +22,9 @@ window.addEventListener('pointerdown', () => (intentarMusica(), desbloquearVoz()
 
 // Registra el service worker: es lo que permite instalar la app y abrirla sin internet
 registerSW({ immediate: true })
+
+// Celulares de gama baja: sin desenfoques ni animaciones de fondo (ver app.css)
+if (esEquipoLimitado()) document.documentElement.setAttribute('data-ligero', '')
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

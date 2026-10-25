@@ -106,14 +106,9 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
 
   const guardarNombre = () => {
     const limpio = nombre.trim()
-    if (!limpio) {
-      avisar('El nombre no puede estar vacío.', 'error')
-      setNombre(ajustes.nombre)
-      return
-    }
     if (limpio !== ajustes.nombre) {
       cambiar({ nombre: limpio })
-      avisar('Nombre guardado.')
+      avisar(limpio ? 'Nombre guardado.' : 'Listo, ya no uso tu nombre.')
     }
   }
 
@@ -142,6 +137,7 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
         <input
           id="nombre"
           type="text"
+          placeholder="Opcional"
           value={nombre}
           autoComplete="given-name"
           onChange={(e) => setNombre(e.target.value)}

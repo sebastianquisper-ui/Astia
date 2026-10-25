@@ -11,7 +11,7 @@ import { diffDays } from '../lib/fechas'
 import { cumplido, cumplimientoDeHoy, rachaDe, tocaHoy } from '../lib/habitos'
 import { planDeHoy } from '../lib/plan'
 import { rutinaDeAhora } from '../lib/rutinas'
-import { saludoDe } from '../lib/saludo'
+import { saludoConNombre } from '../lib/saludo'
 import { diasDeAtraso, urgenciaDe } from '../lib/urgencia'
 import { HeroAstia } from '../mascotas/HeroAstia'
 import { sonar } from '../sonidos/reproductor'
@@ -89,7 +89,7 @@ export function HoyPersonal() {
   return (
     <section className="pantalla">
       <h1 className="saludo">
-        {saludoDe(ahora.getHours())}, {ajustes.nombre}.
+        {saludoConNombre(ahora.getHours(), ajustes.nombre)}
       </h1>
 
       <HeroAstia animo={animo} habla={habla} frase={frase} alTocar={tocarAvatar} progreso={{ vencidas, diasAtraso: diasDeAtraso(personales.filter((t) => t.estado === 'pendiente'), ahora), porHacer: total - hechos, hechas: hechos }} baila={reaccion?.animo === 'contenta'} />
