@@ -6,7 +6,7 @@ export function AvisoMascotas() {
   if (ajustes.mascota !== 'astia') return null
   return (
     <button className="enlace-modo" style={{ marginTop: 12 }} onClick={() => (window.location.hash = '#/mas/mascota')}>
-      <span>Conoce a Alpi, la alpaca que evoluciona contigo</span>
+      <span>Conoce a Alpi, el alpaca que evoluciona contigo</span>
       <span>Ver →</span>
     </button>
   )

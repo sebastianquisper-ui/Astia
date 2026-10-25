@@ -33,7 +33,7 @@ export function Mascotas({ alVolver }: { alVolver: () => void }) {
         <Icono nombre="izquierda" /> Más
       </button>
       <h1 className="titulo">Mi mascota</h1>
-      <p className="sub">Alpi evoluciona con lo que haces: tareas, hábitos, rutinas y cuidarte. Tócala para que reaccione.</p>
+      <p className="sub">Alpi evoluciona con lo que haces: tareas, hábitos, rutinas y cuidarte. Tócalo para que reaccione.</p>
 
       <div className="tarjeta mascota-actual">
         {mascota && estado ? (

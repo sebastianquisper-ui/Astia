@@ -7,7 +7,7 @@ import { useVestidor } from './useVestidor'
 import { useAlpi3D } from './useAlpi3D'
 
 const AlpiIframe = lazy(() => import('./AlpiIframe'))
-const NOMBRES = ['Alpaca bebé', 'Exploradora', 'Guardiana', 'Legendaria']
+const NOMBRES = ['Alpaquito', 'Explorador', 'Guardián', 'Legendario']
 
 /** Lo que necesita el vestidor, sea el de estudios o el de Finanstia (cada uno tiene su Alpi). */
 export interface EstadoVestidor {

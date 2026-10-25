@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
 test('al abrir mi mascota no se ve ninguna imagen de relleno antes del 3D', async ({ page }) => {
   await page.goto('/#/mas/mascota')
   await vigilar(page)
-  await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
+  await page.getByRole('button', { name: /Alpi, El aventurero de los Andes/ }).click()
   await page.waitForTimeout(3000)
   expect(await page.evaluate(() => (window as any).__relleno)).toBe(0)
 })

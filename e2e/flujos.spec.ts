@@ -37,7 +37,7 @@ async function entregarConEnlace(page: import('@playwright/test').Page) {
 
 async function elegirAlpi(page: import('@playwright/test').Page) {
   await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
+  await page.getByRole('button', { name: /Alpi, El aventurero de los Andes/ }).click()
   await page.getByRole('button', { name: 'Elegir a Alpi' }).click()
 }
 
@@ -819,13 +819,13 @@ test('vestidor: con todo cumplido se puede quitar ropa y volver al nivel 1', asy
 
 test('el detalle de Alpi muestra la evolución: lo alcanzado y lo bloqueado con su XP', async ({ page }) => {
   await page.goto('/#/mas/mascota')
-  await page.getByRole('button', { name: /Alpi, La alpaca aventurera/ }).click()
+  await page.getByRole('button', { name: /Alpi, El aventurero de los Andes/ }).click()
   const hoja = page.getByRole('dialog', { name: 'Alpi' })
   await expect(hoja.locator('.evolucion li')).toHaveCount(4)
   await expect(hoja.locator('.evolucion li.alcanzada')).toHaveCount(1) // con ~80 XP de ejemplo todavía es el nivel 1
-  await expect(hoja.getByLabel('Nivel 2, Exploradora, bloqueado')).toContainText('130 XP')
-  await expect(hoja.getByLabel('Nivel 3, Guardiana de los valles, bloqueado')).toContainText('510 XP')
-  await expect(hoja.getByLabel('Nivel 4, Alpaca legendaria, bloqueado')).toContainText('1280 XP')
+  await expect(hoja.getByLabel('Nivel 2, Explorador, bloqueado')).toContainText('130 XP')
+  await expect(hoja.getByLabel('Nivel 3, Guardián de los valles, bloqueado')).toContainText('510 XP')
+  await expect(hoja.getByLabel('Nivel 4, Legendario, bloqueado')).toContainText('1280 XP')
 })
 
 test('al evolucionar se celebra una sola vez', async ({ page }) => {
@@ -836,12 +836,12 @@ test('al evolucionar se celebra una sola vez', async ({ page }) => {
   }, datos)
   await page.goto('/#/hoy')
   const celebracion = page.getByRole('dialog', { name: '¡Hora de evolucionar!' })
-  await expect(celebracion).toContainText('Alpi está lista para ser Alpaca legendaria')
+  await expect(celebracion).toContainText('Alpi está listo para ser Legendario')
   await expect(celebracion.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-2') // primero se ve como estaba
   await expect(celebracion.getByRole('button', { name: '¡Evolucionar!' })).toBeEnabled()
   await celebracion.getByRole('button', { name: '¡Evolucionar!' }).click()
   const hecha = page.getByRole('dialog', { name: '¡Evolucionó!' })
-  await expect(hecha).toContainText('Alpi ahora es Alpaca legendaria')
+  await expect(hecha).toContainText('Alpi ahora es Legendario')
   await expect(hecha).toContainText('Nivel 4 de 4')
   await expect(hecha.locator('.mascota')).toHaveAttribute('data-sprite', 'alpi-4')
   await hecha.getByRole('button', { name: '¡Genial!' }).click()
@@ -1012,7 +1012,7 @@ test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', asy
     localStorage.setItem('astia.datos.v2', JSON.stringify(d))
   }, datos)
   await page.goto('/#/mas/mascota')
-  await expect(page.getByText('Nivel 2 de 4 · Exploradora')).toBeVisible()
+  await expect(page.getByText('Nivel 2 de 4 · Explorador')).toBeVisible()
   await expect(page.getByText(/falta equilibrio: suma XP académico/)).toBeVisible()
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100')
   await expect(page.locator('.mascota').first()).toHaveAttribute('data-sprite', 'alpi-2')
@@ -1220,7 +1220,7 @@ test('ruleta: con todo cumplido, tocar dos veces a Alpi abre emotes y movimiento
   const emotes = page.getByRole('dialog', { name: 'Emotes de Alpi' })
   await expect(emotes).toBeVisible()
   await expect(emotes.getByRole('button', { name: /Automática/ })).toHaveAttribute('aria-pressed', 'true')
-  await emotes.getByRole('button', { name: /Furiosa/ }).click()
+  await emotes.getByRole('button', { name: /Furioso/ }).click()
   await expect(emotes).toHaveCount(0)
   await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'furiosa')
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLook.expresion)).toBe('furiosa')
@@ -1573,7 +1573,7 @@ test('Finanstia: ruleta de emotes y movimientos con doble toque, solo si no est�
   await lienzo.dblclick()
   const emotes = page.getByRole('dialog', { name: 'Emotes de Alpi' })
   await expect(emotes).toBeVisible()
-  await emotes.getByRole('button', { name: /Orgullosa/ }).click()
+  await emotes.getByRole('button', { name: /Orgulloso/ }).click()
   await expect(page.locator('.hero-alpi-modelo')).toHaveAttribute('data-expresion', 'orgullosa')
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLookFinanzas.expresion)).toBe('orgullosa')
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').alpiLook?.expresion)).toBeUndefined() // es otro Alpi: no toca al de estudios

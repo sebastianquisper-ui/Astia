@@ -61,7 +61,7 @@ export function CelebracionEvolucion() {
           </>
         ) : (
           <>
-            <h3 className="titulo">{mascota.nombre} está lista para ser {estado.nombreEtapa}</h3>
+            <h3 className="titulo">{mascota.nombre} está listo para ser {estado.nombreEtapa}</h3>
             <p className="sub">Nivel {nueva} de {estado.etapas}. Tu constancia lo hizo posible. Toca el botón y mira cómo se transforma.</p>
             <div className="acciones" style={{ width: '100%' }}>
               <button className="btn suave" onClick={marcarVista} disabled={paso === 'evolucionando'}>Saltar</button>

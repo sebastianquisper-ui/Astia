@@ -63,8 +63,8 @@ export function expresionPorProgreso(animo: Animo, p: ProgresoAlpi, opciones: { 
 }
 
 export const NOMBRE_EXPRESION: Record<ExpresionAlpi, string> = {
-  normal: 'Normal', feliz: 'Feliz', emocionada: 'Emocionada', curiosa: 'Curiosa', dormida: 'Dormida', concentrada: 'Concentrada', sorpresa: 'Sorprendida',
-  triste: 'Triste', guino: 'Guiño', molesta: 'Molesta', furiosa: 'Furiosa', reganona: 'Regañona', orgullosa: 'Orgullosa',
+  normal: 'Normal', feliz: 'Feliz', emocionada: 'Emocionado', curiosa: 'Curioso', dormida: 'Dormido', concentrada: 'Concentrado', sorpresa: 'Sorprendido',
+  triste: 'Triste', guino: 'Guiño', molesta: 'Molesto', furiosa: 'Furioso', reganona: 'Regañón', orgullosa: 'Orgulloso',
 }
 export const NOMBRE_ACCION: Record<AccionAlpi, string> = { saludar: 'Saludar', saltar: 'Saltar', bailar: 'Bailar', risa: 'Reír', explorar: 'Explorar' }
 

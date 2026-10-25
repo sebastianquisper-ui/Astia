@@ -1,7 +1,7 @@
 import type { Habito, ProgresoDia, Rutina, Tarea } from '../dominio/tipos'
 import { apartadoDe } from './apartados'
 
-// Mascota: Alpi, la compañera que evoluciona con tus logros (la otra opción es la estrella de siempre).
+// Mascota: Alpi, el compañero que evoluciona con tus logros (la otra opción es la estrella de siempre).
 // La experiencia (XP) NO se guarda: se calcula siempre a partir de lo que ya hiciste en la app
 // (tareas hechas, hábitos cumplidos, rutinas, minutos de enfoque). Así no se puede "farmear"
 // marcando y desmarcando, y no hay nada que sincronizar.
@@ -21,7 +21,7 @@ export interface Mascota {
 }
 
 export const MASCOTAS: Mascota[] = [
-  { id: 'alpi', nombre: 'Alpi', apodo: 'La alpaca aventurera', descripcion: 'Una alpaca suave y divertida que te acompaña paso a paso. Representa la perseverancia, la calma y el equilibrio entre tus metas y tu bienestar.', etiquetas: ['Perseverancia', 'Bienestar'], etapas: ['Alpaca bebé', 'Exploradora', 'Guardiana de los valles', 'Alpaca legendaria'] },
+  { id: 'alpi', nombre: 'Alpi', apodo: 'El aventurero de los Andes', descripcion: 'Un compañero alpaca, suave y divertido, que te acompaña paso a paso. Representa la perseverancia, la calma y el equilibrio entre tus metas y tu bienestar.', etiquetas: ['Perseverancia', 'Bienestar'], etapas: ['Alpaquito', 'Explorador', 'Guardián de los valles', 'Legendario'] },
 ]
 
 export const mascotaPorId = (id: string): Mascota | undefined => MASCOTAS.find((m) => m.id === id)

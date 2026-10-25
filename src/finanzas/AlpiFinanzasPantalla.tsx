@@ -4,7 +4,7 @@ import { PUNTOS_FINANZAS, UMBRALES_FINANZAS, totalXPFinanzas } from './xp'
 import { useAlpiFinanzas } from './useAlpiFinanzas'
 import { MascotaMini } from '../mascotas/MascotaVista'
 
-const NOMBRES = ['Alpaca bebé', 'Exploradora', 'Guardiana de los valles', 'Alpaca legendaria']
+const NOMBRES = ['Alpaquito', 'Explorador', 'Guardián de los valles', 'Legendario']
 
 /** Más → Mi Alpi de Finanstia: su nivel, cuánto falta y cómo se gana experiencia con tu plata. */
 export function AlpiFinanzasPantalla({ alVolver }: { alVolver: () => void }) {

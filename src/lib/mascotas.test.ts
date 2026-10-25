@@ -30,7 +30,7 @@ describe('catálogo de mascotas', () => {
     expect(esMascota('alpi')).toBe(true)
     expect(esMascota('mochi')).toBe(false) // ya no existe
     expect(esMascota('astia')).toBe(false)
-    expect(mascotaPorId('alpi')?.apodo).toBe('La alpaca aventurera')
+    expect(mascotaPorId('alpi')?.apodo).toBe('El aventurero de los Andes')
   })
 })
 
