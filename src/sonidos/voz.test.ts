@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { configurarVoz, hablar, probarVoz, vocesEspanol } from './voz'
+import { configurarVoz, hablar, hayVozDelGenero, probarVoz, vocesEspanol } from './voz'
 
 const voces = [
   { voiceURI: 'en', lang: 'en-US', name: 'Sam' },
@@ -19,6 +19,10 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('voz de Alpi', () => {
+  it('detecta si hay voz del género pedido', () => {
+    expect(hayVozDelGenero(vocesEspanol(), 'hombre')).toBe(true)
+    expect(hayVozDelGenero(vocesEspanol().slice(0, 2), 'hombre')).toBe(false)
+  })
   it('solo ofrece voces en español', () => expect(vocesEspanol().map((v) => v.voiceURI)).toEqual(['mx', 'es', 'jorge']))
   it('no habla si no está activa', () => {
     hablar('Guardado')

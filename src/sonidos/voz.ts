@@ -23,6 +23,8 @@ export const configurarVoz = (p: PreferenciasVoz | undefined, delaMascota: Gener
 const NOMBRES_HOMBRE = /\b(jorge|diego|juan|carlos|francisco|pablo|enrique|andr[eé]s|miguel|antonio|male|hombre)\b/i
 const NOMBRES_MUJER = /\b(paulina|m[oó]nica|ang[eé]lica|marisol|soledad|francisca|luciana|helena|laura|sabina|female|mujer)\b/i
 const generoDe = (v: SpeechSynthesisVoice): GeneroVoz | undefined => (NOMBRES_HOMBRE.test(v.name) ? 'hombre' : NOMBRES_MUJER.test(v.name) ? 'mujer' : undefined)
+/** ¿Alguna de estas voces es del género pedido? Safari a veces no entrega las de hombre aunque estén instaladas. */
+export const hayVozDelGenero = (voces: SpeechSynthesisVoice[], genero: GeneroVoz) => voces.some((v) => generoDe(v) === genero)
 export const generoEfectivo = (): GeneroVoz => prefs.genero ?? generoMascota
 
 const motor = () => (typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined' ? window.speechSynthesis : null)
@@ -54,9 +56,6 @@ function decir(texto: string) {
   if (v) (u.voice = v), (u.lang = v.lang)
   else u.lang = 'es-MX'
   u.rate = 1
-  // Si el teléfono no tiene una voz de hombre, se baja el tono de la que haya para que no suene como mujer
-  const faltaVozDelGenero = prefs.voz === undefined && (!v || generoDe(v) !== generoEfectivo())
-  u.pitch = generoEfectivo() === 'hombre' && faltaVozDelGenero ? 0.7 : 1
   m.speak(u)
 }
 
