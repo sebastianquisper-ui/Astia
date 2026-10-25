@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { hayDictado, useDictado } from '../lib/dictado'
+import { explicarFalloMicrofono, hayDictado, useDictado } from '../lib/dictado'
 import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
 import { Hoja } from '../ui/Hoja'
@@ -27,7 +27,7 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
   const { config, metas, medio, datos, alFallar, abrirFormulario } = useFinanzas()
   const avisarGuardado = useAvisarGuardado()
   const avisar = useAviso()
-  const { escuchando, dictar } = useDictado()
+  const { escuchando, dictar, bloqueado: sinReconocimiento } = useDictado()
   const [texto, setTexto] = useState('')
   const [res, setRes] = useState<Interpretacion | null>(null)
   const [metaElegida, setMetaElegida] = useState<Meta | null>(null)
@@ -53,7 +53,7 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
         setTexto(t)
         void entender(t)
       },
-      () => avisar('No se pudo usar el micrófono. Usa el del teclado del iPhone: toca el micrófono del teclado y dicta aquí.', 'error'),
+      (motivo) => avisar(explicarFalloMicrofono(motivo), 'error', { duracion: 7000 }),
     )
 
   const otraVez = () => {
@@ -111,14 +111,14 @@ function Contenido({ alCerrar }: { alCerrar: () => void }) {
       </p>
       <textarea ref={campo} className="fz-texto fz-dictado-texto" rows={3} aria-label="Frase del movimiento" placeholder="Habla o escribe aquí…" value={texto} onChange={(e) => (setTexto(e.target.value), setRes(null))} />
       <div className="acciones">
-        {hayDictado() && (
+        {hayDictado() && !sinReconocimiento && (
           <button type="button" className={'btn suave' + (escuchando ? ' escuchando' : '')} onClick={hablar} aria-pressed={escuchando}>
             <Icono nombre="mic" tam={18} /> {escuchando ? 'Escuchando… toca para parar' : 'Hablar'}
           </button>
         )}
         <button type="button" className="btn" onClick={() => entender(texto)} disabled={!texto.trim() || entendiendo}>Entender</button>
       </div>
-      {!hayDictado() && <p className="fz-nota">Para dictar usa el micrófono del teclado del iPhone: toca el micrófono del teclado y habla. Escribirá la frase aquí.</p>}
+      {(!hayDictado() || sinReconocimiento) && <p className="fz-nota">Para dictar usa el micrófono del teclado del iPhone: toca el micrófono del teclado y habla. Escribirá la frase aquí.</p>}
 
       {res && (
         <section className="fz-entendi" aria-live="polite">

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Tarea } from '../dominio/tipos'
 import { useDatos } from '../datos/DatosProvider'
-import { hayDictado, useDictado } from '../lib/dictado'
+import { explicarFalloMicrofono, hayDictado, useDictado } from '../lib/dictado'
 import { interpretarTarea } from '../lib/dictadoTareas'
 import { useAviso } from '../ui/Aviso'
 import { Hoja } from '../ui/Hoja'
@@ -19,7 +19,7 @@ export function DictadoTarea({ abierto, alCerrar, alEntender }: { abierto: boole
 function Contenido({ alCerrar, alEntender }: { alCerrar: () => void; alEntender: (plantilla: Partial<Tarea>) => void }) {
   const { cursos } = useDatos()
   const avisar = useAviso()
-  const { escuchando, dictar } = useDictado()
+  const { escuchando, dictar, bloqueado } = useDictado()
   const [texto, setTexto] = useState('')
   const campo = useRef<HTMLTextAreaElement>(null)
   useEffect(() => campo.current?.focus(), [])
@@ -36,13 +36,13 @@ function Contenido({ alCerrar, alEntender }: { alCerrar: () => void; alEntender:
         setTexto(t)
         entender(t)
       },
-      () => avisar('No se pudo usar el micrófono. Usa el del teclado del iPhone: toca el micrófono del teclado y dicta aquí.', 'error'),
+      (motivo) => avisar(explicarFalloMicrofono(motivo), 'error', { duracion: 7000 }),
     )
 
   return (
     <div className="fz-dictado">
       <p className="sub">Di o escribe la tarea con su curso y cuándo es. Después la revisas y confirmas.</p>
-      {hayDictado() && (
+      {hayDictado() && !bloqueado && (
         <button className={'btn fz-mic' + (escuchando ? ' escuchando' : '')} onClick={hablar} aria-pressed={escuchando}>
           <Icono nombre="mic" tam={20} /> {escuchando ? 'Escuchando… toca para parar' : 'Hablar'}
         </button>

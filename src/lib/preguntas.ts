@@ -59,6 +59,13 @@ export function responder(frase: string, c: ContextoPreguntas): Respuesta {
   const intencion = interpretarPregunta(frase)
   const uni = c.tareas.filter((t) => t.area === 'universidad' && t.estado === 'pendiente').sort(porUrgencia)
   const hoyYmd = ymd(c.ahora)
+  // Sin datos cargados, "nada pendiente" engaña: mejor decir qué falta
+  const hayTareas = c.tareas.some((t) => t.area === 'universidad')
+  if (!hayTareas && ['urgente', 'vencidas', 'examenes', 'semana', 'hoy'].includes(intencion ?? '')) {
+    return { entendida: true, texto: 'Todavía no tienes tareas cargadas, así que no tengo qué contarte. Agrega una con «+ Nueva tarea» en Hoy, o con el botón Dictar.' }
+  }
+  if (intencion === 'clase' && !c.clases.length) return { entendida: true, texto: 'Todavía no cargaste tu horario. Agrégalo en Más → Horario de clases y te digo qué te toca.' }
+  if (intencion === 'habitos' && !c.habitos.length) return { entendida: true, texto: 'Todavía no tienes hábitos creados. Crea uno en la pestaña Hábitos.' }
   switch (intencion) {
     case 'urgente': {
       const t = uni[0]

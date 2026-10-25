@@ -947,6 +947,26 @@ test('Pregúntale a Astia: responde con tus datos, escribiendo o con las pregunt
   await expect(hoja.getByRole('status')).toContainText('No entendí esa pregunta')
 })
 
+test('si el iPhone no deja usar el reconocimiento de voz, explica qué hacer y esconde Hablar', async ({ page }) => {
+  await page.addInitScript(() => {
+    class Falso {
+      lang = ''
+      onerror: ((e: { error: string }) => void) | null = null
+      onend: (() => void) | null = null
+      start() { setTimeout(() => { this.onerror?.({ error: 'service-not-allowed' }); this.onend?.() }, 10) }
+      stop() {}
+    }
+    ;(window as any).webkitSpeechRecognition = Falso
+  })
+  await page.goto('/#/hoy')
+  await page.getByRole('button', { name: 'Pregúntale a Astia' }).click()
+  const hoja = page.getByRole('dialog', { name: 'Pregúntale a Astia' })
+  await hoja.getByRole('button', { name: 'Hablar' }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'micrófono del teclado' })).toBeVisible()
+  await expect(hoja.getByRole('button', { name: 'Hablar' })).toHaveCount(0)
+  await expect(hoja.getByText(/micrófono del teclado/).first()).toBeVisible()
+})
+
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {
   const datos = conLogros(0, 700) // 1400 XP, todo personal
   await page.addInitScript((d) => {

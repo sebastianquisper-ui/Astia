@@ -1189,3 +1189,8 @@ a.enlace-mascotas { text-decoration: none; color: var(--text); }
 .preguntar-fila .fz-texto { flex: 1; min-width: 0; }
 .preguntar-respuesta { background: var(--surface2); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
 .preguntar-texto { white-space: pre-line; margin-top: 6px; line-height: 1.45; }
+
+.preguntar-aviso { background: var(--surface2); border-radius: 12px; padding: 10px 12px; }
+.preguntar-respuesta { animation: preguntar-entra 0.25s ease; }
+@keyframes preguntar-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .preguntar-respuesta { animation: none; } }

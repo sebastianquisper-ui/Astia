@@ -38,6 +38,11 @@ describe('preguntas sobre tus estudios', () => {
     expect(responder('qué clase me toca', ctx([])).texto).toMatch(/Cálculo II.*A-101.*14:00/)
     expect(responder('cuánto enfoque llevo hoy', ctx([])).texto).toContain('50 min')
   })
+  it('sin tareas ni horario cargados dice qué falta en vez de "estás al día"', () => {
+    const vacio: ContextoPreguntas = { ...ctx([]), clases: [] }
+    expect(responder('qué pendientes tengo hoy', vacio).texto).toContain('Todavía no tienes tareas cargadas')
+    expect(responder('qué clase me toca', vacio).texto).toContain('Todavía no cargaste tu horario')
+  })
   it('si no entiende, dice qué sí entiende', () => {
     const r = responder('cuál es la capital de Francia', ctx([]))
     expect(r.entendida).toBe(false)

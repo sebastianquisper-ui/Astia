@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDatos } from '../datos/DatosProvider'
-import { hayDictado, useDictado } from '../lib/dictado'
+import { explicarFalloMicrofono, hayDictado, useDictado } from '../lib/dictado'
 import { responder, type Respuesta } from '../lib/preguntas'
 import { hablar } from '../sonidos/voz'
 import { useAviso } from './Aviso'
@@ -23,16 +23,16 @@ function Contenido() {
   const { tareas, clases, cursos, habitos, progreso } = useDatos()
   const ahora = useAhora()
   const avisar = useAviso()
-  const { escuchando, dictar } = useDictado()
+  const { escuchando, dictar, bloqueado } = useDictado()
   const [texto, setTexto] = useState('')
-  const [resp, setResp] = useState<{ pregunta: string; r: Respuesta } | null>(null)
+  const [resp, setResp] = useState<{ pregunta: string; r: Respuesta; n: number } | null>(null)
   const campo = useRef<HTMLInputElement>(null)
   useEffect(() => campo.current?.focus(), [])
 
   const preguntar = (frase: string) => {
     if (!frase.trim()) return
     const r = responder(frase, { tareas, clases, cursos, habitos, progreso, ahora })
-    setResp({ pregunta: frase.trim(), r })
+    setResp((previa) => ({ pregunta: frase.trim(), r, n: (previa?.n ?? 0) + 1 }))
     hablar(r.texto.replace(/\n?•\s*/g, '. '))
   }
   const hablarPregunta = () =>
@@ -41,17 +41,18 @@ function Contenido() {
         setTexto(t)
         preguntar(t)
       },
-      () => avisar('No se pudo usar el micrófono. Usa el del teclado del iPhone: toca el micrófono del teclado y dicta aquí.', 'error'),
+      (motivo) => avisar(explicarFalloMicrofono(motivo), 'error', { duracion: 7000 }),
     )
 
   return (
     <div className="preguntar">
       <p className="sub">Pregunta por tus pendientes, tus clases, tu enfoque o tus hábitos. Responde con lo que tienes en la app.</p>
-      {hayDictado() && (
+      {hayDictado() && !bloqueado && (
         <button className={'btn fz-mic' + (escuchando ? ' escuchando' : '')} onClick={hablarPregunta} aria-pressed={escuchando}>
           <Icono nombre="mic" tam={20} /> {escuchando ? 'Escuchando… toca para parar' : 'Hablar'}
         </button>
       )}
+      {(bloqueado || !hayDictado()) && <p className="nota preguntar-aviso">Aquí el iPhone no deja usar el botón Hablar. Toca el cuadro y usa el <b>micrófono del teclado</b> (abajo a la derecha) para dictar.</p>}
       <form
         className="preguntar-fila"
         onSubmit={(e) => {
@@ -63,7 +64,7 @@ function Contenido() {
         <button type="submit" className="btn">Preguntar</button>
       </form>
       {resp && (
-        <div className="preguntar-respuesta" role="status" aria-live="polite">
+        <div key={resp.n} className="preguntar-respuesta" role="status" aria-live="polite">
           <p className="nota">Tú: {resp.pregunta}</p>
           <p className="preguntar-texto">{resp.r.texto}</p>
         </div>

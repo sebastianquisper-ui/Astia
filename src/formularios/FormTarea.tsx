@@ -4,7 +4,7 @@ import type { Area, Curso, Prioridad, Tarea, TipoTarea } from '../dominio/tipos'
 import { crearId } from '../datos/almacenamiento'
 import { APARTADOS, apartadoDe } from '../lib/apartados'
 import { ymd } from '../lib/fechas'
-import { hayDictado, useDictado } from '../lib/dictado'
+import { explicarFalloMicrofono, hayDictado, useDictado } from '../lib/dictado'
 import { METODOS, metodoPorId, sugerirMetodo, type MetodoId } from '../lib/metodos'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
@@ -40,7 +40,7 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
   const [tipo, setTipo] = useState<TipoTarea>(inicial?.tipo ?? plantilla?.tipo ?? 'tarea')
   const { escuchando, dictar } = useDictado()
   const conDictado = hayDictado()
-  const dictarTitulo = () => dictar((t) => setTitulo((previo) => (previo ? previo + ' ' : '') + t), () => avisar('No se pudo usar el micrófono. Usa el del teclado del iPhone.', 'error'))
+  const dictarTitulo = () => dictar((t) => setTitulo((previo) => (previo ? previo + ' ' : '') + t), (motivo) => avisar(explicarFalloMicrofono(motivo), 'error', { duracion: 7000 }))
   const [fecha, setFecha] = useState(inicial?.fecha ?? plantilla?.fecha ?? ymd(new Date()))
   const [hora, setHora] = useState(inicial?.hora ?? plantilla?.hora ?? '')
   const [prioridad, setPrioridad] = useState<Prioridad>(inicial?.prioridad ?? 'media')
