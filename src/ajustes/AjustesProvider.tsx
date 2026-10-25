@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { ExpresionAlpi } from '../mascotas/alpi/datos'
 import { configurarSonidos } from '../sonidos/reproductor'
+import { configurarVoz } from '../sonidos/voz'
 import type { PreferenciasSonido } from '../sonidos/catalogo'
 import type { Etapa } from '../lib/etapa'
 import type { MascotaElegida } from '../lib/mascotas'
@@ -67,6 +68,7 @@ export function AjustesProvider({ children }: { children: ReactNode }) {
 
   // Los sonidos se leen desde fuera de React (por ejemplo, al terminar un temporizador)
   useEffect(() => configurarSonidos(ajustes.sonidos), [ajustes.sonidos])
+  useEffect(() => configurarVoz(ajustes.sonidos?.voz), [ajustes.sonidos?.voz])
 
   // Aplica tema y tamaño de letra al documento
   useEffect(() => {

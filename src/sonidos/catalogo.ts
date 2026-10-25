@@ -1,3 +1,4 @@
+import type { PreferenciasVoz } from './voz'
 // Cuándo suena Astia y qué sonido tiene cada momento por defecto.
 
 export type EventoSonido = 'evolucion' | 'tareaHecha' | 'enfoqueFin' | 'descansoFin' | 'vista2020' | 'metaCumplida'
@@ -29,6 +30,8 @@ export interface PreferenciasSonido {
   eventos?: Partial<Record<EventoSonido, string>>
   /** Los sonidos que subiste tú (el archivo está en el teléfono; aquí solo su nombre). */
   propios?: Partial<Record<EventoSonido, { nombre: string }>>
+  /** Alpi lee los avisos en voz alta. */
+  voz?: PreferenciasVoz
 }
 
 export const SILENCIO = 'silencio'

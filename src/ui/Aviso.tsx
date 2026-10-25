@@ -1,3 +1,4 @@
+import { hablar } from '../sonidos/voz'
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 
 // Regla de oro de la v2: TODA acción muestra confirmación o error claro.
@@ -21,6 +22,7 @@ export function AvisoProvider({ children }: { children: ReactNode }) {
 
   const avisar = useCallback<Avisar>((mensaje, tipo = 'ok', opciones) => {
     setActual({ mensaje, tipo, opciones })
+    hablar(mensaje)
     window.clearTimeout(temporizador.current)
     // Los errores duran más para que dé tiempo de leerlos; un aviso con botón, también
     temporizador.current = window.setTimeout(() => setActual(null), opciones?.duracion ?? (tipo === 'error' ? 4500 : opciones?.accion ? 6000 : 2400))

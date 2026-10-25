@@ -58,6 +58,7 @@ Vite + React + TypeScript. Proyecto de Sebastián Quispe Roca (UNMSM).
   tiene un sonido predeterminado, sintetizado en el teléfono (sin archivos). El de la evolución suena por defecto al tocar "¡Evolucionar!".
   Puedes cambiarlo por otro de la biblioteca, ponerlo en silencio o **subir el tuyo** (mp3, m4a, wav u ogg; hasta 30 s y 2.5 MB; se guarda
   solo en el teléfono, en IndexedDB). En el iPhone el audio se activa con el primer toque en la app.
+  También puedes activar que **Alpi lea los avisos en voz alta** (voz del iPhone, gratis; solo con la app abierta; apagado por defecto).
 - **Una sola cuenta (Firebase):** Astia pide iniciar sesión con Google antes de mostrar nada. Detalles y pasos en `docs/FIREBASE.md`.
   Los datos de estudios y Mi Órbita todavía están en el teléfono; pasarlos a la nube es el siguiente paso (`docs/SUPABASE.md` quedó
   como referencia del plan anterior, ya no se usa).

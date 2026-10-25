@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { borrarSonido, duracionDe, guardarSonido, MAX_SEGUNDOS, validarArchivoSonido } from '../sonidos/archivos'
 import { EVENTOS, PROPIO, SILENCIO, type EventoSonido, type PreferenciasSonido } from '../sonidos/catalogo'
 import { elegidoPara, olvidarPropio, probar } from '../sonidos/reproductor'
 import { PRESETS } from '../sonidos/sintetizador'
+import { probarVoz, vocesEspanol, vozDisponible } from '../sonidos/voz'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
 
@@ -16,6 +17,18 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
   const [subiendo, setSubiendo] = useState<EventoSonido | null>(null)
   const archivo = useRef<HTMLInputElement>(null)
   const eventoDelArchivo = useRef<EventoSonido | null>(null)
+
+  // iOS carga las voces un instante después de abrir la pantalla
+  const [voces, setVoces] = useState(vocesEspanol)
+  useEffect(() => {
+    if (!vozDisponible()) return
+    const act = () => setVoces(vocesEspanol())
+    window.speechSynthesis.addEventListener('voiceschanged', act)
+    act()
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', act)
+  }, [])
+  const voz = prefs.voz ?? {}
+  const guardarVoz = (parcial: NonNullable<PreferenciasSonido['voz']>) => cambiar({ sonidos: { ...prefs, voz: { ...voz, ...parcial } } })
 
   const guardarPrefs = (parcial: PreferenciasSonido) => cambiar({ sonidos: { ...prefs, ...parcial } })
   const elegir = (evento: EventoSonido, valor: string) => guardarPrefs({ eventos: { ...prefs.eventos, [evento]: valor } })
@@ -68,6 +81,37 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
           <button aria-pressed={activo} onClick={() => guardarPrefs({ activo: true })}>Sí</button>
           <button aria-pressed={!activo} onClick={() => guardarPrefs({ activo: false })}>No</button>
         </div>
+      </div>
+
+      <div className="seccion">
+        <h2 className="titulo">Alpi lee los avisos</h2>
+        {vozDisponible() ? (
+          <>
+            <div className="campo">
+              <span className="etiqueta" id="so-voz">Leer los avisos en voz alta</span>
+              <div className="seg" role="group" aria-labelledby="so-voz">
+                <button aria-pressed={voz.activa === true} onClick={() => (guardarVoz({ activa: true }), probarVoz())}>Sí</button>
+                <button aria-pressed={voz.activa !== true} onClick={() => guardarVoz({ activa: false })}>No</button>
+              </div>
+            </div>
+            {voces.length > 0 && (
+              <div className="sonido-controles">
+                <select aria-label="Voz de Alpi" value={voz.voz ?? ''} onChange={(e) => guardarVoz({ voz: e.target.value || undefined })}>
+                  <option value="">Automática</option>
+                  {voces.map((v) => (
+                    <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>
+                  ))}
+                </select>
+                <button className="icono-btn" aria-label="Probar la voz" onClick={() => probarVoz()}>
+                  <Icono nombre="play" tam={18} />
+                </button>
+              </div>
+            )}
+            <p className="nota">Usa la voz de tu iPhone, gratis. Solo habla con Astia abierta. Para una voz más natural, descarga una "mejorada" en Ajustes del iPhone → Accesibilidad → Contenido leído → Voces.</p>
+          </>
+        ) : (
+          <p className="nota">Este navegador no puede leer en voz alta.</p>
+        )}
       </div>
 
       <input ref={archivo} id="archivo-sonido" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" hidden aria-label="Archivo de sonido" onChange={alElegirArchivo} />
