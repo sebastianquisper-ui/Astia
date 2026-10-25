@@ -16,13 +16,18 @@ export interface Mascota {
   apodo: string
   descripcion: string
   etiquetas: [string, string]
+  /** Define la voz automática: Alpi y sus evoluciones son masculinos. */
+  genero: 'hombre' | 'mujer'
   /** Nombre de cada etapa, en orden (el nivel 1 es la primera). */
   etapas: string[]
 }
 
 export const MASCOTAS: Mascota[] = [
-  { id: 'alpi', nombre: 'Alpi', apodo: 'El aventurero de los Andes', descripcion: 'Un compañero alpaca, suave y divertido, que te acompaña paso a paso. Representa la perseverancia, la calma y el equilibrio entre tus metas y tu bienestar.', etiquetas: ['Perseverancia', 'Bienestar'], etapas: ['Alpaquito', 'Explorador', 'Guardián de los valles', 'Legendario'] },
+  { id: 'alpi', nombre: 'Alpi', apodo: 'El aventurero de los Andes', descripcion: 'Un compañero alpaca, suave y divertido, que te acompaña paso a paso. Representa la perseverancia, la calma y el equilibrio entre tus metas y tu bienestar.', etiquetas: ['Perseverancia', 'Bienestar'], genero: 'hombre', etapas: ['Alpaquito', 'Explorador', 'Guardián de los valles', 'Legendario'] },
 ]
+
+/** Género de la mascota elegida; Astia (la estrella) es femenina. */
+export const generoDeMascota = (id: MascotaElegida): 'hombre' | 'mujer' => MASCOTAS.find((m) => m.id === id)?.genero ?? 'mujer'
 
 export const mascotaPorId = (id: string): Mascota | undefined => MASCOTAS.find((m) => m.id === id)
 export const esMascota = (x: unknown): x is MascotaId => typeof x === 'string' && MASCOTAS.some((m) => m.id === x)

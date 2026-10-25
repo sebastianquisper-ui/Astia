@@ -165,6 +165,14 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
                 <button aria-pressed={voz.activa !== true} onClick={() => guardarVoz({ activa: false })}>No</button>
               </div>
             </div>
+            <div className="campo">
+              <span className="etiqueta" id="so-genero">Tipo de voz</span>
+              <div className="seg" role="group" aria-labelledby="so-genero">
+                <button aria-pressed={voz.genero === undefined} onClick={() => guardarVoz({ genero: undefined, voz: undefined })}>Según mi mascota</button>
+                <button aria-pressed={voz.genero === 'hombre'} onClick={() => (guardarVoz({ genero: 'hombre', voz: undefined }), probarVoz())}>Hombre</button>
+                <button aria-pressed={voz.genero === 'mujer'} onClick={() => (guardarVoz({ genero: 'mujer', voz: undefined }), probarVoz())}>Mujer</button>
+              </div>
+            </div>
             {voces.length > 0 && (
               <div className="sonido-controles">
                 <select aria-label="Voz de Alpi" value={voz.voz ?? ''} onChange={(e) => guardarVoz({ voz: e.target.value || undefined })}>
