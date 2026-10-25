@@ -35,7 +35,7 @@ const ENTRADAS: Entrada[] = [
   { id: 'ciclo', titulo: 'Ciclo completo', detalle: 'Todas las semanas y su carga', icono: 'ciclo', modos: ['academico'] },
   { id: 'progreso', titulo: 'Progreso y rachas', detalle: 'Cuántos días seguidos cumples', icono: 'progreso', modos: ['academico', 'personal'] },
   { id: 'enfoque', titulo: 'Enfoque y descanso', detalle: 'Pomodoro, Feynman, Cornell y más técnicas', icono: 'enfoque', modos: ['academico'] },
-  { id: 'sonidos', titulo: 'Sonidos y voz', detalle: 'Qué suena y que Alpi lea los avisos', icono: 'sonido', modos: ['academico', 'personal'] },
+  { id: 'sonidos', titulo: 'Sonidos, música y voz', detalle: 'Música de fondo, sonidos y Alpi que lee los avisos', icono: 'sonido', modos: ['academico', 'personal'] },
   { id: 'ajustes', titulo: 'Ajustes', detalle: 'Tema, tamaño de letra, respaldo', icono: 'ajustes', modos: ['academico', 'personal'] },
   { id: 'mejora', titulo: 'Pedir mejora', detalle: 'Cuéntame qué le falta a Astia', icono: 'mejora', modos: ['academico', 'personal'] },
 ]

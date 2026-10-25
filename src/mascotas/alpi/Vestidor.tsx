@@ -74,7 +74,7 @@ export function VestidorHoja({ v, abierto, alCerrar, bloqueado }: { v: EstadoVes
         <div className="vestidor">
           <div className="vestidor-vista">
             {en3d ? (
-              <Suspense fallback={<Rig mascota="alpi" etapa={v.nivel} animo="contenta" />}>
+              <Suspense fallback={null}>
                 <AlpiIframe nivel={v.nivel} expresion={v.expresion ?? 'feliz'} accesorios={v.accesorios} />
               </Suspense>
             ) : (

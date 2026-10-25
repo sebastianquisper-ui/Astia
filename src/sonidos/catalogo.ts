@@ -1,3 +1,4 @@
+import type { PreferenciasMusica } from './musica'
 import type { PreferenciasVoz } from './voz'
 // Cuándo suena Astia y qué sonido tiene cada momento por defecto.
 
@@ -32,6 +33,8 @@ export interface PreferenciasSonido {
   propios?: Partial<Record<EventoSonido, { nombre: string }>>
   /** Alpi lee los avisos en voz alta. */
   voz?: PreferenciasVoz
+  /** Música de fondo de toda la app. */
+  musica?: PreferenciasMusica
 }
 
 export const SILENCIO = 'silencio'

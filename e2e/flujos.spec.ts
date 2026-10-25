@@ -850,12 +850,12 @@ test('al evolucionar se celebra una sola vez', async ({ page }) => {
   expect(vista).toEqual({ alpi: 3 }) // se anotó la última etapa vista (la 4.ª): ya no se vuelve a celebrar
 })
 
-test('Sonidos: se puede escoger uno de la biblioteca, silenciar y subir uno propio', async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('astia.ajustes', JSON.stringify({ datosEjemplo: false, etapa: 'universidad', alpi3d: false }))
+async function falsearAudio(page: import('@playwright/test').Page, ajustes: object = { datosEjemplo: false, etapa: 'universidad', alpi3d: false }) {
+  await page.addInitScript((ajustes) => {
+    localStorage.setItem('astia.ajustes', JSON.stringify(ajustes))
     ;(window as any).__sonidos = 0
     class Falso {
-      currentTime = 0
+      get currentTime() { return performance.now() / 1000 }
       state = 'running'
       destination = {}
       resume() { return Promise.resolve() }
@@ -868,7 +868,11 @@ test('Sonidos: se puede escoger uno de la biblioteca, silenciar y subir uno prop
     }
     ;(window as any).AudioContext = Falso
     ;(window as any).webkitAudioContext = Falso
-  })
+  }, ajustes)
+}
+
+test('Sonidos: se puede escoger uno de la biblioteca, silenciar y subir uno propio', async ({ page }) => {
+  await falsearAudio(page)
   await page.goto('/#/mas/sonidos')
   await expect(page.getByRole('heading', { name: 'Sonidos', exact: true })).toBeVisible()
   await expect(page.getByLabel('Sonido: Cuando Alpi evoluciona')).toHaveValue('alpi') // predeterminado: el de Alpi
@@ -886,6 +890,33 @@ test('Sonidos: se puede escoger uno de la biblioteca, silenciar y subir uno prop
   await expect(page.getByRole('status').or(page.getByRole('alert')).filter({ hasText: /audio|archivo|sonido/i }).first()).toBeVisible()
   const sinPropio = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').sonidos?.propios)
   expect(sinPropio ?? {}).toEqual({})
+})
+
+test('la música de fondo empieza con el primer toque y se silencia desde la cabecera', async ({ page }) => {
+  await falsearAudio(page)
+  await page.goto('/#/hoy')
+  await expect(page.getByRole('button', { name: 'Silenciar la música' })).toBeVisible()
+  await page.locator('body').click({ position: { x: 5, y: 5 } })
+  await expect.poll(() => page.evaluate(() => (window as any).__sonidos)).toBeGreaterThan(3) // ya suena
+  await page.getByRole('button', { name: 'Silenciar la música' }).click()
+  await expect(page.getByRole('button', { name: 'Activar la música' })).toBeVisible()
+  const prefs = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').sonidos)
+  expect(prefs.musica.activa).toBe(false)
+})
+
+test('Música: se elige volumen y se rechaza un archivo que no es audio', async ({ page }) => {
+  await falsearAudio(page)
+  await page.goto('/#/mas/sonidos')
+  await expect(page.getByRole('radio', { name: /Astia \(predeterminada\)/ })).toHaveAttribute('aria-checked', 'true')
+  await page.getByLabel('Volumen').fill('0.8')
+  await page.getByRole('group', { name: 'Música en toda la app' }).getByRole('button', { name: 'No' }).click()
+  const elegir = page.waitForEvent('filechooser')
+  await page.getByRole('button', { name: 'Subir mi música' }).click()
+  await (await elegir).setFiles({ name: 'tarea.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x') })
+  await expect(page.getByRole('status').filter({ hasText: /audio/i })).toBeVisible()
+  const m = await page.evaluate(() => JSON.parse(localStorage.getItem('astia.ajustes') || '{}').sonidos.musica)
+  expect(m).toMatchObject({ volumen: 0.8, activa: false })
+  expect(m.propias ?? []).toEqual([])
 })
 
 test('sin equilibrio entre estudios y vida personal, no pasa de la etapa 2', async ({ page }) => {

@@ -17,6 +17,9 @@ export function desbloquearAudio(): void {
   }
 }
 
+/** El contexto de audio ya desbloqueado (o null si todavía no se tocó la pantalla). */
+export const contextoAudio = (): AudioContext | null => (contexto && contexto.state !== 'closed' ? contexto : null)
+
 export const audioListo = (): boolean => !!contexto && contexto.state !== 'closed'
 
 type Onda = OscillatorType

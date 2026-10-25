@@ -4,6 +4,8 @@ import { borrarSonido, duracionDe, guardarSonido, MAX_SEGUNDOS, validarArchivoSo
 import { EVENTOS, PROPIO, SILENCIO, type EventoSonido, type PreferenciasSonido } from '../sonidos/catalogo'
 import { elegidoPara, olvidarPropio, probar } from '../sonidos/reproductor'
 import { PRESETS } from '../sonidos/sintetizador'
+import { borrarPista, guardarPista, MAX_SEGUNDOS_MUSICA, validarPista } from '../sonidos/archivosMusica'
+import { MAX_PISTAS, PREDETERMINADA, VOLUMEN_INICIAL } from '../sonidos/musica'
 import { probarVoz, vocesEspanol, vozDisponible } from '../sonidos/voz'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
@@ -29,6 +31,38 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
   }, [])
   const voz = prefs.voz ?? {}
   const guardarVoz = (parcial: NonNullable<PreferenciasSonido['voz']>) => cambiar({ sonidos: { ...prefs, voz: { ...voz, ...parcial } } })
+
+  const musica = prefs.musica ?? {}
+  const guardarMusica = (parcial: NonNullable<PreferenciasSonido['musica']>) => cambiar({ sonidos: { ...prefs, musica: { ...musica, ...parcial } } })
+  const archivoMusica = useRef<HTMLInputElement>(null)
+  const [subiendoMusica, setSubiendoMusica] = useState(false)
+  const alElegirMusica = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    e.target.value = ''
+    if (!f) return
+    const problema = validarPista(f)
+    if (problema) return avisar(problema, 'error')
+    if ((musica.propias?.length ?? 0) >= MAX_PISTAS) return avisar(`Ya tienes ${MAX_PISTAS} pistas. Quita una para subir otra.`, 'error')
+    setSubiendoMusica(true)
+    try {
+      const segundos = await duracionDe(f)
+      if (segundos === null) return avisar('No pude leer ese audio. Prueba con otro archivo (mp3, m4a o wav).', 'error')
+      if (segundos > MAX_SEGUNDOS_MUSICA) return avisar(`Esa pista dura ${Math.round(segundos / 60)} minutos. Usa una de hasta ${MAX_SEGUNDOS_MUSICA / 60}.`, 'error')
+      const id = 'p' + Date.now().toString(36)
+      await guardarPista(id, f)
+      guardarMusica({ propias: [...(musica.propias ?? []), { id, nombre: f.name.replace(/\.[^.]+$/, '') }], pista: id })
+      avisar('Listo: tu música ya suena de fondo.')
+    } catch {
+      avisar('No pude guardar la pista en este teléfono.', 'error')
+    } finally {
+      setSubiendoMusica(false)
+    }
+  }
+  const quitarPista = async (id: string) => {
+    await borrarPista(id)
+    guardarMusica({ propias: (musica.propias ?? []).filter((p) => p.id !== id), pista: musica.pista === id ? PREDETERMINADA : musica.pista })
+    avisar('Quité esa pista.')
+  }
 
   const guardarPrefs = (parcial: PreferenciasSonido) => cambiar({ sonidos: { ...prefs, ...parcial } })
   const elegir = (evento: EventoSonido, valor: string) => guardarPrefs({ eventos: { ...prefs.eventos, [evento]: valor } })
@@ -81,6 +115,43 @@ export function Sonidos({ alVolver }: { alVolver: () => void }) {
           <button aria-pressed={activo} onClick={() => guardarPrefs({ activo: true })}>Sí</button>
           <button aria-pressed={!activo} onClick={() => guardarPrefs({ activo: false })}>No</button>
         </div>
+      </div>
+
+      <div className="seccion">
+        <h2 className="titulo">Música de fondo</h2>
+        <div className="campo">
+          <span className="etiqueta" id="so-musica">Música en toda la app</span>
+          <div className="seg" role="group" aria-labelledby="so-musica">
+            <button aria-pressed={musica.activa !== false} onClick={() => guardarMusica({ activa: true })}>Sí</button>
+            <button aria-pressed={musica.activa === false} onClick={() => guardarMusica({ activa: false })}>No</button>
+          </div>
+        </div>
+        <div className="campo">
+          <label className="etiqueta" htmlFor="so-volumen">Volumen</label>
+          <input id="so-volumen" type="range" min={0} max={1} step={0.05} value={musica.volumen ?? VOLUMEN_INICIAL} onChange={(e) => guardarMusica({ volumen: Number(e.target.value) })} />
+        </div>
+        <div className="lista" role="radiogroup" aria-label="Pista de fondo">
+          <div className="fila">
+            <button className="texto-btn" role="radio" aria-checked={(musica.pista ?? PREDETERMINADA) === PREDETERMINADA} onClick={() => guardarMusica({ pista: PREDETERMINADA })}>
+              <b>Astia (predeterminada)</b>
+              <span>Una musiquita alegre que se compone sola, sin internet</span>
+            </button>
+          </div>
+          {(musica.propias ?? []).map((p) => (
+            <div key={p.id} className="fila">
+              <button className="texto-btn" role="radio" aria-checked={musica.pista === p.id} onClick={() => guardarMusica({ pista: p.id })}>
+                <b>{p.nombre}</b>
+                <span>Tu pista</span>
+              </button>
+              <button className="btn suave pequeno" onClick={() => void quitarPista(p.id)} aria-label={`Quitar la pista ${p.nombre}`}>Quitar</button>
+            </div>
+          ))}
+        </div>
+        <input ref={archivoMusica} id="archivo-musica" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" hidden aria-label="Archivo de música" onChange={alElegirMusica} />
+        <button className="btn suave pequeno" disabled={subiendoMusica} onClick={() => archivoMusica.current?.click()}>
+          {subiendoMusica ? 'Subiendo…' : 'Subir mi música'}
+        </button>
+        <p className="nota">Tu música se guarda solo en este teléfono (hasta {MAX_PISTAS} pistas, 12 MB y {MAX_SEGUNDOS_MUSICA / 60} minutos cada una). En el iPhone empieza con tu primer toque, y el silenciador del lateral también la calla.</p>
       </div>
 
       <div className="seccion">

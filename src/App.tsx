@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { hashDe, leerRuta, PESTANAS_FINANZAS, type Pestana, type Ruta } from './lib/ruta'
 import { Estrella, Icono } from './ui/Icono'
+import { BotonMusica } from './ui/BotonMusica'
 import { NavInferior } from './ui/NavInferior'
 import { Hoy } from './pantallas/Hoy'
 import { Semana } from './pantallas/Semana'
@@ -91,6 +92,7 @@ function Cuerpo({ ruta, elegirPestana, abrirMas, cambiarModo, irAMas }: { ruta: 
           </div>
           {finanzas ? (
             <div className="cabecera-botones">
+              <BotonMusica />
               {f && (
                 <button className="icono-btn" onClick={f.alternarMontos} aria-label={f.montosOcultos ? 'Mostrar montos' : 'Ocultar montos'} aria-pressed={f.montosOcultos}>
                   <Icono nombre={f.montosOcultos ? 'ojoOff' : 'ojo'} tam={20} />
@@ -102,13 +104,18 @@ function Cuerpo({ ruta, elegirPestana, abrirMas, cambiarModo, irAMas }: { ruta: 
                 </button>
               )}
             </div>
-          ) : ajustes.datosEjemplo ? (
-            <button className="estado" onClick={() => abrirMas('ajustes')} aria-label="Datos de ejemplo. Toca para cargar los tuyos en Ajustes">
-              <i /> Datos de ejemplo
-            </button>
           ) : (
-            <div className="estado" title="Tus datos de estudios están en este teléfono">
-              <i /> Solo en este teléfono
+            <div className="cabecera-botones">
+              {ajustes.datosEjemplo ? (
+                <button className="estado" onClick={() => abrirMas('ajustes')} aria-label="Datos de ejemplo. Toca para cargar los tuyos en Ajustes">
+                  <i /> Datos de ejemplo
+                </button>
+              ) : (
+                <div className="estado" title="Tus datos de estudios están en este teléfono">
+                  <i /> Solo en este teléfono
+                </div>
+              )}
+              <BotonMusica />
             </div>
           )}
         </header>
