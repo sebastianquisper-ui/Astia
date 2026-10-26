@@ -179,6 +179,15 @@ export function Ajustes({ alVolver }: { alVolver: () => void }) {
       </div>
 
       <div className="campo">
+        <span className="etiqueta" id="et-plata-hoy">Recomendaciones con mi plata</span>
+        <div className="seg" role="group" aria-labelledby="et-plata-hoy">
+          <button aria-pressed={!ajustes.plataEnHoy} onClick={() => cambiar({ plataEnHoy: false })}>No</button>
+          <button aria-pressed={ajustes.plataEnHoy === true} onClick={() => cambiar({ plataEnHoy: true })}>Sí</button>
+        </div>
+        <p className="nota">Finanstia se abre con PIN. Si lo activas, Hoy solo sabrá si vas en verde, ámbar o rojo para recomendarte mejor; nunca muestra montos.</p>
+      </div>
+
+      <div className="campo">
         <span className="etiqueta" id="et-3d">Alpi en 3D</span>
         <div className="seg" role="group" aria-labelledby="et-3d">
           <button aria-pressed={ajustes.alpi3d !== false} onClick={() => cambiar({ alpi3d: true })}>Sí</button>

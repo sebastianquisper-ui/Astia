@@ -8,6 +8,8 @@ import { gruposTendencia } from './periodos'
 import { alertas, estadoPresupuesto } from './presupuesto'
 import { FILTROS_INICIALES, deMedio, gastosPorCategoria, ordenarRecientes, tendencia, totales, type Totales } from './resumen'
 import { Icono } from '../ui/Icono'
+import { TarjetaRecomienda } from '../ui/TarjetaRecomienda'
+import { estadoDinero } from './estado'
 import { Billeteras, FilaMovimiento, Monto, SelectorPeriodo, Vacio } from './ui'
 
 function Resumen({ t }: { t: Totales }) {
@@ -48,7 +50,7 @@ function AvisoPresupuesto() {
 }
 
 export function Inicio() {
-  const { movs, config, medio, periodo, irA, abrirDictado } = useFinanzas()
+  const { movs, config, movsMes, medio, periodo, irA, abrirDictado } = useFinanzas()
   const [compararAbierto, setCompararAbierto] = useState(false)
   const delMedio = movs ? deMedio(movs, medio) : []
   const porCategoria = gastosPorCategoria(delMedio)
@@ -60,6 +62,8 @@ export function Inicio() {
   return (
     <div className="fz-vista">
       <HeroFinanzas />
+      {/* Aquí ya pusiste el PIN: la plata entra a la recomendación sin pedir permiso aparte */}
+      <TarjetaRecomienda plata={estadoDinero({ config, movsMes }).estado} />
       <button type="button" className="fz-dictar" onClick={abrirDictado}>
         <Icono nombre="mic" tam={22} />
         <span>

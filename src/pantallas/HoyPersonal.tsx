@@ -21,6 +21,7 @@ import { FilaTarea } from '../ui/FilaTarea'
 import { Hoja } from '../ui/Hoja'
 import { TarjetaHabitos } from '../ui/TarjetaHabitos'
 import { useAhora } from '../ui/useAhora'
+import { TarjetaRecomienda } from '../ui/TarjetaRecomienda'
 import { Vacio } from '../ui/Vacio'
 
 /** Hoy en modo Mi Órbita: hábitos del día, rutina del momento y pendientes personales. */
@@ -97,6 +98,8 @@ export function HoyPersonal() {
       <button className="btn suave" style={{ width: '100%' }} onClick={() => irA('#/mas/agenda')}>
         <Icono nombre="reloj" tam={18} /> Recordarme algo
       </button>
+
+      <TarjetaRecomienda />
 
       <TarjetaHabitos
         hechos={hechos}

@@ -74,11 +74,14 @@ test('Ajustes: tema oscuro y letra grande se aplican y se recuerdan', async ({ p
   expect(await page.evaluate(() => document.documentElement.style.fontSize)).toBe('20.8px')
 })
 
-test('Ajustes: un nombre vacío muestra un error claro', async ({ page }) => {
+test('Ajustes: el nombre es opcional y se puede borrar', async ({ page }) => {
   await page.goto('/#/mas/ajustes')
+  await page.getByLabel('Tu nombre').fill('Ana')
+  await page.getByLabel('Tu nombre').blur()
+  await expect(page.getByRole('status')).toContainText('Nombre guardado')
   await page.getByLabel('Tu nombre').fill('   ')
   await page.getByLabel('Tu nombre').blur()
-  await expect(page.getByRole('status')).toContainText('no puede estar vacío')
+  await expect(page.getByRole('status').last()).toContainText('ya no uso tu nombre')
 })
 
 test('la app es instalable: manifest con nombre, icono y modo app', async ({ page, request }) => {
