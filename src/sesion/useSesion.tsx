@@ -32,6 +32,7 @@ export function useSesion() {
     nodo = (
       <SesionEstudio
         key={sesion.clave}
+        metodoId={m}
         titulo={m === 'arranque' ? 'Solo 10 minutos' : metodoPorId(m).nombre}
         fases={m === 'arranque' ? [FASE_ARRANQUE] : fasesDe(m, cfg)}
         tarea={tarea}

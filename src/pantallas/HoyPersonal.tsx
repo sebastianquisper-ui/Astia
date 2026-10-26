@@ -22,6 +22,7 @@ import { Hoja } from '../ui/Hoja'
 import { TarjetaHabitos } from '../ui/TarjetaHabitos'
 import { useAhora } from '../ui/useAhora'
 import { TarjetaRecomienda } from '../ui/TarjetaRecomienda'
+import { TarjetaSueno } from '../ui/TarjetaSueno'
 import { Vacio } from '../ui/Vacio'
 
 /** Hoy en modo Mi Órbita: hábitos del día, rutina del momento y pendientes personales. */
@@ -100,6 +101,8 @@ export function HoyPersonal() {
       </button>
 
       <TarjetaRecomienda />
+
+      <TarjetaSueno />
 
       <TarjetaHabitos
         hechos={hechos}

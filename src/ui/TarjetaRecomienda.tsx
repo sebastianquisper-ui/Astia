@@ -2,7 +2,9 @@ import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
 import { usePlata } from '../finanzas/usePlata'
 import { recomendar, type Energia, type EstadoPlata } from '../lib/recomendaciones'
+import { resumenDeSueno } from '../lib/sueno'
 import { useEnergia } from '../lib/useEnergia'
+import { useSueno } from '../lib/useSueno'
 import { useSesion } from '../sesion/useSesion'
 import { Icono } from './Icono'
 import { useAhora } from './useAhora'
@@ -24,8 +26,9 @@ export function TarjetaRecomienda({ plata }: { plata?: EstadoPlata }) {
   const [energia, elegirEnergia] = useEnergia(ahora)
   const plataPermitida = usePlata(plata === undefined && ajustes.plataEnHoy === true)
   const sesion = useSesion()
+  const { registros } = useSueno(ahora)
 
-  const recomendaciones = recomendar({ ahora, tareas, cursos, habitos, progreso, energia, plata: plata ?? plataPermitida })
+  const recomendaciones = recomendar({ ahora, tareas, cursos, habitos, progreso, energia, plata: plata ?? plataPermitida, sueno: resumenDeSueno(registros, ahora) })
   if (tareas.length === 0 && habitos.length === 0) return null
 
   return (

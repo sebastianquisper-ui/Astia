@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { NOMBRE_ACCION, NOMBRE_EXPRESION, type AccionAlpi, type ExpresionAlpi } from './datos'
 
@@ -52,13 +52,20 @@ export function RuedaAlpi({ abierta, alCerrar, elegida, alElegirExpresion, alMov
   alMovimiento: (a: AccionAlpi) => void
 }) {
   const [vista, setVista] = useState<'emotes' | 'movimientos'>('emotes')
+  // `alCerrar` suele ser una función nueva en cada dibujo de la pantalla: se guarda aparte para que
+  // un nuevo dibujo no reinicie la rueda a "emotes" mientras estás en "movimientos".
+  const cerrar = useRef(alCerrar)
+  cerrar.current = alCerrar
   useEffect(() => {
     if (!abierta) return
     setVista('emotes')
-    const alTeclear = (e: KeyboardEvent) => e.key === 'Escape' && alCerrar()
+  }, [abierta])
+  useEffect(() => {
+    if (!abierta) return
+    const alTeclear = (e: KeyboardEvent) => e.key === 'Escape' && cerrar.current()
     document.addEventListener('keydown', alTeclear)
     return () => document.removeEventListener('keydown', alTeclear)
-  }, [abierta, alCerrar])
+  }, [abierta])
 
   if (!abierta) return null
   const emotes = vista === 'emotes'

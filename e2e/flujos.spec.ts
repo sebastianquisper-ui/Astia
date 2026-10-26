@@ -1711,3 +1711,16 @@ test('registrar: desde el formulario se puede pasar a dictar', async ({ page }) 
   await page.getByRole('dialog', { name: 'Nuevo movimiento' }).getByRole('button', { name: 'Mejor lo dicto' }).click()
   await expect(page.getByRole('dialog', { name: 'Dictar un movimiento' })).toBeVisible()
 })
+
+test('Mi Órbita: el control de sueño cuenta las horas y las recuerda', async ({ page }) => {
+  await page.goto('/')
+  await MODO(page).getByRole('button', { name: 'Mi Órbita' }).click()
+  const tarjeta = page.getByRole('region', { name: 'Control de sueño' })
+  await tarjeta.getByRole('button', { name: 'Me voy a dormir' }).click()
+  await expect(tarjeta).toContainText('Durmiendo desde')
+  // Se recuerda al recargar
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Control de sueño' })).toContainText('Durmiendo desde')
+  await page.getByRole('button', { name: 'Ya desperté' }).click()
+  await expect(page.getByRole('button', { name: 'Me voy a dormir' })).toBeVisible()
+})
