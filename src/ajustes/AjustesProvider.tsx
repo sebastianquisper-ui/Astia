@@ -44,6 +44,8 @@ export interface Ajustes {
   datosEjemplo: boolean
   /** Quita desenfoques y animaciones de fondo, para celulares que van lentos. */
   ligero: boolean
+  /** Deja que "Astia te recomienda" mire si vas en verde, ámbar o rojo con tu plata (nunca montos). */
+  plataEnHoy?: boolean
 }
 
 const CLAVE = 'astia.ajustes'

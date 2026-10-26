@@ -22,6 +22,7 @@ import { TarjetaAhora } from '../ui/TarjetaAhora'
 import { DictadoTarea } from '../formularios/DictadoTarea'
 import { PreguntarAstia } from '../ui/PreguntarAstia'
 import { useAhora } from '../ui/useAhora'
+import { TarjetaRecomienda } from '../ui/TarjetaRecomienda'
 import { Vacio } from '../ui/Vacio'
 
 /** Hoy en modo Académico: clase actual, urgencias y tus 3 de hoy de la universidad. */
@@ -114,6 +115,8 @@ export function HoyAcademico() {
       <button className="btn suave" style={{ width: '100%' }} onClick={() => (window.location.hash = '#/mas/agenda')}>
         <Icono nombre="reloj" tam={18} /> Recordarme algo
       </button>
+
+      <TarjetaRecomienda />
 
       {hayDatos && (
         <div className="chips">
