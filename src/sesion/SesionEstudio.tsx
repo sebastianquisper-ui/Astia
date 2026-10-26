@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import type { Tarea } from '../dominio/tipos'
 import { useDatos } from '../datos/DatosProvider'
 import type { Fase } from '../lib/metodos'
+import { registrarSesion } from '../lib/sesiones'
 import { AvatarMascota } from '../mascotas/AvatarMascota'
 import { Icono } from '../ui/Icono'
 import { sonar } from '../sonidos/reproductor'
@@ -16,6 +17,8 @@ const mmss = (ms: number) => {
 
 interface Props {
   titulo: string
+  /** Para anotar con qué método estudiaste (ver lib/sesiones). */
+  metodoId?: string
   fases: Fase[]
   tarea?: Tarea
   esPomodoro?: boolean
@@ -28,12 +31,22 @@ interface Props {
 }
 
 /** Sesión guiada a pantalla completa: recorre las fases del método con su temporizador. */
-export function SesionEstudio({ titulo, fases, tarea, esPomodoro, esArranque, descansoMin, siguiente, alMarcarHecha, alCerrar }: Props) {
+export function SesionEstudio({ titulo, metodoId, fases, tarea, esPomodoro, esArranque, descansoMin, siguiente, alMarcarHecha, alCerrar }: Props) {
   const { registrarMinutos } = useDatos()
   const [, dibujar] = useReducer((n: number) => n + 1, 0)
   // Todo el estado del reloj vive en una referencia: así el intervalo siempre ve el valor actual
   const S = useRef({ idx: 0, corriendo: true, fin: Date.now() + fases[0].minutos * 60_000, restante: 0, terminada: false, enfoqueMin: 0 })
   const s = S.current
+
+  // Al cerrar la sesión (de cualquier forma) queda anotada: hora, método y si llegaste al final
+  const inicio = useRef(new Date().toISOString())
+  useEffect(
+    () => () => {
+      registrarSesion({ inicio: inicio.current, metodo: metodoId ?? 'otro', tareaId: tarea?.id, enfoqueMin: s.enfoqueMin, completa: s.terminada })
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   // Registra lo que llevas de la fase actual (minutos enteros) y devuelve cuánto era
   const registrarFase = (entera: boolean) => {

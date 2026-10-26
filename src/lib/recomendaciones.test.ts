@@ -56,6 +56,19 @@ describe('recomendar', () => {
     it('en verde no molesta', () => expect(ids({ plata: 'verde', tareas: [tarea({})] })).not.toContain('plata'))
   })
 
+  describe('el sueño', () => {
+    const examen = [tarea({ tipo: 'examen', fecha: dia(1) })]
+    it('dormir poco con examen cerca manda sobre todo', () => {
+      const r = recomendar({ ...base, tareas: examen, sueno: { horasUltimaNoche: 4, promedio7: null } })
+      expect(r[0].id).toBe('sueno-examen')
+    })
+    it('dormir poco sin examen baja el ritmo', () => expect(ids({ tareas: [tarea({})], sueno: { horasUltimaNoche: 5, promedio7: null } })).toContain('sueno-poco'))
+    it('un promedio bajo con examen esta semana avisa que se cae', () => {
+      expect(ids({ tareas: [tarea({ tipo: 'examen', fecha: dia(5) })], sueno: { horasUltimaNoche: 7, promedio7: 5.5 } })).toContain('sueno-cae')
+    })
+    it('dormir bien no cambia nada', () => expect(ids({ tareas: examen, sueno: { horasUltimaNoche: 8, promedio7: 7.5 } })).not.toContain('sueno-examen'))
+  })
+
   it('nunca devuelve más de 3 y va de mayor a menor prioridad', () => {
     const r = recomendar({ ...base, energia: 'baja', plata: 'rojo', habitos: [habito({ registro: [dia(-1), dia(-2), dia(-3)] })], tareas: [tarea({ tipo: 'examen', fecha: dia(1) }), tarea({ fecha: dia(-1) })] })
     expect(r).toHaveLength(3)

@@ -2,6 +2,8 @@ import type { Curso, Habito, ProgresoDia, Tarea } from '../dominio/tipos'
 import { diffDays, parseYmd, ymd } from './fechas'
 import { cumplido, rachaDe, tocaHoy } from './habitos'
 import { metodoPorId, sugerirMetodo, type MetodoId } from './metodos'
+import type { ResumenSueno } from './sueno'
+import { textoDuracion } from './sueno'
 import { urgenciaDe, venceEn } from './urgencia'
 
 // "Astia te recomienda": junta lo que ya sabe de tu estudio, tus hábitos, cómo te sientes hoy y, si tú lo
@@ -21,6 +23,8 @@ export interface ContextoRecomendacion {
   energia: Energia | null
   /** null si el usuario no quiere que Hoy mire su plata. */
   plata: EstadoPlata | null
+  /** Lo que registró en el control de sueño; si no lo usa, todo en null. */
+  sueno?: ResumenSueno
 }
 
 export interface Recomendacion {
@@ -37,7 +41,7 @@ export interface Recomendacion {
 const MAX = 3
 
 export function recomendar(c: ContextoRecomendacion): Recomendacion[] {
-  const { ahora, tareas, cursos, habitos, energia, plata } = c
+  const { ahora, tareas, cursos, habitos, energia, plata, sueno } = c
   const hoy = ymd(ahora)
   const hoyFecha = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate())
   const pendientes = tareas.filter((t) => t.estado === 'pendiente').sort((a, b) => venceEn(a) - venceEn(b))
@@ -74,6 +78,18 @@ export function recomendar(c: ContextoRecomendacion): Recomendacion[] {
     }
   }
 
+  // Sueño y estudio: dormir poco con un examen cerca, o un sueño que se viene cayendo
+  if (sueno?.horasUltimaNoche != null && sueno.horasUltimaNoche < 6) {
+    const horas = textoDuracion(sueno.horasUltimaNoche)
+    lista.push(
+      proximo && dias(proximo) <= 2
+        ? { id: 'sueno-examen', titulo: `Dormiste ${horas} y tienes examen pronto`, detalle: 'Haz sesiones cortas con descansos y acuéstate temprano hoy: llegar descansado rinde más que una noche de estudio.', prioridad: 105 }
+        : { id: 'sueno-poco', titulo: `Dormiste ${horas}: hoy baja el ritmo`, detalle: 'Elige lo más importante, hazlo en bloques cortos y trata de dormir más esta noche.', prioridad: 68 },
+    )
+  } else if (sueno?.promedio7 != null && sueno.promedio7 < 6.5 && proximo) {
+    lista.push({ id: 'sueno-cae', titulo: 'Tu sueño se viene cayendo', detalle: `Promedias ${textoDuracion(sueno.promedio7)} y tienes examen esta semana. Dormir lo que corresponde también es estudiar.`, prioridad: 85 })
+  }
+
   // 2. Lo vencido primero
   if (vencidas.length) {
     const t = vencidas[0]
@@ -89,7 +105,7 @@ export function recomendar(c: ContextoRecomendacion): Recomendacion[] {
   }
 
   // 3. Cómo te sientes hoy
-  if (energia === 'baja' && pendientes.length) {
+  if (energia === 'baja' && pendientes.length && !lista.some((r) => r.id === 'sueno-poco')) {
     const facil = pendientes.find((t) => t.prioridad === 'baja') ?? pendientes[0]
     lista.push({
       id: 'energia-baja',
