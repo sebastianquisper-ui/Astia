@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Claves de avisos de Astia</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px 16px; line-height: 1.5; background: #0A0E21; color: #eef; }
+  button { font: inherit; padding: 12px 18px; border-radius: 12px; border: 0; background: #6c7bff; color: #fff; font-weight: 600; }
+  code { display: block; word-break: break-all; background: #1F2230; padding: 12px; border-radius: 10px; margin: 6px 0 16px; user-select: all; }
+  .privada { border: 1px solid #ff8a8a; }
+</style>
+</head>
+<body>
+<h1>Claves de avisos</h1>
+<p>Esta página crea las dos claves que necesita el servidor de avisos. Se generan <b>aquí, en tu teléfono</b>: no se envían a ningún sitio.</p>
+<button id="generar">Generar claves</button>
+<div id="salida" hidden>
+  <h2>Clave pública</h2>
+  <p>Esta va en el código de Astia y en el servidor. No es secreta.</p>
+  <code id="publica"></code>
+  <h2>Clave privada</h2>
+  <p><b>Secreta.</b> Solo va en el servidor. No la pegues en ningún chat ni se la des a nadie, ni a Claude.</p>
+  <code id="privada" class="privada"></code>
+</div>
+<script>
+const b64 = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+document.getElementById('generar').onclick = async () => {
+  const par = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign'])
+  const pub = new Uint8Array(await crypto.subtle.exportKey('raw', par.publicKey))
+  const jwk = await crypto.subtle.exportKey('jwk', par.privateKey)
+  document.getElementById('publica').textContent = b64(pub)
+  document.getElementById('privada').textContent = jwk.d
+  document.getElementById('salida').hidden = false
+}
+</script>
+</body>
+</html>

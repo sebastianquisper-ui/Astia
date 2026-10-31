@@ -29,6 +29,8 @@ export interface Ajustes {
   sonidos?: PreferenciasSonido
   /** Si quedó activado crear los recordatorios también en Google Calendar. */
   calendario?: { activo?: boolean }
+  /** Avisos con la app cerrada (Web Push): activos en este dispositivo. */
+  avisosCerrada?: { activo?: boolean }
   /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
   alpi3d?: boolean
   /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */

@@ -3,6 +3,8 @@ import { useAjustes } from '../ajustes/AjustesProvider'
 import { borrarEventoRecordatorio, calendarioConfigurado, calendarioConectado, conectarCalendario } from '../calendario/google'
 import { useDatos } from '../datos/DatosProvider'
 import { fraseDeAviso } from '../lib/recordatorios'
+import { avisosDeRecordatorios } from '../notificaciones/avisos'
+import { pushConfigurado, sincronizarAvisos } from '../notificaciones/push'
 import { sonar } from '../sonidos/reproductor'
 import { decirRecordatorio } from '../sonidos/voz'
 import { useAviso } from '../ui/Aviso'
@@ -21,6 +23,14 @@ export function MotorRecordatorios() {
   const ultimo = useRef({ recordatorios, ajustes, guardarRecordatorio, borrarRecordatorio, avisar })
   ultimo.current = { recordatorios, ajustes, guardarRecordatorio, borrarRecordatorio, avisar }
   const limpiando = useRef(false)
+
+  // Con los avisos de la app cerrada activos, el servidor recibe la lista actualizada cada vez que cambian los recordatorios
+  const conAvisos = ajustes.avisosCerrada?.activo === true
+  useEffect(() => {
+    if (!conAvisos || !pushConfigurado()) return
+    const espera = window.setTimeout(() => void sincronizarAvisos(avisosDeRecordatorios(recordatorios, Date.now())), 1500)
+    return () => window.clearTimeout(espera)
+  }, [conAvisos, recordatorios])
 
   useEffect(() => {
     const revisar = () => {

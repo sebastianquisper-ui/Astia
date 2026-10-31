@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Las pruebas del servidor de avisos usan sus propias dependencias
+      - run: npm ci --prefix servidor
       - run: npm test
       - run: npm run build
         env:

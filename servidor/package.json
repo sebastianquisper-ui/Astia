@@ -1,0 +1,19 @@
+{
+  "name": "astia-avisos",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Servidor de avisos de Astia (Cloudflare Worker): envía las notificaciones con la app cerrada.",
+  "scripts": {
+    "claves": "node generar-claves.mjs",
+    "dev": "wrangler dev",
+    "desplegar": "wrangler deploy",
+    "empaquetar": "wrangler deploy --dry-run --outdir dist && node -e \"require('fs').copyFileSync('dist/index.js','astia-avisos.js')\""
+  },
+  "dependencies": {
+    "@block65/webcrypto-web-push": "2.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.156.0"
+  }
+}
