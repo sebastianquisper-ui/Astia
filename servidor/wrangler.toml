@@ -1,0 +1,22 @@
+name = "astia-avisos"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+# Cada minuto revisa si toca enviar algún aviso
+[triggers]
+crons = ["* * * * *"]
+
+# Aquí se guardan las suscripciones y los avisos pendientes.
+# El "id" lo da el comando `npx wrangler kv namespace create AVISOS` (ver docs/NOTIFICACIONES.md).
+[[kv_namespaces]]
+binding = "AVISOS"
+id = "PON_AQUI_EL_ID_DEL_KV"
+
+[vars]
+# Quién puede hablar con el servidor (la dirección de Astia)
+ORIGENES = "https://sebastianquisper-ui.github.io,http://localhost:5173,http://localhost:4173"
+# Se manda a Apple/Google junto con los avisos: una dirección web, no un correo
+VAPID_SUBJECT = "https://sebastianquisper-ui.github.io/Astia/"
+# La pública es la misma que va en la app (no es secreta)
+VAPID_PUBLIC_KEY = "PON_AQUI_LA_CLAVE_PUBLICA"
+# La privada NO se escribe aquí: se guarda con `npx wrangler secret put VAPID_PRIVATE_KEY`

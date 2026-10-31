@@ -39,12 +39,14 @@ export default defineConfig({
         // Todo lo de la app queda guardado en el teléfono: abre sin internet
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
         navigateFallback: BASE + 'index.html',
+        // Muestra los avisos que llegan con la app cerrada (public/push-sw.js)
+        importScripts: ['push-sw.js'],
       },
     }),
   ],
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.test.ts', 'supabase/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'supabase/**/*.test.ts', 'servidor/src/**/*.test.ts'],
     // Estas necesitan el emulador de Firestore: se corren con `npm run test:firestore`
     exclude: ['**/node_modules/**', '**/*.emulador.test.ts'],
   },
