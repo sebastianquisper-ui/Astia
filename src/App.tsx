@@ -4,6 +4,7 @@ import { Estrella, Icono } from './ui/Icono'
 import { BotonMusica } from './ui/BotonMusica'
 import { EstadoNubeInsignia } from './ui/EstadoNubeInsignia'
 import { MotorRecordatorios } from './recordatorios/MotorRecordatorios'
+import { MotorAlarmas } from './recordatorios/MotorAlarmas'
 import { NavInferior } from './ui/NavInferior'
 import { Hoy } from './pantallas/Hoy'
 import { Semana } from './pantallas/Semana'
@@ -86,6 +87,7 @@ function Cuerpo({ ruta, elegirPestana, abrirMas, cambiarModo, irAMas }: { ruta: 
       {finanzas ? <FondoDinero /> : <Cielo />}
       <DescansoVista />
       <MotorRecordatorios />
+      <MotorAlarmas />
       <Bienvenida />
       <div className="app">
         <header className="cabecera">

@@ -8,6 +8,7 @@ import type { Etapa } from '../lib/etapa'
 import { generoDeMascota, type MascotaElegida } from '../lib/mascotas'
 import { COLOR_BARRA, ESCALA_LETRA, temaEfectivo, type ModoTema, type TamanoLetra } from '../lib/tema'
 import { guardarLocal, leerLocal } from '../lib/almacen'
+import type { AjustesAlarmas } from '../lib/alarmas'
 import { useAviso } from '../ui/Aviso'
 
 // Ajustes de vista. En la fase 2 se sincronizarán con la nube (tabla `profiles`);
@@ -31,6 +32,8 @@ export interface Ajustes {
   calendario?: { activo?: boolean }
   /** Avisos con la app cerrada (Web Push): activos en este dispositivo. */
   avisosCerrada?: { activo?: boolean }
+  /** Alarmas a pantalla completa: horas del día en que Astia te revisa los pendientes y aviso antes de cada clase. */
+  alarmas?: AjustesAlarmas
   /** Alpi en 3D (por defecto sí). Apagado se ve dibujada: gasta menos batería. */
   alpi3d?: boolean
   /** Recordatorio 20-20-20 para descansar la vista (por defecto sí). */

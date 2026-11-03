@@ -110,6 +110,46 @@ export async function borrarEventoRecordatorio(idEvento: string): Promise<boolea
   }
 }
 
+/**
+ * Deja en Google Calendar exactamente estas alarmas diarias (una por hora, que se repite todos los días con aviso a la hora exacta).
+ * Primero borra las que Astia creó antes, así cambiar las horas nunca duplica. Devuelve cuántas quedaron.
+ */
+export async function sincronizarAlarmasDiarias(horas: string[], titulo: string): Promise<number> {
+  const t = vigente()
+  if (!t) throw new Error('Sin permiso de Google Calendar')
+  const cab = { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' }
+  const lista = await fetch(`${API}?privateExtendedProperty=${encodeURIComponent('astiaAlarma=1')}&maxResults=250&showDeleted=false`, { headers: cab })
+  if (!lista.ok) throw new Error(`Google Calendar respondió ${lista.status}`)
+  const previas = ((await lista.json()) as { items?: { id: string }[] }).items ?? []
+  for (const e of previas) await fetch(`${API}/${encodeURIComponent(e.id)}`, { method: 'DELETE', headers: cab })
+
+  const zona = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const hoy = new Date()
+  const dia = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`
+  let creadas = 0
+  for (const h of horas) {
+    const [hh, mm] = h.split(':').map(Number)
+    const finMin = hh * 60 + mm + 10
+    const fin = `${String(Math.floor(finMin / 60) % 24).padStart(2, '0')}:${String(finMin % 60).padStart(2, '0')}`
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: cab,
+      body: JSON.stringify({
+        summary: titulo,
+        description: 'Alarma diaria de Astia: abre la app y revisa tus pendientes. Se actualiza sola desde Astia.',
+        start: { dateTime: `${dia}T${h}:00`, timeZone: zona },
+        end: { dateTime: `${dia}T${fin}:00`, timeZone: zona },
+        recurrence: ['RRULE:FREQ=DAILY'],
+        reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }] },
+        extendedProperties: { private: { astiaAlarma: '1' } },
+      }),
+    })
+    if (!res.ok) throw new Error(`Google Calendar respondió ${res.status}`)
+    creadas++
+  }
+  return creadas
+}
+
 /** Solo para pruebas. */
 export const _olvidarToken = () => {
   token = null

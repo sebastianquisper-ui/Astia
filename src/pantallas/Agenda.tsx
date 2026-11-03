@@ -8,6 +8,7 @@ import { explicarFalloMicrofono, hayDictado, useDictado } from '../lib/dictado'
 import { fechaCorta, parseYmd, ymd } from '../lib/fechas'
 import { cuandoTexto, interpretarRecordatorio } from '../lib/recordatorios'
 import { PanelAvisos } from '../notificaciones/PanelAvisos'
+import { PanelAlarmas } from '../recordatorios/PanelAlarmas'
 import { useAviso } from '../ui/Aviso'
 import { Icono } from '../ui/Icono'
 import { useAhora } from '../ui/useAhora'
@@ -95,6 +96,8 @@ export function Agenda({ alVolver }: { alVolver: () => void }) {
           <button type="submit" className="btn" disabled={creando}>Recordar</button>
         </form>
         {(bloqueado || !hayDictado()) && <p className="nota preguntar-aviso">Para dictar usa el <b>micrófono del teclado</b> (abajo a la derecha) y toca Recordar.</p>}
+
+        <PanelAlarmas />
 
         <PanelAvisos />
 

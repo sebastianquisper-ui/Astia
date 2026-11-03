@@ -15,3 +15,10 @@ Para que además lleguen **con la app cerrada**, Astia crea un evento con alarma
 
 Permiso que pide: solo `calendar.events` (crear y borrar eventos). Las alarmas suenan con la app de Google Calendar instalada y las notificaciones permitidas
 (o con tu cuenta agregada al Calendario del iPhone). El permiso dura alrededor de una hora: si caducó, Astia lo vuelve a pedir con un toque.
+
+## Alarmas a pantalla completa (Más → Recordatorios y apuntes)
+Tú eliges a qué horas del día Astia te revisa los pendientes (las que quieras) y cuántos minutos antes de cada clase te avisa (5 a 30, o no).
+Con Astia abierta (o al abrirla hasta 45 min después de la hora) el aviso **tapa toda la pantalla**, suena y Alpi lo dice; tiene "Ver mis pendientes",
+"Recordarme en 10 min" y "Entendido". Con **"También en Google Calendar"** cada hora se crea además como evento diario con aviso (se reemplazan solas al cambiar las horas).
+Límite honesto: con la app cerrada solo puede llegar la notificación normal de Google Calendar, no una pantalla completa propia (el navegador/iPhone no lo permite).
+Código: `src/lib/alarmas.ts` (lógica con pruebas), `src/recordatorios/MotorAlarmas.tsx`, `PantallaAviso.tsx`, `PanelAlarmas.tsx`.

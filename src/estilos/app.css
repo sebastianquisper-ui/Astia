@@ -1202,3 +1202,25 @@ a.enlace-mascotas { text-decoration: none; color: var(--text); }
 :root[data-ligero] .deriva, :root[data-ligero] .fugaz, :root[data-ligero] .estrellas.e2, :root[data-ligero] .estrellas.e3, :root[data-ligero] .mascota-sombra, :root[data-ligero] .avatar, :root[data-ligero] .rig-resp { animation: none; }
 :root[data-ligero] .fugaz { display: none; }
 :root[data-ligero] .mascota-sombra { filter: none; }
+
+/* Alarmas a pantalla completa (como el aviso del curso que te toca) */
+.aviso-grande {
+  position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
+  padding: calc(40px + env(safe-area-inset-top, 0px)) 24px calc(28px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg); color: var(--text); overflow-y: auto; animation: aparece 0.2s ease-out;
+}
+.aviso-grande-cuerpo { margin: auto 0; text-align: center; }
+.aviso-grande-etiqueta { font-weight: 700; color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.8125rem; }
+.aviso-grande-titulo { font-family: var(--display); font-size: clamp(2rem, 9vw, 3.25rem); line-height: 1.1; margin-top: 10px; }
+.aviso-grande-cuenta { font-size: 1.5rem; font-weight: 700; margin-top: 14px; color: var(--gold); }
+.aviso-grande-sub { color: var(--muted); margin-top: 8px; }
+.aviso-grande-lista { list-style: none; margin: 18px auto 0; padding: 0; max-width: 420px; display: grid; gap: 10px; text-align: left; }
+.aviso-grande-lista li { background: var(--surface); border-radius: 14px; padding: 12px 14px; box-shadow: var(--sombra); border-left: 5px solid var(--green); }
+.aviso-grande-lista li.vencida, .aviso-grande-lista li.roja { border-left-color: var(--red); }
+.aviso-grande-lista li.ambar { border-left-color: var(--amber); }
+.aviso-grande-lista b { display: block; }
+.aviso-grande-lista span { color: var(--muted); font-size: 0.8125rem; }
+.aviso-grande-acciones { position: sticky; bottom: 0; background: var(--bg); padding-top: 8px; display: grid; gap: 10px; max-width: 420px; width: 100%; margin: 0 auto; }
+.alarma-horas { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+.alarma-hora { border: 0; cursor: pointer; }
+.alarma-sub { display: block; margin-top: 16px; }
