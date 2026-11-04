@@ -1224,3 +1224,6 @@ a.enlace-mascotas { text-decoration: none; color: var(--text); }
 .alarma-horas { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
 .alarma-hora { border: 0; cursor: pointer; }
 .alarma-sub { display: block; margin-top: 16px; }
+.alarma-hora.elegido { background: var(--accent); color: var(--accent-ink); }
+.aviso-tarea-botones { flex-direction: column; margin-top: 16px; }
+.aviso-tarea-botones .btn { width: 100%; }

@@ -150,6 +150,36 @@ export async function sincronizarAlarmasDiarias(horas: string[], titulo: string)
   return creadas
 }
 
+/** Crea en Google Calendar la entrega de una tarea con todas sus alarmas (y, si se pidió, el aviso diario hasta entregar). */
+export async function crearEventoTarea(e: { titulo: string; detalle: string; inicio: Date; fin: Date; alarmas: number[]; diario?: { primero: Date; hasta: Date } }): Promise<void> {
+  const t = vigente()
+  if (!t) throw new Error('Sin permiso de Google Calendar')
+  const zona = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const cab = { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' }
+  const envio = async (cuerpo: object) => {
+    const res = await fetch(API, { method: 'POST', headers: cab, body: JSON.stringify(cuerpo) })
+    if (!res.ok) throw new Error(`Google Calendar respondió ${res.status}`)
+  }
+  await envio({
+    summary: e.titulo,
+    description: e.detalle,
+    start: { dateTime: e.inicio.toISOString(), timeZone: zona },
+    end: { dateTime: e.fin.toISOString(), timeZone: zona },
+    reminders: { useDefault: false, overrides: e.alarmas.slice(0, 5).map((minutes) => ({ method: 'popup', minutes })) },
+  })
+  if (e.diario) {
+    const utc = e.diario.hasta.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+    await envio({
+      summary: '📌 Revisa: ' + e.titulo.replace(/^📝 /, ''),
+      description: e.detalle,
+      start: { dateTime: e.diario.primero.toISOString(), timeZone: zona },
+      end: { dateTime: new Date(e.diario.primero.getTime() + 10 * 60_000).toISOString(), timeZone: zona },
+      recurrence: [`RRULE:FREQ=DAILY;UNTIL=${utc}`],
+      reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }] },
+    })
+  }
+}
+
 /** Solo para pruebas. */
 export const _olvidarToken = () => {
   token = null

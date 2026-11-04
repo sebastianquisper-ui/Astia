@@ -3,7 +3,9 @@ import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
 import { alarmasPendientes, claseInminente, claveDeAlarma, normalizarHoras, pendientesParaAlarma } from '../lib/alarmas'
 import { leerLocal, guardarLocal } from '../lib/almacen'
+import { avisosDeTareaQueTocan, leerConfigs } from '../lib/avisosTarea'
 import { ymd } from '../lib/fechas'
+import { textoVence } from '../lib/urgencia'
 import { sonar } from '../sonidos/reproductor'
 import { decirRecordatorio } from '../sonidos/voz'
 import { PantallaAviso, type AvisoGrande } from './PantallaAviso'
@@ -55,9 +57,20 @@ export function MotorAlarmas() {
         mostrar(a, a.tipo === 'clase' ? `${a.curso}, ${a.inicio}` : 'Tienes pendientes por revisar')
         return
       }
-      const al = aj.alarmas
-      if (!al?.activo || abierto) return
+      if (abierto) return
       const nombreCurso = (id: string | null) => cu.find((c) => c.id === id)?.nombre ?? ''
+
+      // Avisos que tú configuraste para una tarea (botón "Configurar avisos"): funcionan aunque las alarmas diarias estén apagadas
+      const deTarea = avisosDeTareaQueTocan(ts, leerConfigs(), ahora, mostradas.current)
+      if (deTarea.length) {
+        for (const a of deTarea) marcar(a.clave)
+        const a = deTarea[0]
+        mostrar({ tipo: 'tarea', titulo: a.tarea.titulo, curso: nombreCurso(a.tarea.cursoId), cuando: textoVence(a.tarea, ahora) }, `${a.tarea.titulo}. ${textoVence(a.tarea, ahora)}`)
+        return
+      }
+
+      const al = aj.alarmas
+      if (!al?.activo) return
 
       const clase = claseInminente(cs, ahora, al.claseMin ?? 0)
       if (clase && !mostradas.current.has(clase.clave)) {

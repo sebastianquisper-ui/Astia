@@ -22,3 +22,8 @@ Con Astia abierta (o al abrirla hasta 45 min después de la hora) el aviso **tap
 "Recordarme en 10 min" y "Entendido". Con **"También en Google Calendar"** cada hora se crea además como evento diario con aviso (se reemplazan solas al cambiar las horas).
 Límite honesto: con la app cerrada solo puede llegar la notificación normal de Google Calendar, no una pantalla completa propia (el navegador/iPhone no lo permite).
 Código: `src/lib/alarmas.ts` (lógica con pruebas), `src/recordatorios/MotorAlarmas.tsx`, `PantallaAviso.tsx`, `PanelAlarmas.tsx`.
+
+## Avisos por tarea ("Configurar avisos")
+Al guardar una tarea aparece "Configurar avisos"; también está dentro de la tarea (🔔 Configurar avisos). Eliges hasta 5 avisos (a la hora, 10 min, 30 min, 1 h, 3 h, 1 día, 2 días antes o un tiempo propio)
+y, si quieres, un aviso diario a la hora que digas hasta la entrega. Se puede: **solo en Astia** (pantalla completa con la app abierta), **archivo .ics** (abre el Calendario del teléfono o Google Calendar con todas las alarmas, sin configurar nada)
+o **crear en Google Calendar** (necesita el `CLIENT_ID` de arriba). Código: `src/lib/avisosTarea.ts`, `src/formularios/AvisosTarea.tsx`.

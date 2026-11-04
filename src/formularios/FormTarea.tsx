@@ -22,6 +22,8 @@ interface Props {
   cursos: Curso[]
   alGuardar: (t: Tarea) => void
   alBorrar?: () => void
+  /** Abre la hoja "Configurar avisos" de esta tarea (solo al editar una que ya existe). */
+  alConfigurarAvisos?: () => void
   alCerrar: () => void
 }
 
@@ -30,7 +32,7 @@ interface Props {
  * - Universidad: curso, tipo (tarea, estudio, examen), prioridad y evidencia.
  * - Mi Órbita: solo qué hacer, el apartado (Deporte, Salud...) y cuándo. Nada de exámenes.
  */
-export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alCerrar }: Props) {
+export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alConfigurarAvisos, alCerrar }: Props) {
   const avisar = useAviso()
   const area: Area = inicial?.area ?? plantilla?.area ?? 'universidad'
   const personal = area === 'personal'
@@ -159,6 +161,11 @@ export function FormTarea({ inicial, plantilla, cursos, alGuardar, alBorrar, alC
       {inicial?.evidencia && <VerEvidencia tarea={inicial} />}
       <p className="nota">Para marcarla hecha te pediré evidencia: una foto de tu trabajo o el enlace de la entrega.</p>
 
+      {alConfigurarAvisos && (
+        <div className="acciones">
+          <button type="button" className="btn suave" onClick={alConfigurarAvisos}>🔔 Configurar avisos (Google Calendar)</button>
+        </div>
+      )}
       <div className="acciones">
         <button type="button" className="btn suave" onClick={alCerrar}>Cancelar</button>
         <button type="submit" className="btn">Guardar</button>

@@ -3,6 +3,7 @@ import type { Tarea } from '../dominio/tipos'
 import { useDatos } from '../datos/DatosProvider'
 import { Hoja } from '../ui/Hoja'
 import { useAviso } from '../ui/Aviso'
+import { AvisosTarea } from './AvisosTarea'
 import { FormTarea } from './FormTarea'
 
 /**
@@ -13,6 +14,7 @@ export function useEditorTarea() {
   const { cursos, tareas, guardarTarea, borrarTarea } = useDatos()
   const avisar = useAviso()
   const [estado, setEstado] = useState<{ id?: string; plantilla?: Partial<Tarea> } | null>(null)
+  const [avisosDe, setAvisosDe] = useState<string | null>(null)
   const abrir = useCallback((id?: string, plantilla?: Partial<Tarea>) => setEstado({ id, plantilla }), [])
   const cerrar = useCallback(() => setEstado(null), [])
   const inicial = estado?.id ? tareas.find((t) => t.id === estado.id) : undefined
@@ -29,7 +31,7 @@ export function useEditorTarea() {
           alGuardar={(t) => {
             guardarTarea(t)
             cerrar()
-            avisar(personal ? (inicial ? 'Pendiente actualizado.' : 'Pendiente agregado.') : inicial ? 'Tarea actualizada.' : 'Tarea agregada.')
+            avisar(personal ? (inicial ? 'Pendiente actualizado.' : 'Pendiente agregado.') : inicial ? 'Tarea actualizada.' : 'Tarea agregada.', 'ok', { accion: 'Configurar avisos', alAccion: () => setAvisosDe(t.id), duracion: 7000 })
           }}
           alBorrar={
             inicial
@@ -40,10 +42,17 @@ export function useEditorTarea() {
                 }
               : undefined
           }
+          alConfigurarAvisos={inicial ? () => { cerrar(); setAvisosDe(inicial.id) } : undefined}
           alCerrar={cerrar}
         />
       )}
     </Hoja>
   )
-  return { abrir, nodo }
+  const paraAvisos = avisosDe ? tareas.find((t) => t.id === avisosDe) : undefined
+  const nodoAvisos = (
+    <Hoja titulo="Configurar avisos" abierta={paraAvisos !== undefined} alCerrar={() => setAvisosDe(null)}>
+      {paraAvisos && <AvisosTarea key={paraAvisos.id} tarea={paraAvisos} curso={cursos.find((c) => c.id === paraAvisos.cursoId)} alCerrar={() => setAvisosDe(null)} />}
+    </Hoja>
+  )
+  return { abrir, nodo: <>{nodo}{nodoAvisos}</> }
 }

@@ -6,6 +6,7 @@ import { textoVence, urgenciaDe } from '../lib/urgencia'
 /** Lo que se muestra a pantalla completa. */
 export type AvisoGrande =
   | { tipo: 'clase'; curso: string; aula: string; inicio: string; minutos: number }
+  | { tipo: 'tarea'; titulo: string; curso: string; cuando: string }
   | { tipo: 'alarma'; hora: string; pendientes: Tarea[]; cursoDe: (t: Tarea) => string }
 
 /**
@@ -21,16 +22,21 @@ export function PantallaAviso({ aviso, alCerrar, alPosponer, alVerPendientes }: 
   }, [alCerrar])
 
   const ahora = new Date()
-  const titulo = aviso.tipo === 'clase' ? aviso.curso : 'Revisa tus pendientes'
+  const titulo = aviso.tipo === 'clase' ? aviso.curso : aviso.tipo === 'tarea' ? aviso.titulo : 'Revisa tus pendientes'
   return (
     <div className="aviso-grande" role="alertdialog" aria-modal="true" aria-labelledby="ag-titulo">
       <div className="aviso-grande-cuerpo">
-        <p className="aviso-grande-etiqueta">{aviso.tipo === 'clase' ? 'Tu próxima clase' : `Alarma de las ${horaBonita(aviso.hora)}`}</p>
+        <p className="aviso-grande-etiqueta">{aviso.tipo === 'clase' ? 'Tu próxima clase' : aviso.tipo === 'tarea' ? 'Entrega cerca' : `Alarma de las ${horaBonita(aviso.hora)}`}</p>
         <h1 id="ag-titulo" className="aviso-grande-titulo">{titulo}</h1>
         {aviso.tipo === 'clase' ? (
           <>
             <p className="aviso-grande-cuenta">{textoFalta(aviso.minutos)}</p>
             <p className="aviso-grande-sub">{aviso.inicio}{aviso.aula ? ` · ${aviso.aula}` : ''}</p>
+          </>
+        ) : aviso.tipo === 'tarea' ? (
+          <>
+            <p className="aviso-grande-cuenta">{aviso.cuando}</p>
+            {aviso.curso && <p className="aviso-grande-sub">{aviso.curso}</p>}
           </>
         ) : (
           <>
@@ -48,7 +54,7 @@ export function PantallaAviso({ aviso, alCerrar, alPosponer, alVerPendientes }: 
         )}
       </div>
       <div className="aviso-grande-acciones">
-        {aviso.tipo === 'alarma' && <button className="btn" onClick={alVerPendientes}>Ver mis pendientes</button>}
+        {aviso.tipo !== 'clase' && <button className="btn" onClick={alVerPendientes}>Ver mis pendientes</button>}
         <button className="btn suave" onClick={alPosponer}>Recordarme en 10 min</button>
         <button className="btn suave" onClick={alCerrar}>Entendido</button>
       </div>
