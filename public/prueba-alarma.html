@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de alarma · Astia</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 460px; margin: 0 auto; padding: 24px 16px; line-height: 1.45; background: #080b18; color: #e6e9f6; }
+  h1 { font-size: 1.4rem; }
+  button { display: block; width: 100%; padding: 16px; margin: 12px 0; font-size: 1rem; font-weight: 700; border: 0; border-radius: 14px; background: #a9b8ff; color: #11152b; }
+  p, li { color: #a9b2d0; }
+  #estado { padding: 10px 12px; border-radius: 10px; background: #1b2142; color: #e6e9f6; }
+</style>
+</head>
+<body>
+<h1>Prueba: alarma del reloj desde Astia</h1>
+<p id="estado">Revisando tu dispositivo…</p>
+<p>Abre esta página en <b>Chrome de tu Android</b> y toca un botón. Después cuéntame qué pasó.</p>
+<button id="a">1) Alarma en 2 minutos</button>
+<button id="t">2) Temporizador de 1 minuto</button>
+<ul>
+  <li>Si se abre el Reloj con la alarma o el temporizador puesto: <b>funciona</b>, y Astia puede pedir alarmas reales.</li>
+  <li>Si no pasa nada o sale un error: en la web no se puede, y la solución es una app de Android.</li>
+</ul>
+<script>
+  var android = /Android/i.test(navigator.userAgent);
+  document.getElementById('estado').textContent = android ? 'Es un Android: puedes probar.' : 'Esto no es un Android: ábrela desde tu celular Android.';
+  function ir(accion, extras) {
+    var u = 'intent:#Intent;action=' + accion + ';' + extras + 'B.android.intent.extra.alarm.SKIP_UI=false;end';
+    window.location.href = u;
+  }
+  document.getElementById('a').onclick = function () {
+    var d = new Date(Date.now() + 2 * 60000);
+    ir('android.intent.action.SET_ALARM', 'i.android.intent.extra.alarm.HOUR=' + d.getHours() + ';i.android.intent.extra.alarm.MINUTES=' + d.getMinutes() + ';S.android.intent.extra.alarm.MESSAGE=' + encodeURIComponent('Prueba de Astia') + ';');
+  };
+  document.getElementById('t').onclick = function () {
+    ir('android.intent.action.SET_TIMER', 'i.android.intent.extra.alarm.LENGTH=60;S.android.intent.extra.alarm.MESSAGE=' + encodeURIComponent('Prueba de Astia') + ';');
+  };
+</script>
+</body>
+</html>
