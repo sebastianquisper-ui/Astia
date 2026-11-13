@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Rutina } from '../dominio/tipos'
 import { useDatos } from '../datos/DatosProvider'
 import { useEjecutorRutina } from '../formularios/EjecutarRutina'
+import { AvisosRecurrentes } from '../formularios/AvisosRecurrentes'
 import { FormRutina } from '../formularios/FormRutina'
 import { apartadoDe } from '../lib/apartados'
 import { MOMENTOS, hechaHoy, textoDias } from '../lib/rutinas'
@@ -16,6 +17,8 @@ export function Rutinas({ alVolver }: { alVolver: () => void }) {
   const { rutinas, guardarRutina, borrarRutina } = useDatos()
   const avisar = useAviso()
   const [editando, setEditando] = useState<{ id?: string; plantilla?: number } | null>(null)
+  const [avisosId, setAvisosId] = useState<string | null>(null)
+  const rutinaAvisos = avisosId ? rutinas.find((r) => r.id === avisosId) : undefined
   const inicial = editando?.id ? rutinas.find((r) => r.id === editando.id) : undefined
   const hoy = new Date()
   const ejecutor = useEjecutorRutina()
@@ -34,6 +37,7 @@ export function Rutinas({ alVolver }: { alVolver: () => void }) {
           </span>
           {hecha && <span className="etiqueta verde">Hecha hoy</span>}
         </button>
+        <button className="icono-btn" aria-label={'Configurar avisos de ' + r.nombre} onClick={() => setAvisosId(r.id)}>🔔</button>
         <button className="btn pequeno" onClick={() => ejecutor.empezar(r.id)} aria-label={(hecha ? 'Repetir: ' : 'Empezar: ') + r.nombre}>{hecha ? 'Repetir' : 'Empezar'}</button>
       </div>
     )
@@ -73,6 +77,10 @@ export function Rutinas({ alVolver }: { alVolver: () => void }) {
           ) : null
         })
       )}
+
+      <Hoja titulo="Configurar avisos" abierta={rutinaAvisos !== undefined} alCerrar={() => setAvisosId(null)}>
+        {rutinaAvisos && <AvisosRecurrentes key={rutinaAvisos.id} id={'r-' + rutinaAvisos.id} titulo={`⏰ ${rutinaAvisos.nombre}`} dias={rutinaAvisos.dias.length ? rutinaAvisos.dias : null} alCerrar={() => setAvisosId(null)} />}
+      </Hoja>
 
       <Hoja titulo={inicial ? 'Editar rutina' : 'Nueva rutina'} abierta={editando !== null} alCerrar={() => setEditando(null)}>
         {editando && (

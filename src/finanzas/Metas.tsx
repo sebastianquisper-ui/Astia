@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { sonar } from '../sonidos/reproductor'
 import { useAviso } from '../ui/Aviso'
+import { AvisosTarea } from '../formularios/AvisosTarea'
 import { Hoja } from '../ui/Hoja'
 import { Icono } from '../ui/Icono'
 import { useFinanzas } from './FinanzasProvider'
@@ -8,6 +9,7 @@ import { MAX_NOMBRE_META, esFecha, fechaLocal, parsearMonto } from './modelo'
 import { datosDeMeta, validarAporte } from './repo'
 import { fechaCorta, sumarDias } from './periodos'
 import { ordenarMetas, progresoMeta, type ProgresoMeta } from './metas'
+import type { Tarea } from '../dominio/tipos'
 import type { Meta } from './tipos'
 import { BarraProgreso, Monto, Segmentado, Vacio } from './ui'
 
@@ -35,6 +37,7 @@ function Detalle({ meta, p }: { meta: Meta; p: ProgresoMeta }) {
 export function Metas() {
   const { metas } = useFinanzas()
   const [formulario, setFormulario] = useState<{ meta?: Meta } | null>(null)
+  const [avisosMeta, setAvisosMeta] = useState<Meta | null>(null)
   const [aporte, setAporte] = useState<{ meta: Meta; modo: 'aportar' | 'retirar' } | null>(null)
   const hoy = fechaLocal()
   return (
@@ -61,6 +64,7 @@ export function Metas() {
               <Detalle meta={m} p={p} />
               <div className="acciones">
                 <button type="button" className="btn suave" onClick={() => setAporte({ meta: m, modo: 'aportar' })}>Aportar</button>
+                {m.limite && <button type="button" className="btn suave" onClick={() => setAvisosMeta(m)}>🔔 Avisos</button>}
                 <button type="button" className="btn suave" disabled={p.ahorrado <= 0} onClick={() => setAporte({ meta: m, modo: 'retirar' })}>Retirar</button>
               </div>
             </section>
@@ -75,6 +79,15 @@ export function Metas() {
 
       <Hoja titulo={formulario?.meta ? 'Editar meta' : 'Nueva meta'} abierta={formulario !== null} alCerrar={() => setFormulario(null)}>
         {formulario && <FormMeta key={formulario.meta?.id ?? 'nueva'} meta={formulario.meta} alCerrar={() => setFormulario(null)} />}
+      </Hoja>
+      <Hoja titulo="Avisos de la meta" abierta={avisosMeta !== null} alCerrar={() => setAvisosMeta(null)}>
+        {avisosMeta?.limite && (
+          <AvisosTarea
+            key={avisosMeta.id}
+            tarea={{ id: 'meta-' + avisosMeta.id, actualizadoEn: 0, titulo: avisosMeta.nombre, area: 'personal', cursoId: null, tipo: 'tarea', fecha: avisosMeta.limite, prioridad: 'media', pideEvidencia: false, pasos: [], estado: 'pendiente' } as Tarea}
+            alCerrar={() => setAvisosMeta(null)}
+          />
+        )}
       </Hoja>
       <Hoja titulo={aporte?.meta.nombre ?? ''} abierta={aporte !== null} alCerrar={() => setAporte(null)}>
         {aporte && <FormAporte key={aporte.meta.id + aporte.modo} meta={aporte.meta} modoInicial={aporte.modo} alCerrar={() => setAporte(null)} />}

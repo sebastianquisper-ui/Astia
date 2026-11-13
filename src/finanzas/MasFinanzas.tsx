@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAviso } from '../ui/Aviso'
 import { Icono, type NombreIcono } from '../ui/Icono'
+import { AvisosRecurrentes } from '../formularios/AvisosRecurrentes'
 import { Ajustes } from '../pantallas/Ajustes'
 import { Sonidos } from '../pantallas/Sonidos'
 import { AlpiFinanzasPantalla } from './AlpiFinanzasPantalla'
@@ -19,6 +20,7 @@ interface Entrada {
 const ENTRADAS: Entrada[] = [
   { id: 'comparar', titulo: 'Comparar periodos', detalle: 'Este mes contra el anterior, o los que quieras', icono: 'progreso' },
   { id: 'alpi-finanzas', titulo: 'Mi Alpi de Finanstia', detalle: 'Su nivel y cómo gana experiencia con tu plata', icono: 'mascota' },
+  { id: 'avisos-gastos', titulo: 'Avisos para anotar gastos', detalle: 'Las horas del día en que Finanstia te recuerda anotar', icono: 'reloj' },
   { id: 'respaldo', titulo: 'Respaldo de mis finanzas', detalle: 'Copia tus movimientos, metas y presupuestos', icono: 'tramites' },
   { id: 'sonidos', titulo: 'Sonidos', detalle: 'Qué suena al cumplir una meta y más', icono: 'sonido' },
   { id: 'ajustes', titulo: 'Ajustes y cuenta', detalle: 'Tema, letra, tu cuenta de Google', icono: 'ajustes' },
@@ -32,6 +34,17 @@ export function MasFinanzas({ sub, alAbrir }: { sub: string; alAbrir: (sub: stri
   if (sub === 'ajustes') return <Ajustes alVolver={volver} />
   if (sub === 'sonidos') return <Sonidos alVolver={volver} />
   if (sub === 'alpi-finanzas') return <AlpiFinanzasPantalla alVolver={volver} />
+  if (sub === 'avisos-gastos')
+    return (
+      <section className="pantalla">
+        <button className="volver" onClick={volver}>
+          <Icono nombre="izquierda" /> Más
+        </button>
+        <h1 className="titulo">Avisos para anotar gastos</h1>
+        <p className="sub">A la hora que elijas, Astia tapa la pantalla con un aviso (sin mostrar montos). Cada meta con fecha límite tiene su propio botón 🔔 Avisos en Metas.</p>
+        <AvisosRecurrentes id="plata" titulo="💸 Anota tus gastos en Finanstia" dias={null} />
+      </section>
+    )
   if (sub === 'respaldo') return <Respaldo alVolver={volver} />
   if (sub === 'comparar')
     return (

@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useFinanzasOpcional } from '../finanzas/FinanzasProvider'
 import { useAjustes } from '../ajustes/AjustesProvider'
 import { useDatos } from '../datos/DatosProvider'
 import { alarmasPendientes, claseInminente, claveDeAlarma, normalizarHoras, pendientesParaAlarma } from '../lib/alarmas'
 import { leerLocal, guardarLocal } from '../lib/almacen'
+import type { Tarea } from '../dominio/tipos'
 import { avisosDeTareaQueTocan, leerConfigs } from '../lib/avisosTarea'
-import { ymd } from '../lib/fechas'
+import { leerRecurrentes, recurrentesQueTocan, type ItemRecurrente } from '../lib/avisosRecurrentes'
+import { indiceDia, ymd } from '../lib/fechas'
+import { cumplido, tocaHoy } from '../lib/habitos'
 import { textoVence } from '../lib/urgencia'
 import { sonar } from '../sonidos/reproductor'
 import { decirRecordatorio } from '../sonidos/voz'
@@ -27,13 +31,14 @@ const IR_A_PENDIENTES = '#/tareas'
  * y Alpi lo dice en voz alta. Funciona con Astia abierta (o al volver a abrirla poco después de la hora).
  */
 export function MotorAlarmas() {
-  const { ajustes } = useAjustes()
-  const { tareas, clases, cursos } = useDatos()
+  const { ajustes, cambiar } = useAjustes()
+  const { tareas, clases, cursos, habitos, rutinas } = useDatos()
+  const finanzas = useFinanzasOpcional()
   const [aviso, setAviso] = useState<AvisoGrande | null>(null)
   const mostradas = useRef<Set<string>>(leerMostradas())
   const pospuesto = useRef<{ hasta: number; aviso: AvisoGrande } | null>(null)
-  const ultimo = useRef({ ajustes, tareas, clases, cursos, aviso })
-  ultimo.current = { ajustes, tareas, clases, cursos, aviso }
+  const ultimo = useRef({ ajustes, tareas, clases, cursos, aviso, habitos, rutinas, metas: finanzas?.metas ?? null })
+  ultimo.current = { ajustes, tareas, clases, cursos, aviso, habitos, rutinas, metas: finanzas?.metas ?? null }
 
   const marcar = useCallback((clave: string) => {
     mostradas.current.add(clave)
@@ -48,7 +53,7 @@ export function MotorAlarmas() {
 
   useEffect(() => {
     const revisar = () => {
-      const { ajustes: aj, tareas: ts, clases: cs, cursos: cu, aviso: abierto } = ultimo.current
+      const { ajustes: aj, tareas: ts, clases: cs, cursos: cu, aviso: abierto, habitos: hs, rutinas: rs, metas: ms } = ultimo.current
       const ahora = new Date()
       // Un aviso pospuesto vuelve a su hora
       if (!abierto && pospuesto.current && pospuesto.current.hasta <= ahora.getTime()) {
@@ -66,6 +71,32 @@ export function MotorAlarmas() {
         for (const a of deTarea) marcar(a.clave)
         const a = deTarea[0]
         mostrar({ tipo: 'tarea', titulo: a.tarea.titulo, curso: nombreCurso(a.tarea.cursoId), cuando: textoVence(a.tarea, ahora) }, `${a.tarea.titulo}. ${textoVence(a.tarea, ahora)}`)
+        return
+      }
+
+      // Metas de ahorro de Finanstia con aviso (solo con Finanstia abierta; nunca muestra montos)
+      if (ms?.length) {
+        const pseudo = ms.filter((m) => m.limite).map((m) => ({ id: 'meta-' + m.id, actualizadoEn: 0, titulo: m.nombre, area: 'personal', cursoId: null, tipo: 'tarea', fecha: m.limite!, prioridad: 'media', pideEvidencia: false, pasos: [], estado: 'pendiente' }) as Tarea)
+        const m = avisosDeTareaQueTocan(pseudo, leerConfigs(), ahora, mostradas.current)
+        if (m.length) {
+          for (const a of m) marcar(a.clave)
+          mostrar({ tipo: 'simple', etiqueta: 'Tu meta de ahorro', titulo: m[0].tarea.titulo, sub: textoVence(m[0].tarea, ahora), destino: '#/metas', modo: 'finanzas' }, `Tu meta ${m[0].tarea.titulo}. ${textoVence(m[0].tarea, ahora)}`)
+          return
+        }
+      }
+
+      // Hábitos, rutinas y "anotar gastos": a las horas que elegiste, los días que toca y si aún no lo cumpliste
+      const hoyY = ymd(ahora)
+      const items: ItemRecurrente[] = [
+        ...hs.map((h) => ({ id: 'h-' + h.id, titulo: h.nombre, pendienteHoy: tocaHoy(h, ahora) && !cumplido(h, hoyY), etiqueta: 'Es hora de tu hábito', sub: h.minimo ? `Mínimo: ${h.minimo}` : '', destino: '#/habitos', modo: 'personal' as const })),
+        ...rs.map((r) => ({ id: 'r-' + r.id, titulo: r.nombre, pendienteHoy: (r.dias.length === 0 || r.dias.includes(indiceDia(ahora))) && !r.registro.includes(hoyY), etiqueta: 'Es hora de tu rutina', sub: '', destino: '#/mas/rutinas', modo: 'personal' as const })),
+        { id: 'plata', titulo: 'Anota tus gastos', pendienteHoy: true, etiqueta: 'Finanstia', sub: 'Que no se te pase ninguno', destino: '#/movimientos', modo: 'finanzas' as const },
+      ]
+      const rec = recurrentesQueTocan(items, leerRecurrentes(), ahora, mostradas.current)
+      if (rec.length) {
+        for (const r of rec) marcar(r.clave)
+        const { item } = rec[0]
+        mostrar({ tipo: 'simple', etiqueta: item.etiqueta, titulo: item.titulo, sub: item.sub, destino: item.destino, modo: item.modo }, `${item.etiqueta}: ${item.titulo}`)
         return
       }
 
@@ -130,7 +161,10 @@ export function MotorAlarmas() {
       }}
       alVerPendientes={() => {
         setAviso(null)
-        window.location.hash = IR_A_PENDIENTES
+        if (aviso.tipo === 'simple') {
+          cambiar({ modo: aviso.modo })
+          window.location.hash = aviso.destino
+        } else window.location.hash = IR_A_PENDIENTES
       }}
     />
   )

@@ -180,6 +180,28 @@ export async function crearEventoTarea(e: { titulo: string; detalle: string; ini
   }
 }
 
+/** Crea eventos que se repiten (uno por hora) con aviso a la hora exacta: hábitos, rutinas, anotar gastos. */
+export async function crearEventosRecurrentes(titulo: string, primeras: Date[], regla: string): Promise<void> {
+  const t = vigente()
+  if (!t) throw new Error('Sin permiso de Google Calendar')
+  const zona = Intl.DateTimeFormat().resolvedOptions().timeZone
+  for (const ini of primeras) {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${t}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        summary: titulo,
+        description: 'Aviso de Astia.',
+        start: { dateTime: ini.toISOString(), timeZone: zona },
+        end: { dateTime: new Date(ini.getTime() + 10 * 60_000).toISOString(), timeZone: zona },
+        recurrence: [`RRULE:${regla}`],
+        reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 0 }] },
+      }),
+    })
+    if (!res.ok) throw new Error(`Google Calendar respondió ${res.status}`)
+  }
+}
+
 /** Solo para pruebas. */
 export const _olvidarToken = () => {
   token = null

@@ -27,3 +27,8 @@ Código: `src/lib/alarmas.ts` (lógica con pruebas), `src/recordatorios/MotorAla
 Al guardar una tarea aparece "Configurar avisos"; también está dentro de la tarea (🔔 Configurar avisos). Eliges hasta 5 avisos (a la hora, 10 min, 30 min, 1 h, 3 h, 1 día, 2 días antes o un tiempo propio)
 y, si quieres, un aviso diario a la hora que digas hasta la entrega. Se puede: **solo en Astia** (pantalla completa con la app abierta), **archivo .ics** (abre el Calendario del teléfono o Google Calendar con todas las alarmas, sin configurar nada)
 o **crear en Google Calendar** (necesita el `CLIENT_ID` de arriba). Código: `src/lib/avisosTarea.ts`, `src/formularios/AvisosTarea.tsx`.
+
+## Avisos en hábitos, rutinas y Finanstia
+- **Hábitos:** abre el hábito → 🔔 Configurar avisos. **Rutinas:** botón 🔔 en cada rutina. Eliges las horas del día; avisa solo los días que toca y si aún no lo cumpliste.
+- **Finanstia:** Más → "Avisos para anotar gastos" (horas del día) y, en cada meta con fecha límite, 🔔 Avisos (cuánto antes de la fecha). El aviso nunca muestra montos.
+- Las tres opciones son las mismas que en las tareas: solo en Astia (pantalla completa), archivo .ics o Google Calendar. Código: `src/lib/avisosRecurrentes.ts`, `src/formularios/AvisosRecurrentes.tsx`.

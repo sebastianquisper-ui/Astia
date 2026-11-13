@@ -4,9 +4,11 @@ import { apartadoDe } from '../lib/apartados'
 import { INICIALES_DIAS, MESES_LARGOS, addDays, indiceDia, ymd } from '../lib/fechas'
 import { cumplido, cumplimiento30, mejorRacha, rachaDe, textoFrecuencia } from '../lib/habitos'
 import { Icono } from '../ui/Icono'
+import { AvisosRecurrentes } from './AvisosRecurrentes'
 
 /** El detalle de un hábito: estadísticas y el calendario del mes (toca un día para marcarlo o desmarcarlo). */
 export function DetalleHabito({ habito, hoy, alAlternarFecha, alEditar }: { habito: Habito; hoy: Date; alAlternarFecha: (fecha: string) => void; alEditar: () => void }) {
+  const [avisos, setAvisos] = useState(false)
   const [mes, setMes] = useState(() => new Date(hoy.getFullYear(), hoy.getMonth(), 1))
   const racha = rachaDe(habito, hoy)
   const mejor = mejorRacha(habito, hoy)
@@ -25,6 +27,9 @@ export function DetalleHabito({ habito, hoy, alAlternarFecha, alEditar }: { habi
         {ap.nombre} · {textoFrecuencia(habito.frecuencia)}
       </p>
       {habito.minimo && <p className="habito-minimo" style={{ marginTop: 6 }}>Mínimo: {habito.minimo}</p>}
+
+      <button type="button" className="btn suave" onClick={() => setAvisos((a) => !a)} aria-expanded={avisos}>🔔 Configurar avisos</button>
+      {avisos && <AvisosRecurrentes id={'h-' + habito.id} titulo={`⏰ ${habito.nombre}`} dias={habito.frecuencia.tipo === 'dias' ? habito.frecuencia.dias : null} alCerrar={() => setAvisos(false)} />}
 
       <div className="estadisticas">
         <div><b>{racha.n}</b><span>racha actual ({racha.unidad})</span></div>
